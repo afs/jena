@@ -106,8 +106,7 @@ public class SPARQL_Upload extends ActionSPARQL
         catch (Exception ex) { ServletOps.errorOccurred(ex) ; }
     }
 
-    // Also used by SPARQL_REST
-    static public long upload(HttpAction action, String base) {
+    private long upload(HttpAction action, String base) {
         if ( action.isTransactional() )
             return uploadTxn(action, base) ;
         else
