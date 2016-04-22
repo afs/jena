@@ -62,12 +62,11 @@ public class SPARQL_GSP_RW extends SPARQL_GSP_R
             if ( action.log.isDebugEnabled() )
                 action.log.debug("DELETE->"+target) ;
             boolean existedBefore = target.exists() ; 
-            if ( ! existedBefore)
-            {
+            if ( ! existedBefore) {
                 // commit, not abort, because locking "transactions" don't support abort. 
                 action.commit() ;
                 ServletOps.errorNotFound("No such graph: "+target.name) ;
-            } 
+            }
             deleteGraph(action) ;
             action.commit() ;
         }
@@ -90,11 +89,9 @@ public class SPARQL_GSP_RW extends SPARQL_GSP_R
             ServletOps.error(HttpSC.UNSUPPORTED_MEDIA_TYPE_415, "multipart/mixed not supported") ;
         }
         
-        UploadDetails details ;
-        if ( action.isTransactional() )
-            details = addDataIntoTxn(action, overwrite) ;
-        else
-            details = addDataIntoNonTxn(action, overwrite) ;
+        UploadDetails details = action.isTransactional() 
+            ? addDataIntoTxn(action, overwrite)
+            : addDataIntoNonTxn(action, overwrite) ;
         
         MediaType mt = ConNeg.chooseCharset(action.request, DEF.jsonOffer, DEF.acceptJSON) ;
         
@@ -116,7 +113,7 @@ public class SPARQL_GSP_RW extends SPARQL_GSP_R
      * @param cleanDest Whether to remove data first (true = PUT, false = POST)
      * @return whether the target existed beforehand
      */
-    protected static UploadDetails addDataIntoTxn(HttpAction action, boolean overwrite) {   
+    private static UploadDetails addDataIntoTxn(HttpAction action, boolean overwrite) {   
         action.beginWrite();
         Target target = determineTarget(action) ;
         boolean existedBefore = false ;
@@ -156,7 +153,7 @@ public class SPARQL_GSP_RW extends SPARQL_GSP_R
      * @return whether the target existed beforehand.
      */
     
-    protected static UploadDetails addDataIntoNonTxn(HttpAction action, boolean overwrite) {
+    private static UploadDetails addDataIntoNonTxn(HttpAction action, boolean overwrite) {
         Graph graphTmp = GraphFactory.createGraphMem() ;
         StreamRDF dest = StreamRDFLib.graph(graphTmp) ;
 
@@ -191,7 +188,7 @@ public class SPARQL_GSP_RW extends SPARQL_GSP_R
         } finally { action.endWrite() ; }
     }
     
-    protected static void deleteGraph(HttpAction action) {
+    private static void deleteGraph(HttpAction action) {
         Target target = determineTarget(action) ;
         if ( target.isDefault )
             target.graph().clear() ;
@@ -199,7 +196,7 @@ public class SPARQL_GSP_RW extends SPARQL_GSP_R
             action.getActiveDSG().removeGraph(target.graphName) ;
     }
 
-    protected static void clearGraph(Target target) {
+    private static void clearGraph(Target target) {
         Graph g = target.graph() ;
         g.clear() ;
         Map<String, String> pm = g.getPrefixMapping().getNsPrefixMap() ;
