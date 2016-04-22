@@ -45,6 +45,7 @@ import javax.servlet.http.HttpServletResponse ;
 
 import org.apache.jena.atlas.io.IO ;
 import org.apache.jena.atlas.io.IndentedLineBuffer ;
+import org.apache.jena.atlas.lib.Cache ;
 import org.apache.jena.atlas.web.ContentType ;
 import org.apache.jena.fuseki.Fuseki ;
 import org.apache.jena.fuseki.FusekiException ;
@@ -266,10 +267,21 @@ public abstract class SPARQL_Query extends SPARQL_Protocol
         try {
             action.beginRead() ;
             Dataset dataset = decideDataset(action, query, queryStringLog) ;
-            try ( QueryExecution qExec = createQueryExecution(query, dataset) ; ) {
-                SPARQLResult result = executeQuery(action, qExec, query, queryStringLog) ;
-                // Deals with exceptions itself.
+            String name = action.getAccessPointName() ;
+            SPARQLResult result = processViaCache(action, query, queryStringLog) ;
+            if ( result != null )
                 sendResults(action, result, query.getPrologue()) ;
+            else {
+                try ( QueryExecution qExec = createQueryExecution(query, dataset) ; ) {
+                    // XXX Timing : need to lock across starting request that creates a cache entry and finishing. 
+                    
+                    // Start - get key, end - insert with key. 
+                    
+                    SPARQLResult result1 = executeQuery(action, qExec, query, queryStringLog) ;
+                    SPARQLResult result2 = prepareForCache(action, result1) ;
+                    sendResults(action, result2, query.getPrologue()) ;
+                    insertIntoCache(action, query, result2) ;
+                }
             }
         }
         catch (QueryParseException ex) {
@@ -281,6 +293,30 @@ public abstract class SPARQL_Query extends SPARQL_Protocol
             incCounter(action.getEndpoint().getCounters(), QueryTimeouts) ;
             throw ex ;
         } finally { action.endRead() ; }
+    }
+
+    /** Use the results cache - return null for no cache entry */ 
+    private SPARQLResult processViaCache(HttpAction action, Query query, String queryStringLog) {
+        Cache<Query, SPARQLResult> cache = ResultsCache.getByDataset(action) ;
+        if ( cache == null )
+            return null ;
+        return cache.getIfPresent(query) ;
+    }
+
+    /** Setup for results to collect a cache copy. */ 
+    private SPARQLResult prepareForCache(HttpAction action, SPARQLResult result) {
+        // XXX Nothing!
+        return result ;
+    }
+
+    // Inside READ.
+    private void insertIntoCache(HttpAction action, Query query, SPARQLResult result) {
+        if ( true )
+            return ;
+        if ( result == null )
+            return ;
+        Cache<Query, SPARQLResult> cache = ResultsCache.getCreateByDataset(action) ;
+        cache.put(query, result); 
     }
 
     /**

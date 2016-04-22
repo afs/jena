@@ -71,7 +71,7 @@ public class HttpAction
     /** Handle to dataset+services being acted on (maybe null) */
     private DataAccessPoint dataAccessPoint = null ;
     private DataService dataService         = null ;
-    private String datasetName              = null ;        // Dataset URI used (e.g. registry)
+    private String dataAccessPointName      = null ;        // Canonical name used
     private DatasetGraph dsg                = null ;
 
     // ----
@@ -131,7 +131,7 @@ public class HttpAction
     public void setRequest(DataAccessPoint dataAccessPoint, DataService dService) {
         this.dataAccessPoint = dataAccessPoint ;
         if ( dataAccessPoint != null )
-            this.datasetName = dataAccessPoint.getName() ; 
+            this.dataAccessPointName = dataAccessPoint.getName() ; 
 
         if ( this.dataService != null )
             throw new FusekiException("Redefinition of DatasetRef in the request action") ;
@@ -185,7 +185,7 @@ public class HttpAction
         this.dataService = null ;
         if ( dataAccessPoint != null )
             this.dataService = dataAccessPoint.getDataService() ;
-        this.datasetName = datasetUri ;
+        this.dataAccessPointName = datasetUri ;
         if ( dataService != null )
             setDataset(dataAccessPoint.getDataService().getDataset()) ; 
     }
@@ -266,6 +266,9 @@ public class HttpAction
         transactional.begin(WRITE) ;
         activeMode = WRITE ;
         activeDSG = dsg ;
+        // Is there a more general mechanism needed for signaling
+        // begin-end for read and write?
+        ResultsCache.updateAction(this) ;
         dataService.startTxn(WRITE) ;
     }
 
@@ -342,12 +345,12 @@ public class HttpAction
 //        this.dataService = dataService;
 //    }
 
-    public final String getDatasetName() {
-        return datasetName;
+    public final String getAccessPointName() {
+        return dataAccessPointName;
     }
 
-//    public void setDatasetName(String datasetName) {
-//        this.datasetName = datasetName;
+//    public void setAccessPointName(String dataAccessPointName) {
+//        this.dataAccessPointName = dataAccessPointName;
 //    }
 
     /** Reduce to a size that can be kept around for sometime. 
