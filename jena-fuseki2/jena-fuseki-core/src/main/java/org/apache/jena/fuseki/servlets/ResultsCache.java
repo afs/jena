@@ -26,31 +26,37 @@ import org.apache.jena.query.Query ;
 import org.apache.jena.sparql.resultset.SPARQLResult ;
 
 public class ResultsCache {
+    
+    private static ResultsCache singleton = new ResultsCache() ; 
+    
+    public static ResultsCache get() { return singleton ; }
+    private ResultsCache() {}
+    
     // Invalidation : Update GSP, Upload -- Done in HttpAction.beginWrite
     //    better - bing able to lock entries in the cache and brack begin-end for read/create and write
     // Configuration
     // Deletion
 
-    private static ConcurrentHashMap<String, Cache<Query, SPARQLResult>> x = new ConcurrentHashMap<>() ;
+    private ConcurrentHashMap<String, Cache<Query, SPARQLResult>> x = new ConcurrentHashMap<>() ;
 
-    public static Cache<Query, SPARQLResult> getByDataset(HttpAction action) {
+    public Cache<Query, SPARQLResult> getByDataset(HttpAction action) {
         return x.get(name(action)) ;
     }
 
-    public static Cache<Query, SPARQLResult> getCreateByDataset(HttpAction action) {
-        return x.computeIfAbsent(name(action), ResultsCache::build) ;
+    public Cache<Query, SPARQLResult> getCreateByDataset(HttpAction action) {
+        return x.computeIfAbsent(name(action), this::build) ;
     }
 
-    private static Cache<Query, SPARQLResult> build(String name) {
+    private Cache<Query, SPARQLResult> build(String name) {
         // Improve!
         return CacheFactory.createCache(10) ;
     }
     
-    public static void updateAction(HttpAction action) {
+    public void updateAction(HttpAction action) {
         clearDatasetCache(action);
     }
     
-    public static void clearDatasetCache(HttpAction action) {
+    public void clearDatasetCache(HttpAction action) {
         x.remove(name(action)) ;
         //x.computeIfPresent(name, (n,cache) -> { cache.clear() ; return cache ; }) ;
     }

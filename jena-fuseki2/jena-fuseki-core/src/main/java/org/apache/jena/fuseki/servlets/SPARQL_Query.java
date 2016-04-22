@@ -269,14 +269,13 @@ public abstract class SPARQL_Query extends SPARQL_Protocol
             Dataset dataset = decideDataset(action, query, queryStringLog) ;
             String name = action.getAccessPointName() ;
             SPARQLResult result = processViaCache(action, query, queryStringLog) ;
-            if ( result != null )
+            if ( result != null ) {
+                
                 sendResults(action, result, query.getPrologue()) ;
+            }
             else {
                 try ( QueryExecution qExec = createQueryExecution(query, dataset) ; ) {
                     // XXX Timing : need to lock across starting request that creates a cache entry and finishing. 
-                    
-                    // Start - get key, end - insert with key. 
-                    
                     SPARQLResult result1 = executeQuery(action, qExec, query, queryStringLog) ;
                     SPARQLResult result2 = prepareForCache(action, result1) ;
                     sendResults(action, result2, query.getPrologue()) ;
@@ -297,25 +296,42 @@ public abstract class SPARQL_Query extends SPARQL_Protocol
 
     /** Use the results cache - return null for no cache entry */ 
     private SPARQLResult processViaCache(HttpAction action, Query query, String queryStringLog) {
-        Cache<Query, SPARQLResult> cache = ResultsCache.getByDataset(action) ;
-        if ( cache == null )
+        Cache<Query, SPARQLResult> cache = ResultsCache.get().getByDataset(action) ;
+        if ( cache == null ) {
+            action.log.info(format("[%d] ** Cache miss", action.id)) ;
             return null ;
-        return cache.getIfPresent(query) ;
+        }
+        action.log.info(format("[%d] ** Cache hit", action.id)) ;
+        // XXX illustration only
+        SPARQLResult result = cache.getIfPresent(query) ;
+        if ( ! result.isResultSet() )
+            return result ;
+        ((ResultSetRewindable)(result.getResultSet())).reset() ;
+        return result ;
     }
 
     /** Setup for results to collect a cache copy. */ 
     private SPARQLResult prepareForCache(HttpAction action, SPARQLResult result) {
-        // XXX Nothing!
-        return result ;
+        if ( ! result.isResultSet() )
+            return result ;
+        ResultSet rs = result.getResultSet() ;
+        // XXX illustration only - this should copy-as-run.
+        ResultSetRewindable rs2 = ResultSetFactory.copyResults(rs) ;
+        rs2.reset();
+        return new SPARQLResult(rs2) ;  
     }
 
     // Inside READ.
     private void insertIntoCache(HttpAction action, Query query, SPARQLResult result) {
-        if ( true )
-            return ;
         if ( result == null )
             return ;
-        Cache<Query, SPARQLResult> cache = ResultsCache.getCreateByDataset(action) ;
+        if ( ! result.isResultSet() )
+            return ;
+        // XXX illustration only
+        ResultSetRewindable rs2 = (ResultSetRewindable)result.getResultSet() ;
+        rs2.reset() ;
+        action.log.info(format("[%d] ** Cache insert", action.id)) ;
+        Cache<Query, SPARQLResult> cache = ResultsCache.get().getCreateByDataset(action) ;
         cache.put(query, result); 
     }
 

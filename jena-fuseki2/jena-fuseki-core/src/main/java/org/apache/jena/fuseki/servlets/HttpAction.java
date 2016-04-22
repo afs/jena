@@ -18,6 +18,7 @@
 
 package org.apache.jena.fuseki.servlets;
 
+import static java.lang.String.format ;
 import static org.apache.jena.query.ReadWrite.READ ;
 import static org.apache.jena.query.ReadWrite.WRITE ;
 
@@ -268,7 +269,8 @@ public class HttpAction
         activeDSG = dsg ;
         // Is there a more general mechanism needed for signaling
         // begin-end for read and write?
-        ResultsCache.updateAction(this) ;
+        ResultsCache.get().updateAction(this) ;
+        log.info(format("[%d] ** Cache clear", id)) ;
         dataService.startTxn(WRITE) ;
     }
 
