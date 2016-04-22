@@ -49,7 +49,7 @@ public abstract class SPARQL_GSP extends ActionREST
             
             // Direct naming.
             String directName = action.request.getRequestURL().toString() ;
-            if ( action.request.getRequestURI().equals(action.getDatasetName()) )
+            if ( action.request.getRequestURI().equals(action.getAccessPointName()) )
                 // No name (should have been a quads operations).
                 ServletOps.errorBadRequest("Neither default graph nor named graph specified and no direct name") ;
             Node gn = NodeFactory.createURI(directName) ;
