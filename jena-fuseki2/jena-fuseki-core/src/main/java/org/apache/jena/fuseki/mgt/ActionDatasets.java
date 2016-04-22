@@ -97,11 +97,11 @@ public class ActionDatasets extends ActionContainerItem {
 
     @Override
     protected JsonValue execGetItem(HttpAction action) {
-        action.log.info(format("[%d] GET dataset %s", action.id, action.getDatasetName())) ;
+        action.log.info(format("[%d] GET dataset %s", action.id, action.getAccessPointName())) ;
         JsonBuilder builder = new JsonBuilder() ;
-        DataAccessPoint dsDesc = DataAccessPointRegistry.get().get(action.getDatasetName()) ;
+        DataAccessPoint dsDesc = DataAccessPointRegistry.get().get(action.getAccessPointName()) ;
         if ( dsDesc == null )
-            ServletOps.errorNotFound("Not found: dataset "+action.getDatasetName());
+            ServletOps.errorNotFound("Not found: dataset "+action.getAccessPointName());
         JsonDescription.describe(builder, dsDesc) ;
         return builder.build() ;
     }
@@ -227,13 +227,13 @@ public class ActionDatasets extends ActionContainerItem {
     
     @Override
     protected JsonValue execPostItem(HttpAction action) {
-        String name = action.getDatasetName() ;
+        String name = action.getAccessPointName() ;
         if ( name == null )
             name = "''" ;
         action.log.info(format("[%d] POST dataset %s", action.id, name)) ;
         
         if ( action.getDataAccessPoint() == null )
-            ServletOps.errorNotFound("Not found: dataset "+action.getDatasetName());
+            ServletOps.errorNotFound("Not found: dataset "+action.getAccessPointName());
         
         DataService dSrv = action.getDataService() ;
         if ( dSrv == null )
@@ -262,7 +262,7 @@ public class ActionDatasets extends ActionContainerItem {
         } else if ( s.equalsIgnoreCase("unlink") ) {
             action.log.info(format("[%d] UNLINK ACCESS NAME %s", action.id, name)) ;
             DataAccessPoint access = action.getDataAccessPoint() ;
-            ServletOps.errorNotImplemented("unlink: dataset"+action.getDatasetName());
+            ServletOps.errorNotImplemented("unlink: dataset"+action.getAccessPointName());
             //access.goOffline() ;
             // Registry?
         }
@@ -314,7 +314,7 @@ public class ActionDatasets extends ActionContainerItem {
 //      return ;
 //  }
         // Does not exist?
-        String name = action.getDatasetName() ;
+        String name = action.getAccessPointName() ;
         if ( name == null )
             name = "" ;
         action.log.info(format("[%d] DELETE ds=%s", action.id, name)) ;

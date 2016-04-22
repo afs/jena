@@ -32,7 +32,7 @@ public class ActionBackup extends ActionAsyncTask
 
     @Override
     protected Runnable createRunnable(HttpAction action) {
-        String name = action.getDatasetName() ;
+        String name = action.getAccessPointName() ;
         if ( name == null ) {
             action.log.error("Null for dataset name in item request") ;  
             ServletOps.errorOccurred("Null for dataset name in item request");

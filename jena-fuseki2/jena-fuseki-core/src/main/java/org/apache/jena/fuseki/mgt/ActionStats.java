@@ -59,10 +59,10 @@ public class ActionStats extends ActionContainerItem
 
     @Override
     protected JsonValue execGetItem(HttpAction action) {
-        action.log.info(format("[%d] GET stats dataset %s", action.id, action.getDatasetName())) ;
+        action.log.info(format("[%d] GET stats dataset %s", action.id, action.getAccessPointName())) ;
         
         JsonBuilder builder = new JsonBuilder() ;
-        String datasetPath = DataAccessPoint.canonical(action.getDatasetName()) ;
+        String datasetPath = DataAccessPoint.canonical(action.getAccessPointName()) ;
         builder.startObject("TOP") ;
         
         builder.key(JsonConst.datasets) ;

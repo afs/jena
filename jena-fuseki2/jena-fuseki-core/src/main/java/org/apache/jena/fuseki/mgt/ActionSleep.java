@@ -54,7 +54,7 @@ public class ActionSleep extends ActionCtl /* Not ActionAsyncTask - that is a co
     }
 
     protected Runnable createRunnable(HttpAction action) {
-        String name = action.getDatasetName() ;
+        String name = action.getAccessPointName() ;
         if ( name == null ) {
 //            action.log.error("Null for dataset name in item request") ;  
 //            ServletOps.errorOccurred("Null for dataset name in item request");

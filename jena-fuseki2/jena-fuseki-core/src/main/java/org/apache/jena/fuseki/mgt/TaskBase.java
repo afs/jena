@@ -38,6 +38,6 @@ abstract class TaskBase implements Runnable {
         this.actionId = action.id ;
         this.dataset = action.getDataset() ;
         this.transactional = action.getTransactional() ; 
-        this.datasetName = action.getDatasetName() ;
+        this.datasetName = action.getAccessPointName() ;
     }
 }
