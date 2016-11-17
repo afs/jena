@@ -70,6 +70,8 @@ public abstract class ExprFunctionOp extends ExprFunction
     
     // ---- Evaluation
     
+    public static boolean DEBUG = false ;
+    public static boolean ENABLE_EXISTS_CG = true ;
     @Override
     public final NodeValue eval(Binding binding, FunctionEnv env)
     {
@@ -82,9 +84,8 @@ public abstract class ExprFunctionOp extends ExprFunction
 //                opRun = Optimize.apply("Property Functions", new TransformPropertyFunction(env.getContext()), opRun) ;
 //        }
         
-        boolean DEBUG = false ;
-        if ( true ) {
-            
+        if ( ENABLE_EXISTS_CG ) {
+            // EXISTS CG
             
             Transform t1 = new TransformExistsInsertValues(binding, env) ;
             // Transform t2 = new TransformExistsInsertFilters(binding, env) ;
