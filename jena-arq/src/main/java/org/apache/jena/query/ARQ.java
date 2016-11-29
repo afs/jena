@@ -551,7 +551,7 @@ public class ARQ
     public static final String NAME         = "ARQ";
    
     /** The full name of the current ARQ version */   
-    public static final String VERSION      = metadata.get(PATH+".version", "unknown") ;
+    public static final String VERSION      = metadata.get(PATH+".version", "unknown")+"(exists)" ;
    
     /** The date and time at which this release was built */   
     public static final String BUILD_DATE   = metadata.get(PATH+".build.datetime", "unset") ;
