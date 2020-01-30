@@ -26,8 +26,11 @@ import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.web.LangTag;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sys.JenaSystem;
 
@@ -128,6 +131,28 @@ public class JenaCommonsRDF {
         org.apache.jena.graph.Graph g = GraphFactory.createGraphMem();
         graph.stream().forEach(t->g.add(toJena(t)));
         return g;
+    }
+
+    /** Convert a CommonsRDF Dataset to a Jena DatasetGraph.
+     * If the Dataset was from Jena originally, return that original object else
+     * create a copy using Jena objects.
+     */
+    public static org.apache.jena.sparql.core.DatasetGraph toJena(Dataset dataset) {
+        if ( dataset instanceof JenaDataset )
+            return ((JenaDataset)dataset).getDataset();
+        org.apache.jena.sparql.core.DatasetGraph d = DatasetGraphFactory.createGeneral();
+        dataset.stream().forEach(q->d.add(toJena(q)));
+        return d;
+    }
+
+    /** Adapt a CommonsRDF Syntax to a Jena {@link Lang} */
+    public static Optional<Lang> toJena(final RDFSyntax syntax) {
+        return Optional.ofNullable(RDFLanguages.contentTypeToLang(syntax.mediaType()));
+    }
+
+    /** Adapt a Jena Lang to a CommonsRDF {@link Syntax} */
+    public static Optional<RDFSyntax> fromJena(final Lang lang) {
+        return RDFSyntax.byMediaType(lang.getContentType().getContentType());
     }
 
     /** Adapt an existing Jena Node to CommonsRDF {@link RDFTerm}. */
