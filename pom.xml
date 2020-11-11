@@ -90,7 +90,7 @@
          In the case of 4.2.6, there isn't a httpcore-osgi.
     -->
     <ver.httpcore-osgi>${ver.httpcore}</ver.httpcore-osgi>
-    <ver.httpclient-osgi>${ver.httpclient}</ver.httpclient-osgi>
+    <ver.httpclient-osgi>4.5.13</ver.httpclient-osgi>
     
     <ver.lucene>7.7.2</ver.lucene>
     <!-- Align to Lucene version -->
