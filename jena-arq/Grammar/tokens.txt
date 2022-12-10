@@ -100,7 +100,7 @@
 [<FIND>]       ::=    'FIND'
 
 [<FILTER>]     ::= 'FILTER'
-[<REGEXP>]     ::= 'REGEXP'
+//[<REGEXP>]     ::= 'REGEXP'
 [<GRAPH>]      ::= 'GRAPH'
 [<UNION>]      ::= 'UNION'
 [<OPTIONAL>]   ::= 'OPTIONAL'
@@ -176,6 +176,7 @@
 [<IS_NUMERIC>] ::= 'isNUMERIC'
 [<SAME_TERM>]  ::= 'sameTerm'
 [<REGEX>]      ::= 'REGEX'
+[<LIKE>]       ::= 'LIKE'
 [<TRUE>]       ::= 'true'
 [<FALSE>]      ::= 'false'
 

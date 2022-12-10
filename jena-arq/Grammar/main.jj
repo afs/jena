@@ -2114,9 +2114,11 @@ Expr BuiltInCall() : { Expr expr ;
 
   | <IS_NUMERIC> <LPAREN> expr = Expression() <RPAREN>
     { return new E_IsNumeric(expr) ; }
-  | // Regular expression matcher
-    expr = RegexExpression() { return expr ; }
 
+  | expr = RegexExpression() { return expr ; }
+#ifdef ARQ
+  | expr = LikeExpression()  { return expr ; }
+#endif
   | expr = ExistsFunc()      { return expr ; }
 
   | expr = NotExistsFunc()   { return expr ; }
@@ -2150,6 +2152,21 @@ Expr RegexExpression() :
     <RPAREN>
       { return new E_Regex(expr, patExpr, flagsExpr) ; }
 }
+
+#ifdef ARQ
+Expr LikeExpression() :
+{ Expr expr ; Expr patExpr = null ; Expr flagsExpr = null ; }
+{
+    <LIKE> 
+    <LPAREN> 
+      expr = Expression() 
+      <COMMA>
+      patExpr = Expression()
+      ( <COMMA> flagsExpr = Expression() ) ?
+    <RPAREN>
+      { return new E_Like(expr, patExpr, flagsExpr) ; }
+}
+#endif
 
 Expr SubstringExpression() :
 { Expr expr1 ; Expr expr2 = null ; Expr expr3 = null ; }
@@ -2597,6 +2614,9 @@ TOKEN [IGNORE_CASE] :
 |  < IS_BLANK:    "isBlank" >
 |  < IS_LITERAL:  "isLiteral" >
 |  < IS_NUMERIC:  "isNumeric" >
+#ifdef ARQ
+|  < LIKE:        "like" >
+#endif
 |  < REGEX:       "regex" >
 |  < SAME_TERM:   "sameTerm" >
 

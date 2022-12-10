@@ -244,6 +244,18 @@ public class BuilderExpr
         return new E_Regex(expr, pattern, flags);
     };
 
+    private static Build buildLike = (ItemList list) -> {
+        BuilderLib.checkLength(3, 4, list, "Like: wanted 2 or 3 arguments");
+        Expr expr = buildExpr(list.get(1));
+        Expr pattern = buildExpr(list.get(2));
+        Expr flags = null;
+        if ( list.size() != 3 )
+            flags = buildExpr(list.get(3));
+
+        return new E_Like(expr, pattern, flags);
+    };
+
+
     private static Build buildPlus = (ItemList list) -> {
         BuilderLib.checkLength(2, 3, list, "+: wanted 1 or 2 arguments");
         if ( list.size() == 2 )
@@ -968,7 +980,6 @@ public class BuilderExpr
 
     private static Map<String, Build> createDispatchTable() {
         Map<String, Build> dispatch = new HashMap<>();
-        dispatch.put(Tags.tagRegex, buildRegex);
         dispatch.put(Tags.symEQ, buildEQ);
         dispatch.put(Tags.tagEQ, buildEQ);
         dispatch.put(Tags.symNE, buildNE);
@@ -1009,6 +1020,9 @@ public class BuilderExpr
         dispatch.put(Tags.tagStr, buildStr);
         dispatch.put(Tags.tagStrLang, buildStrLang);
         dispatch.put(Tags.tagStrDatatype, buildStrDatatype);
+
+        dispatch.put(Tags.tagRegex, buildRegex);
+        dispatch.put(Tags.tagLike, buildLike);
 
         dispatch.put(Tags.tagYear, buildYear);
         dispatch.put(Tags.tagMonth, buildMonth);

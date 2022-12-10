@@ -1500,8 +1500,8 @@ Expr BuiltInCall() : { Expr expr ;
     { return new E_IsLiteral(expr) ; }
   | <IS_NUMERIC> <LPAREN> expr = Expression() <RPAREN>
     { return new E_IsNumeric(expr) ; }
-  |
-    expr = RegexExpression() { return expr ; }
+  | expr = RegexExpression() { return expr ; }
+  | expr = LikeExpression() { return expr ; }
   | expr = ExistsFunc() { return expr ; }
   | expr = NotExistsFunc() { return expr ; }
   | <IS_TRIPLE> <LPAREN> expr = Expression() <RPAREN>
@@ -1526,6 +1526,18 @@ Expr RegexExpression() :
       ( <COMMA> flagsExpr = Expression() ) ?
     <RPAREN>
       { return new E_Regex(expr, patExpr, flagsExpr) ; }
+}
+Expr LikeExpression() :
+{ Expr expr ; Expr patExpr = null ; Expr flagsExpr = null ; }
+{
+    <LIKE>
+    <LPAREN>
+      expr = Expression()
+      <COMMA>
+      patExpr = Expression()
+      ( <COMMA> flagsExpr = Expression() ) ?
+    <RPAREN>
+      { return new E_Like(expr, patExpr, flagsExpr) ; }
 }
 Expr SubstringExpression() :
 { Expr expr1 ; Expr expr2 = null ; Expr expr3 = null ; }
@@ -1840,6 +1852,7 @@ TOKEN [IGNORE_CASE] :
 | < IS_BLANK: "isBlank" >
 | < IS_LITERAL: "isLiteral" >
 | < IS_NUMERIC: "isNumeric" >
+| < LIKE: "like" >
 | < REGEX: "regex" >
 | < SAME_TERM: "sameTerm" >
 | < RAND: "RAND" >

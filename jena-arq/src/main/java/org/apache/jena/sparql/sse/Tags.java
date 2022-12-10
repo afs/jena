@@ -180,6 +180,7 @@ public class Tags
     public static final String tagIsBlank         = "isBlank";
     public static final String tagIsLiteral       = "isLiteral";
     public static final String tagRegex           = "regex";
+    public static final String tagLike            = "like";
     public static final String tagExists          = "exists";
     public static final String tagNotExists       = "notexists";
 

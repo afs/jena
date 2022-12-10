@@ -44,6 +44,7 @@ import org.junit.runners.Suite.SuiteClasses;
     , TestComparison.class
     , TestSortOrdering.class
     , TestRegex.class
+    , TestLike.class
     , TestXSDFuncOp.class
     , TestExprLib.class
     , TestExprTransform.class
