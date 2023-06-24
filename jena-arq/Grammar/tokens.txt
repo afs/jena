@@ -12,7 +12,8 @@
 
 <VAR1>       ::= '?' <VARNAME>
 <VAR2>       ::= '$' <VARNAME>
-<LANGTAG>    ::= '@' [a-zA-Z]+ ('-' [a-zA-Z0-9]+)*
+// With SPARQL 1.2 base direction.
+<LANGTAG>    ::= '@' [a-zA-Z]+ ('-' [a-zA-Z0-9]+)* ('--' [a-zA-Z]+)?
 
 <INTEGER>	::= [0-9]+
 <DECIMAL>   ::= ( [0-9]* '.' [0-9]+ )

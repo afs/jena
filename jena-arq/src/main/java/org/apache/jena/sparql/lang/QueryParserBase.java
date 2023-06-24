@@ -206,6 +206,27 @@ public class QueryParserBase
     }
 
     protected Node createLiteral(String lexicalForm, String langTag, String datatypeURI) {
+        // SPARQL 1.0 and SPARQL 1.1 form.
+        return createLiteral(lexicalForm, langTag, null, datatypeURI, -1 , -1);
+    }
+
+    protected Node createLiteral(String lexicalForm, String datatypeURI) {
+        // SPARQL 1.2, no @ token. datatype may be null.
+        return createLiteral(lexicalForm, null, null, datatypeURI, -1 , -1);
+    }
+
+    protected Node createLiteral(String lexicalForm, String langTag, String dir, int line, int column) {
+        return createLiteral(lexicalForm, langTag, dir, null, line, column);
+    }
+
+    private Node createLiteral(String lexicalForm, String langTag, String dir, String datatypeURI, int line, int column) {
+        if ( dir != null ) {
+            if ( ! dir.equals("ltr") && ! dir.equals("rtl") )
+                throw new QueryParseException("Base direction must be 'rtl' or 'ltr'", line, column);
+        }
+        if ( dir != null && langTag == null )
+            throw new ARQInternalErrorException("Base direction but no language tag");
+
         Node n = null ;
         // Can't have type and lang tag in parsing.
         if ( datatypeURI != null ) {
@@ -216,6 +237,22 @@ public class QueryParserBase
         else
             n = NodeFactory.createLiteral(lexicalForm) ;
         return n ;
+    }
+
+    protected String langFromToken(String image) {
+        int idx = image.indexOf("--");
+        if ( idx < 0 )
+            // No direction; remove @
+            return image.substring(1);
+        return image.substring(1, idx);
+    }
+
+    protected String dirFromToken(String image) {
+        int idx = image.indexOf("--");
+        if ( idx < 0 )
+            return null;
+        // Not checked for value
+        return image.substring(idx+2);
     }
 
     protected long integerValue(String s) {
@@ -463,14 +500,6 @@ public class QueryParserBase
     }
 
     protected Expr asExpr(Node n) {
-        return ExprLib.nodeToExpr(n) ;
-    }
-
-    protected Expr asExprNoSign(Node n) {
-        String lex = n.getLiteralLexicalForm() ;
-        String lang = n.getLiteralLanguage() ;
-        String dtURI = n.getLiteralDatatypeURI() ;
-        n = createLiteral(lex, lang, dtURI) ;
         return ExprLib.nodeToExpr(n) ;
     }
 

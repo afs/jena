@@ -25,7 +25,7 @@ TOKENS
 | <BLANK_NODE_LABEL: "_:" (<PN_CHARS_U> | ["0"-"9"]) ((<PN_CHARS> | ".")* <PN_CHARS>)?>
 | <VAR1: "?" <VARNAME>>
 | <VAR2: "$" <VARNAME>>
-| <LANGTAG: <AT> (<A2Z>)+ ("-" (<A2ZN>)+)*>
+| <LANGTAG: <AT> (<A2Z>)+ ("-" (<A2ZN>)+)* ("--" (<A2Z>)+)?>
 | <#A2Z: ["a"-"z","A"-"Z"]>
 | <#A2ZN: ["a"-"z","A"-"Z","0"-"9"]>
 }

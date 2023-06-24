@@ -2297,13 +2297,18 @@ Node RDFLiteral() : { Token t ; String lex = null ; }
 {
   lex = String()
   // Optional lang tag and datatype.
-  { String lang = null ; String uri = null ; }
+  { String lang = null ; String dir = null; String uri = null ; }
   (
-    ( t = <LANGTAG>  { lang = stripChars(t.image, 1) ; } )
+    ( t = <LANGTAG>
+      { lang = langFromToken(t.image) ;
+        dir = dirFromToken(t.image) ;
+        return createLiteral(lex, lang, dir, t.beginLine, t.beginColumn) ;
+      } 
+    )
   |
     ( <DATATYPE> uri = iri() )
   )?
-    { return createLiteral(lex, lang, uri) ; }
+  { return createLiteral(lex, uri) ; }
 } 
 
 
@@ -2443,7 +2448,7 @@ TOKEN:
 |  <BLANK_NODE_LABEL: "_:" (<PN_CHARS_U> | ["0"-"9"]) ((<PN_CHARS>|".")* <PN_CHARS>)?  >
 |  <VAR1: "?" <VARNAME> >
 |  <VAR2: "$" <VARNAME> >
-|  <LANGTAG: <AT> (<A2Z>)+("-" (<A2ZN>)+)* >
+|  <LANGTAG: <AT> (<A2Z>)+ ("-" (<A2ZN>)+)* ("--"(<A2Z>)+)? >
 |  <#A2Z: ["a"-"z","A"-"Z"]>
 |  <#A2ZN: ["a"-"z","A"-"Z","0"-"9"]>
 }

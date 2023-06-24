@@ -5111,14 +5111,16 @@ if ( a == null )
 
   final public Node RDFLiteral() throws ParseException {Token t ; String lex = null ;
     lex = String();
-String lang = null ; String uri = null ;
+String lang = null ; String dir = null; String uri = null ;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case LANGTAG:
     case DATATYPE:{
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case LANGTAG:{
         t = jj_consume_token(LANGTAG);
-lang = stripChars(t.image, 1) ;
+lang = langFromToken(t.image) ;
+        dir = dirFromToken(t.image) ;
+        {if ("" != null) return createLiteral(lex, lang, dir, t.beginLine, t.beginColumn) ;}
         break;
         }
       case DATATYPE:{
@@ -5137,7 +5139,7 @@ lang = stripChars(t.image, 1) ;
       jj_la1[157] = jj_gen;
       ;
     }
-{if ("" != null) return createLiteral(lex, lang, uri) ;}
+{if ("" != null) return createLiteral(lex, uri) ;}
     throw new Error("Missing return statement in function");
 }
 
