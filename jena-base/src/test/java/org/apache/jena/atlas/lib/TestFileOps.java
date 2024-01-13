@@ -43,7 +43,6 @@ public class TestFileOps
         assertEquals(expected, result);
     }
 
-
     @Test public void split01()
     { testParts("/aa/bb/cc.ext", "/aa/bb", "cc", "ext") ; }
 

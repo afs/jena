@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.dboe.sys.Names;
 
 /**
@@ -172,7 +173,7 @@ public class Location {
      * location
      */
     public String absolute(String filename, String extension) {
-        return (extension == null) ? absolute(filename) : absolute(filename + "." + extension);
+        return StringUtils.isBlank(extension) ? absolute(filename) : absolute(filename + "." + extension);
     }
 
     /**

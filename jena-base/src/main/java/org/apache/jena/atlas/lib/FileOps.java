@@ -21,6 +21,7 @@ package org.apache.jena.atlas.lib ;
 import java.io.File ;
 import java.io.IOException ;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.apache.jena.atlas.AtlasException ;
 import org.apache.jena.atlas.io.IO ;
@@ -114,13 +115,29 @@ public class FileOps {
     }
 
     /** Test for an empty file */
-    public static boolean isEmpty(String filename) {
+    public static boolean isEmptyFile(String filename) {
         File f = new File(filename) ;
-        if ( f.exists() )
-            return true ;
-        if ( f.isFile() )
-            return f.length() == 0 ;
-        throw new AtlasException("Not a file") ;
+        if ( ! f.exists() )
+            return false ;
+        if ( ! f.isFile() )
+            throw new AtlasException("Not a file") ;
+        return f.length() == 0 ;
+    }
+
+    /** Test for an empty directory (after following symbolic links) */
+    public static boolean isEmptyDirectory(String dirname) {
+        Path path = Path.of(dirname);
+        if ( ! Files.exists(path) )
+            return false ;
+        if ( ! Files.isDirectory(path) )
+            throw new AtlasException("Not a directory") ;
+
+        try {
+            boolean isEmpty = Files.list(path).findFirst().isEmpty();
+            return isEmpty;
+        } catch (IOException e) {
+            throw new AtlasException("Failed to read directory entries", e);
+        }
     }
 
     /** Ensure a directory exists */

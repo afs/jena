@@ -157,7 +157,7 @@ public class Lib
     }
 
     /**
-     * Get system properties (argument sysPropName) or if not found, read an
+     * Get system properties (argument sysPropName) or, if not found, read an
      * environment variable value (argument envName).
      */
     public static String getenv(String sysPropName, String envName) {

@@ -49,7 +49,7 @@ public class FusekiLogging
     // setLogging is pointless (it's already set).
 
     // Set logging.
-    // 1/ Use system property log4j2.configurationFile if defined.
+    // 1/ Use the log4j2 configuration setup via system property log4j2.configurationFile if defined.
     // 2/ Use file:log4j2.properties if exists
     // 3/ Use log4j2.properties on the classpath.
     // 4/ Use org/apache/jena/fuseki/log4j2.properties on the classpath.
@@ -64,8 +64,12 @@ public class FusekiLogging
         "log4j2.properties"
     };
 
+    // Log logging initialization  to stderr.
+    /** Environment variable to log logging initialization. */
     public static String envLogLoggingProperty = "FUSEKI_LOGLOGGING";
+    /** System property to log logging initialization. */
     public static String logLoggingProperty = "fuseki.logLogging";
+    /** Legacy - System property to log logging initialization. */
     private static String logLoggingPropertyAlt = "fuseki.loglogging";
 
     private static final boolean LogLogging = getLogLogging();
@@ -76,7 +80,8 @@ public class FusekiLogging
             logLogging("Old system property used '%s'", logLoggingPropertyAlt);
             return x.equalsIgnoreCase("true");
         }
-        x = Lib.getenv("FUSEKI_LOGLOGGING", logLoggingProperty);
+        // Look for either a system property or an environment variables.
+        x = Lib.getenv(logLoggingProperty, envLogLoggingProperty);
         return x != null && x.equalsIgnoreCase("true");
     }
 
@@ -126,8 +131,7 @@ public class FusekiLogging
         // Is there a log4j setup provided?
         if ( checkSystemProperties(log4j2_configurationFile) ||
              checkSystemProperties(log4j2_configurationFileLegacy) ||
-             System.getenv("LOG4J_CONFIGURATION_FILE") != null )
-        {
+             System.getenv("LOG4J_CONFIGURATION_FILE") != null ) {
             logLogging("External log4j2 setup ");
             return ;
         }
