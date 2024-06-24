@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,14 +18,13 @@
 
 package org.apache.jena.riot.process;
 
-import org.junit.runner.RunWith ;
-import org.junit.runners.Suite ;
+import org.apache.jena.graph.Node ;
+import org.apache.jena.riot.process.normalize.NormalizeRDFTerms;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses( {
-    TestNormalization.class,
-    TestNormalizationTTL.class,
-    TestNormalizationXSD.class
-})
-public class TS_Process
-{}
+public class TestNormalizationTTL extends AbstractTestNormalization {
+    @Override
+    protected Node normalize(Node n1) {
+        Node n2 = NormalizeRDFTerms.getTTL().normalize(n1);
+        return n2;
+    }
+}

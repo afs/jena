@@ -38,6 +38,7 @@ public class StreamCanonicalLiterals extends StreamRDFApplyObject {
     private static Node canonical(Node n) {
         if ( ! n.isLiteral() )
             return n;
+        @SuppressWarnings("deprecation")
         Node obj2 = CanonicalizeLiteral.canonicalValue(n);
         return obj2;
     }

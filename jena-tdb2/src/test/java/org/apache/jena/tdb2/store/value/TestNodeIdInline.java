@@ -94,7 +94,7 @@ public class TestNodeIdInline
 
     // Just this once, directly create the Node.
     @Test public void nodeId_decimal_3()
-    { test("12.89", NodeFactory.createLiteral("12.89", XSDDatatype.XSDdecimal)); }
+    { test("12.89", NodeFactory.createLiteralDT("12.89", XSDDatatype.XSDdecimal)); }
 
     @Test public void nodeId_decimal_4()
     { test("-1.0",  "-1.0"); }
@@ -109,11 +109,11 @@ public class TestNodeIdInline
 
     @Test public void nodeId_decimal_7()
     { test("'0.00000001'^^xsd:decimal",
-           NodeFactory.createLiteral("0.00000001", XSDDatatype.XSDdecimal));
+           NodeFactory.createLiteralDT("0.00000001", XSDDatatype.XSDdecimal));
     }
 
     @Test public void nodeId_decimal_8()
-    { test("0.00000001", NodeFactory.createLiteral("0.00000001", XSDDatatype.XSDdecimal)); }
+    { test("0.00000001", NodeFactory.createLiteralDT("0.00000001", XSDDatatype.XSDdecimal)); }
 
     @Test public void nodeId_dateTime_01()
     { test("'2008-04-28T15:36:15+01:00'^^xsd:dateTime"); }
@@ -215,20 +215,20 @@ public class TestNodeIdInline
     // Many tests in TestDoubleNode62
 
     @Test public void nodeId_double_1()
-    { test("1.0e0", NodeFactory.createLiteral("1.0e0", XSDDatatype.XSDdouble)); }
+    { test("1.0e0", NodeFactory.createLiteralDT("1.0e0", XSDDatatype.XSDdouble)); }
 
     // Becomes the RDF/SPARQL preferred form - with expooent - for pretty printing.
     @Test public void nodeId_double_2()
-    { test("'-0001.0'^^xsd:double", NodeFactory.createLiteral("-1.0e0", XSDDatatype.XSDdouble)); }
+    { test("'-0001.0'^^xsd:double", NodeFactory.createLiteralDT("-1.0e0", XSDDatatype.XSDdouble)); }
 
     @Test public void nodeId_double_3()
-    { test("'NaN'^^xsd:double", NodeFactory.createLiteral("NaN", XSDDatatype.XSDdouble)); }
+    { test("'NaN'^^xsd:double", NodeFactory.createLiteralDT("NaN", XSDDatatype.XSDdouble)); }
 
     @Test public void nodeId_double_4()
-    { test("'INF'^^xsd:double", NodeFactory.createLiteral("INF", XSDDatatype.XSDdouble)); }
+    { test("'INF'^^xsd:double", NodeFactory.createLiteralDT("INF", XSDDatatype.XSDdouble)); }
 
     @Test public void nodeId_double_5()
-    { test("'-INF'^^xsd:double", NodeFactory.createLiteral("-INF", XSDDatatype.XSDdouble)); }
+    { test("'-INF'^^xsd:double", NodeFactory.createLiteralDT("-INF", XSDDatatype.XSDdouble)); }
 
     @Test public void nodeId_double_6()
     { test("'1.1E9'^^xsd:double"); }

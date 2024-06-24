@@ -16,15 +16,27 @@
  * limitations under the License.
  */
 
-package org.apache.jena.riot.process;
+package org.apache.jena.tdb2.sys;
 
-import org.apache.jena.graph.Node ;
+import org.apache.jena.graph.Node;
+import org.apache.jena.riot.process.normalize.CanonicalizeLiteral;
 import org.apache.jena.riot.process.normalize.NormalizeRDFTerms;
+import org.apache.jena.tdb2.store.NodeId;
+import org.apache.jena.tdb2.store.NodeIdInline;
 
-public class TestNormalization extends AbstractTestNormalization {
-    @Override
-    protected Node normalize(Node n1) {
-        Node n2 = NormalizeRDFTerms.normalizeValue(n1);
-        return n2;
+/**
+ * A variation on {@link CanonicalizeLiteral} that attempts to generate TDB2 {@link NodeIdInline inline} NodeIds,
+ * then convert back to {@link Node Nodes}.
+ * This is used to ensure that TDB2 NodInlining is compatible with {@link CanonicalizeLiteral}
+ */
+public class CanonicalTermsTDB2 {
+    // Via TDB2 Node inlining.
+    public static Node canonicalTDB2(Node node) {
+        NodeId x = NodeIdInline.inline(node);
+        if ( x == null )
+            // No inline.
+            return NormalizeRDFTerms.get().normalize(node);
+        Node inlined = NodeIdInline.extract(x);
+        return inlined;
     }
 }

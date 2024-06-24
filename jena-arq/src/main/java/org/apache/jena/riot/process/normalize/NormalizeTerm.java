@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,16 +16,11 @@
  * limitations under the License.
  */
 
-package org.apache.jena.riot.process;
+package org.apache.jena.riot.process.normalize;
 
-import org.junit.runner.RunWith ;
-import org.junit.runners.Suite ;
+import org.apache.jena.graph.Node;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses( {
-    TestNormalization.class,
-    TestNormalizationTTL.class,
-    TestNormalizationXSD.class
-})
-public class TS_Process
-{}
+@FunctionalInterface
+public interface NormalizeTerm  {
+    public Node normalize(Node node);
+}

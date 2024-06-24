@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,16 +16,15 @@
  * limitations under the License.
  */
 
-package org.apache.jena.riot.process;
+package org.apache.jena.tdb2.sys;
 
-import org.junit.runner.RunWith ;
-import org.junit.runners.Suite ;
+import org.apache.jena.graph.Node;
+import org.apache.jena.riot.process.AbstractTestNormalization;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses( {
-    TestNormalization.class,
-    TestNormalizationTTL.class,
-    TestNormalizationXSD.class
-})
-public class TS_Process
-{}
+public class TestNormalizationTDB2 extends AbstractTestNormalization {
+
+    @Override
+    protected Node normalize(Node node) {
+        return CanonicalTermsTDB2.canonicalTDB2(node);
+    }
+}
