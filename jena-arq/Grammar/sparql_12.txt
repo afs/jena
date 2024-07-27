@@ -211,12 +211,14 @@ TOKENS
 | <LT: "<">
 | <LE: "<=">
 | <GE: ">=">
-| <GT2: ">>">
+| <L_TRIPLE: "<<(">
+| <R_TRIPLE: ")>>">
 | <LT2: "<<">
+| <GT2: ">>">
 | <L_ANN: "{|">
 | <R_ANN: "|}">
-| <BANG: "!">
 | <TILDE: "~">
+| <BANG: "!">
 | <COLON: ":">
 | <SC_OR: "||">
 | <SC_AND: "&&">
@@ -306,6 +308,8 @@ NON-TERMINALS
 	GroupGraphPattern	:=	<LBRACE> ( SubSelect | GroupGraphPatternSub ) <RBRACE>
 	GroupGraphPatternSub	:=	( TriplesBlock )? ( GraphPatternNotTriples ( <DOT> )? ( TriplesBlock )? )*
 	TriplesBlock	:=	TriplesSameSubjectPath ( <DOT> ( TriplesBlock )? )?
+	ReifiedTripleBlock	:=	ReifiedTriple PropertyList
+	ReifiedTripleBlockPath	:=	ReifiedTriple PropertyListPath
 	GraphPatternNotTriples	:=	( GroupOrUnionGraphPattern | OptionalGraphPattern | MinusGraphPattern | GraphGraphPattern | ServiceGraphPattern | Filter | Bind | InlineData )
 	OptionalGraphPattern	:=	<OPTIONAL> GroupGraphPattern
 	GraphGraphPattern	:=	<GRAPH> VarOrIri GroupGraphPattern
@@ -320,7 +324,11 @@ NON-TERMINALS
 		|	NumericLiteral
 		|	BooleanLiteral
 		|	<UNDEF>
-		|	QuotedTripleData
+		|	ReifiedTripleData
+	Reifier	:=	<TILDE> ( VarOrReifierId )?
+	ReifierData	:=	<TILDE> ( ReifierId )?
+	ReifierId	:=	( iri | BlankNode )
+	VarOrReifierId	:=	( Var | ReifierId )
 	MinusGraphPattern	:=	<MINUS_P> GroupGraphPattern
 	GroupOrUnionGraphPattern	:=	GroupGraphPattern ( <UNION> GroupGraphPattern )*
 	Filter	:=	<FILTER> Constraint
@@ -332,6 +340,7 @@ NON-TERMINALS
 	ConstructTriples	:=	TriplesSameSubject ( <DOT> ( ConstructTriples )? )?
 	TriplesSameSubject	:=	VarOrTerm PropertyListNotEmpty
 		|	TriplesNode PropertyList
+		|	ReifiedTripleBlock
 	PropertyList	:=	( PropertyListNotEmpty )?
 	PropertyListNotEmpty	:=	Verb ObjectList ( <SEMICOLON> ( Verb ObjectList )? )*
 	Verb	:=	( VarOrIri | <KW_A> )
@@ -339,6 +348,7 @@ NON-TERMINALS
 	Object	:=	GraphNode Annotation
 	TriplesSameSubjectPath	:=	VarOrTerm PropertyListPathNotEmpty
 		|	TriplesNodePath PropertyListPath
+		|	ReifiedTripleBlockPath
 	PropertyListPath	:=	( PropertyListPathNotEmpty )?
 	PropertyListPathNotEmpty	:=	( VerbPath | VerbSimple ) ObjectListPath ( <SEMICOLON> ( ( VerbPath | VerbSimple ) ObjectListPath )? )*
 	VerbPath	:=	Path
@@ -363,20 +373,27 @@ NON-TERMINALS
 	BlankNodePropertyListPath	:=	<LBRACKET> PropertyListPathNotEmpty <RBRACKET>
 	Collection	:=	<LPAREN> ( GraphNode )+ <RPAREN>
 	CollectionPath	:=	<LPAREN> ( GraphNodePath )+ <RPAREN>
-	AnnotationPath	:=	( <L_ANN> PropertyListPathNotEmpty <R_ANN> )?
-	Annotation	:=	( <L_ANN> PropertyListNotEmpty <R_ANN> )?
+	AnnotationPath	:=	( Reifier | AnnotationPathBlock )*
+	AnnotationPathBlock	:=	<L_ANN> PropertyListPath <R_ANN>
+	Annotation	:=	( Reifier | AnnotationBlock )*
+	AnnotationBlock	:=	<L_ANN> PropertyList <R_ANN>
 	GraphNode	:=	VarOrTerm
 		|	TriplesNode
+		|	ReifiedTriple
 	GraphNodePath	:=	VarOrTerm
 		|	TriplesNodePath
-	VarOrTerm	:=	( Var | iri | RDFLiteral | NumericLiteral | BooleanLiteral | BlankNode | <NIL> | QuotedTriple )
-	QuotedTriple	:=	<LT2> VarOrTerm Verb VarOrTerm <GT2>
-	QuotedTripleData	:=	<LT2> ( DataValueTerm ) ( iri | <KW_A> ) ( DataValueTerm ) <GT2>
+		|	ReifiedTriple
+	VarOrTerm	:=	( Var | iri | RDFLiteral | NumericLiteral | BooleanLiteral | BlankNode | <NIL> | TripleTerm )
+	ReifiedTriple	:=	<LT2> VarOrTerm Verb VarOrTerm ( Reifier )? <GT2>
+	ReifiedTripleData	:=	<LT2> ( DataValueTerm ) ( iri | <KW_A> ) ( DataValueTerm ) ( ReifierData )? <GT2>
+	TripleTerm	:=	<L_TRIPLE> VarOrTerm Verb VarOrTerm <R_TRIPLE>
+	TripleTermData	:=	<L_TRIPLE> DataValueTerm ( iri | <KW_A> ) DataValueTerm <R_TRIPLE>
 	DataValueTerm	:=	iri
 		|	RDFLiteral
 		|	NumericLiteral
 		|	BooleanLiteral
-		|	QuotedTripleData
+		|	ReifiedTripleData
+		|	TripleTermData
 	VarOrIri	:=	( Var | iri )
 	Var	:=	( <VAR1> | <VAR2> )
 	Expression	:=	ConditionalOrExpression
@@ -391,9 +408,9 @@ NON-TERMINALS
 		|	<PLUS> PrimaryExpression
 		|	<MINUS> PrimaryExpression
 		|	PrimaryExpression
-	PrimaryExpression	:=	( BrackettedExpression | BuiltInCall | iriOrFunction | RDFLiteral | NumericLiteral | BooleanLiteral | Var | ExprQuotedTriple )
-	ExprVarOrTerm	:=	( iri | RDFLiteral | NumericLiteral | BooleanLiteral | Var | ExprQuotedTriple )
-	ExprQuotedTriple	:=	<LT2> ExprVarOrTerm Verb ExprVarOrTerm <GT2>
+	PrimaryExpression	:=	( BrackettedExpression | BuiltInCall | iriOrFunction | RDFLiteral | NumericLiteral | BooleanLiteral | Var | ExprReifiedTriple )
+	ExprVarOrTerm	:=	( iri | RDFLiteral | NumericLiteral | BooleanLiteral | Var | ExprReifiedTriple )
+	ExprReifiedTriple	:=	<LT2> ExprVarOrTerm Verb ExprVarOrTerm <GT2>
 	BrackettedExpression	:=	<LPAREN> Expression <RPAREN>
 	BuiltInCall	:=	Aggregate
 		|	<STR> <LPAREN> Expression <RPAREN>

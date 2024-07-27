@@ -871,15 +871,29 @@ Element TriplesBlock(ElementPathBlock acc) : { }
     { return acc ; }
 }
 
+Node ReifiedTripleBlock(TripleCollector acc) : {
+   Node reifSubj = null ;
+} {
+  // NEW-SYNTAX
+  reifSubj = ReifiedTriple()
+  PropertyList(reifSubj, acc)   // Maybe empty
+  { return reifSubj ; }
+}
+
+Node ReifiedTripleBlockPath(TripleCollector acc) : {
+   Node reifSubj = null ;
+} {
+  // NEW-SYNTAX
+  reifSubj = ReifiedTriple()
+  PropertyListPath(reifSubj, acc)   // Maybe empty
+  { return reifSubj ; }
+}
+
 // -----
 
 Element GraphPatternNotTriples() : { Element el = null ; }
 {
  (
-//    el = GroupGraphPattern()
-//  |
-//    el = UnionGraphPattern()
-//  |
    el = GroupOrUnionGraphPattern()
  |
    el = OptionalGraphPattern()
@@ -1021,8 +1035,54 @@ Node DataBlockValue() : { Node n ; String iri ; }
 | n = NumericLiteral()  { return n ; }
 | n = BooleanLiteral()  { return n ; }
 | <UNDEF>               { return null ; }
-| n = QuotedTripleData()      { return n ; }
+  // NEW-SYNTAX
+| n = ReifiedTripleData()      { return n ; }
 
+}
+
+// ---- Reifier, various cases.
+
+Node Reifier(TripleCollector acc, Node s, Node p, Node o) : { Token t = null ; Node reifSubj = null ; }
+{
+ 
+    // NEW-SYNTAX
+    // Possible use of <VBAR> of reifiers 
+    //    ( t = <VBAR> | t = <TILDE> )
+    t = <TILDE>
+    (reifSubj = VarOrReifierId() )?
+    { if ( reifSubj == null )
+        reifSubj = createBNode(t.beginLine, t.beginColumn) ;
+      return reifSubj ;
+    }
+}
+
+// No variables.
+Node ReifierData(TripleCollector acc, Node s, Node p, Node o) : { Token t = null ; Node reifSubj = null ; }
+{
+    // NEW-SYNTAX
+    // Possible use of <VBAR> of reifiers 
+    // ( t = <VBAR> | t = <TILDE> )
+    t = <TILDE>
+    (reifSubj = ReifierId() )?
+    { if ( reifSubj == null )
+        reifSubj = createBNode(t.beginLine, t.beginColumn) ;
+      return reifSubj ;
+    }
+}
+
+Node ReifierId() : { Node n = null ; String iri ; } 
+{
+  // No variable
+  ( iri = iri()           { return createNode(iri) ; }
+  | n = BlankNode()       { return n ; }
+  )
+}
+
+Node VarOrReifierId() : { Node n = null; }
+{
+   ( n = Var()        { return n; }
+   | n = ReifierId()  { return n; }
+   )
 }
 
 #ifdef ARQ
@@ -1115,7 +1175,7 @@ Expr FunctionCall() : { String fname ; Args a ; }
      if ( AggregateRegistry.isRegistered(fname) ) {
          // aggregates
          if ( ! getAllowAggregatesInExpressions() )
-            throwParseException("Aggregate expression not legal at this point : "+fname, -1, -1) ;
+            throwParseException("Aggregate expression not legal at this point : "+fname, token.beginLine, token.beginColumn) ;
          Aggregator agg = AggregatorFactory.createCustom(fname, a) ;
          Expr exprAgg = getQuery().allocAggregate(agg) ;
          return exprAgg ;
@@ -1157,8 +1217,6 @@ ExprList ExpressionList() : { Expr expr = null ; ExprList exprList = new ExprLis
   )
   { return exprList ; }
 }
-
-
 
 // -------- Construct patterns
 #ifdef ARQ
@@ -1214,6 +1272,8 @@ void TriplesSameSubject(TripleCollector acc) : { Node s ; }
   s = TriplesNode(tempAcc)
   PropertyList(s, tempAcc)
   { insert(acc, tempAcc) ; }
+|
+  ReifiedTripleBlock(acc)
 }
 
 void PropertyList(Node s, TripleCollector acc) : { }
@@ -1269,6 +1329,8 @@ void TriplesSameSubjectPath(TripleCollector acc) : { Node s ; }
   s = TriplesNodePath(tempAcc)
   PropertyListPath(s, tempAcc)
   { insert(acc, tempAcc) ; }
+|
+  ReifiedTripleBlockPath(acc)
 }
 
 void PropertyListPath(Node s, TripleCollector acc) : { }
@@ -1291,12 +1353,8 @@ void PropertyListPathNotEmpty(Node s, TripleCollector acc) :
       | p = VerbSimple()
       )
       ObjectListPath(s, p, path, acc)
-    )? 
+    )?
   )*
-#if 0
-  |
-  Reification(s, acc)
-#endif
 }
 
 Path VerbPath() : {Node p ; Path path ; }
@@ -1312,7 +1370,7 @@ Node VerbSimple() : { Node p ; }
   { return p ; }
 }
 
-void ObjectListPath(Node s,  Node p, Path path, TripleCollector acc): { Node o ; } 
+void ObjectListPath(Node s, Node p, Path path, TripleCollector acc): { Node o ; } 
 {
   ObjectPath(s, p, path, acc)
   ( <COMMA> ObjectPath(s, p, path, acc) )*
@@ -1494,13 +1552,9 @@ long Integer() : {Token t ;}
 
 Node TriplesNode(TripleCollectorMark acc) : { Node n ; }
 {
-  n = Collection(acc) { return n ; }
+   n = Collection(acc) { return n ; }
  |
-  n = BlankNodePropertyList(acc) { return n ; }
-#if 0
- |
-  n = Reification(null, acc) { return n ; }
-#endif
+   n = BlankNodePropertyList(acc) { return n ; }
 }
 
 Node BlankNodePropertyList(TripleCollector acc) : { Token t ; }
@@ -1514,13 +1568,9 @@ Node BlankNodePropertyList(TripleCollector acc) : { Token t ; }
 
 Node TriplesNodePath(TripleCollectorMark acc) : { Node n ; }
 {
-  n = CollectionPath(acc) { return n ; }
+   n = CollectionPath(acc) { return n ; }
  |
-  n = BlankNodePropertyListPath(acc) { return n ; }
-#if 0
- |
-  n = Reification(null, acc) { return n ; }
-#endif
+   n = BlankNodePropertyListPath(acc) { return n ; }
 }
 
 Node BlankNodePropertyListPath(TripleCollector acc) : { Token t ; }
@@ -1531,32 +1581,6 @@ Node BlankNodePropertyListPath(TripleCollector acc) : { Token t ; }
   <RBRACKET>
     { return n ; }
 }
-
-// << >> as reification. Allows any subject/predicate/object nodes.
-#if 0
-Node Reification(Node id, TripleCollectorMark acc) : 
-    { Node s , p , o ; int mark ; Token t ; }
-{
-  // Insert reification triple before the resulting subtriples (if any)
-  t = <LT2>
-    { int beginLine = t.beginLine; int beginColumn = t.beginColumn; t = null; }
-    { if ( id == null )
-        id = createBNode(beginLine, beginColumn() ;
-      mark = acc.mark() ; }
-  s = GraphNode(acc)
-    { insert(acc, mark, id, nRDFsubject, s) ;
-      mark = acc.mark() ; 
-    }
-  p = GraphNode(acc)
-    { insert(acc, mark, id, nRDFpredicate, p) ;
-      mark = acc.mark() ;
-    }
-  o = GraphNode(acc)
-    { insert(acc, mark, id, nRDFobject, o) ; }
-  <GT2>
-    { return id ; }
-}
-#endif
 
 // ------- RDF collections
 
@@ -1612,52 +1636,92 @@ Node CollectionPath(TripleCollectorMark acc) :
      return listHead ; }
 }
 
-// RDF-star Annotation Syntax
-void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) : {}
+// ---- RDF-star Annotation Syntax
+// Allow paths. Query graph patterns.
+void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) : {  Node reifSubj = null ; }
 {
-  (
-    <L_ANN>
-      { Node pAnn = preConditionAnnotation(s, p, path, o, token.beginLine, token.beginColumn) ;
-        Node x = createQuotedTriple(s, pAnn, o, token.beginLine, token.beginColumn);
-      }
-      PropertyListPathNotEmpty(x, acc)
-    <R_ANN>
-  )?
+//   (
+//     (
+//       reifSubj = Reifier(acc, s, p, o)
+//       AnnotationPathBlock(acc, reifSubj)
+//     |
+//       { reifSubj = createBNode(token.beginLine, token.beginColumn); }
+//       AnnotationPathBlock(acc, null)
+//     )
+//     AnnotationPath(acc, s, p, path, o)
+//   )?
+
+  (  Reifier(acc, s, p, o) |  AnnotationPathBlock(acc, reifSubj) ) *
+
 }
 
-// RDF-star Annotation Syntax
-void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) : { }
+void AnnotationPathBlock(TripleCollector acc, Node reifSubj) : { }
 {
-  // path should be null.
-  (
-    <L_ANN>
-      { Node pAnn = preConditionAnnotation(s, p, path, o, token.beginLine, token.beginColumn) ;
-        Node x = createQuotedTriple(s, p, o, token.beginLine, token.beginColumn);
-      }
-      PropertyListNotEmpty(x, acc)
-    <R_ANN>
-  )?
+   // NEW-SYNTAX
+   // Roll back into AnnotationPath
+   <L_ANN>
+      { if ( reifSubj == null ) reifSubj = createBNode(token.beginLine, token.beginColumn); }
+      PropertyListPath(reifSubj, acc)
+   <R_ANN>
+}
+
+// ---- RDF-star Annotation Syntax
+// No paths. Construct templates.
+void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node reifSubj = null ; }
+{
+//   // NEW_SYNTAX @@
+//   (
+//     (
+//       reifSubj = Reifier(acc, s, p, o)
+//       AnnotationBlock(acc, reifSubj)
+//     |
+//       { reifSubj = createBNode(token.beginLine, token.beginColumn); }
+//       AnnotationBlock(acc, null)
+//     )
+//     Annotation(acc, s, p, path, o)
+//   )?
+
+  (  Reifier(acc, s, p, o) |  AnnotationBlock(acc, reifSubj) ) *
+
+}
+
+void AnnotationBlock(TripleCollector acc, Node reifSubj) : { }
+{
+   // NEW-SYNTAX
+   // Roll back into Annotation?
+   <L_ANN>
+      { if ( reifSubj == null ) reifSubj = createBNode(token.beginLine, token.beginColumn); }
+      PropertyList(reifSubj, acc)
+   <R_ANN>
 }
 
 // -------- Nodes in a graph pattern or template
 
+// Object position RDF term.
+// No paths in TriplesNode
+// NEW-SYNTAX Rename?
 Node GraphNode(TripleCollectorMark acc) : { Node n ; }
 {
-  n = VarOrTerm() { return n ; }
+   n = VarOrTerm() { return n ; }
  |
-  n = TriplesNode(acc) { return n ; }
+   n = TriplesNode(acc) { return n ; }
+ |
+   n = ReifiedTriple()  { return n ; }
 }
 
+// Object position RDF term. NEW-SYNTAX Rename?
 Node GraphNodePath(TripleCollectorMark acc) : { Node n ; }
 {
   n = VarOrTerm() { return n ; }
- |
+|
   n = TriplesNodePath(acc) { return n ; }
+|
+  n = ReifiedTriple()  { return n ; }
 }
 
 Node VarOrTerm() : { Node n = null ; String iri ; }
 {
-  ( n = Var()
+  ( n = Var()             { return n ; }
   | iri = iri()           { return createNode(iri) ; }
   | n = RDFLiteral()      { return n ; }
   | n = NumericLiteral()  { return n ; }
@@ -1665,40 +1729,83 @@ Node VarOrTerm() : { Node n = null ; String iri ; }
   | n = BlankNode()       { return n ; }
   //  <LPAREN> <RPAREN>     { return nRDFnil ; }
   | <NIL>  { return nRDFnil ; }
-  | n = QuotedTriple()
-)
-  { return n ; }
+  | n = TripleTerm()      { return n; }
+  )
 }
 
-Node QuotedTriple() :  { Node n = null ; Token t ; Node s , p , o ; }
+Node ReifiedTriple() :  { Node n = null ; Token t ; TripleCollector acc = null; Node s; Node p ; Node o ; }
 {
   t = <LT2>
+#ifdef ARQ
+  // Leading reifier
+  // (LOOKAHEAD(2) VarOrTerm() <VBAR> )?
+#endif
   s = VarOrTerm()
   p = Verb()
   o = VarOrTerm()
-  { n = createQuotedTriple(s, p, o, t.beginLine, t.beginColumn); }
+  { n = createReifiedTriple(s, p, o, t.beginLine, t.beginColumn); }
+  // NEW-SYNTAX -- FIXME
+  // @@ Argument acc
+  // Having * here create problems in <<>> :x :y . -- what is the subject.
+  (Reifier(acc, s, p, o))?
   <GT2>
   { return n; }
 }
 
-Node QuotedTripleData() :  { Node n = null ; Token t ; String iri ; Node s , p , o ; }
+// No variables.
+Node ReifiedTripleData() : { Node n = null ; Token t ; String iri ; TripleCollector acc = null; Node s; Node p ; Node o ; }
 {
   t = <LT2>
+#ifdef ARQ
+  // Leadign reifier
+  // ( LOOKAHEAD(2) VarOrTerm() <VBAR> )?
+#endif
   ( s = DataValueTerm() )
   ( iri = iri() { p = createNode(iri) ; } | <KW_A> { p = nRDFtype ; } )
   ( o = DataValueTerm() )
-  { n = createQuotedTriple(s, p, o, t.beginLine, t.beginColumn); }
+  // NEW-SYNTAX -- FIXME
+  { n = createReifiedTriple(s, p, o, t.beginLine, t.beginColumn); }
+  (ReifierData(acc, s, p, o))?
   <GT2>
   { return n; }
 }
 
+Node TripleTerm() :  { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }
+{
+    openToken = <L_TRIPLE>
+    s = VarOrTerm()
+    p = Verb()
+    o = VarOrTerm()
+    // NEW-SYNTAX FIXME
+    // @@ Rename
+    { n = createReifiedTriple(s, p, o, openToken.beginLine, openToken.beginColumn); }
+    <R_TRIPLE>
+    { return n ; }
+}
+
+Node TripleTermData() :  { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }
+{
+    openToken = <L_TRIPLE>
+    s = DataValueTerm()
+    ( iri = iri() { p = createNode(iri) ; } | <KW_A> { p = nRDFtype ; } )
+    o = DataValueTerm()
+    // NEW-SYNTAX FIXME
+    // @@ Rename
+    { n = createReifiedTriple(s, p, o, openToken.beginLine, openToken.beginColumn); }
+    <R_TRIPLE>
+    { return n ; }
+}
+
+// VarOrTerm except no var, no bnodes
+// @@ Rename?
 Node DataValueTerm() : {  Node n = null ; String iri ; Node s , p , o ; }
 {
-  iri = iri()           { return createNode(iri) ; }
-| n = RDFLiteral()      { return n ; }
-| n = NumericLiteral()  { return n ; }
-| n = BooleanLiteral()  { return n ; }
-| n = QuotedTripleData()  { return n ; }
+  iri = iri()            { return createNode(iri) ; }
+| n = RDFLiteral()       { return n ; }
+| n = NumericLiteral()   { return n ; }
+| n = BooleanLiteral()   { return n ; }
+| n = ReifiedTripleData() { return n ; }
+| n = TripleTermData()   { return n; }
 }
 
 // e.g. Property (if no bNodes) + DESCRIBE
@@ -1863,7 +1970,7 @@ Expr PrimaryExpression() : { Expr expr ; Node n ; }
   | n = NumericLiteral()  { return asExpr(n) ; }
   | n = BooleanLiteral()  { return asExpr(n) ; }
   | n = Var()             { return asExpr(n) ; }
-  | n = ExprQuotedTriple()  { return asExpr(n) ; }
+  | n = ExprReifiedTriple()  { return asExpr(n) ; }
 
 // and not SPARQL 12
 // needs checking.
@@ -1879,17 +1986,17 @@ Node ExprVarOrTerm() : { Node n; String s;}
   | n = NumericLiteral()
   | n = BooleanLiteral()
   | n = Var()
-  | n = ExprQuotedTriple()
+  | n = ExprReifiedTriple()
   )
   { return n; }
 }
 
-Node ExprQuotedTriple() : { Token t ; Node s,p,o,n; }
+Node ExprReifiedTriple() : { Token t ; Node s,p,o,n; }
 { t = <LT2>
   s = ExprVarOrTerm()
   p = Verb()
   o = ExprVarOrTerm()
-  { n = createQuotedTriple(s, p, o, t.beginLine, t.beginColumn); }
+  { n = createReifiedTriple(s, p, o, t.beginLine, t.beginColumn); }
   <GT2>
   { return n; }
 }
@@ -2269,7 +2376,7 @@ Expr iriOrFunction() : { String iri ; Args a = null ; }
     if ( AggregateRegistry.isRegistered(iri) ) {
          // aggregates
          if ( ! getAllowAggregatesInExpressions() )
-            throwParseException("Aggregate expression not legal at this point : "+iri, -1, -1) ;
+            throwParseException("Aggregate expression not legal at this point : "+iri, token.beginLine, token.beginColumn) ;
          Aggregator agg = AggregatorFactory.createCustom(iri, a) ;
          Expr exprAgg = getQuery().allocAggregate(agg) ;
          return exprAgg ;
@@ -2734,13 +2841,15 @@ TOKEN :
 | < LE:      "<=" >    // Maybe: | "=>" >
 | < GE:      ">=" >    // Maybe: | "=<" >
 
-| < GT2:     ">>" >
+| < L_TRIPLE: "<<(" >
+| < R_TRIPLE: ")>>" >
 | < LT2:     "<<" >
+| < GT2:     ">>" >
 | <L_ANN:    "{|" >
 | <R_ANN:    "|}" >
 
-| < BANG:    "!" >
 | < TILDE:   "~" >
+| < BANG:    "!" >
 | < COLON:   ":" >
 
 | < SC_OR:   "||" >

@@ -420,7 +420,7 @@ public class QueryParserBase
         return null;
     }
 
-    protected Node createQuotedTriple(Node s, Node p, Node o, int line, int column) {
+    protected Node createReifiedTriple(Node s, Node p, Node o, int line, int column) {
         return NodeFactory.createTripleNode(s, p, o);
     }
 
