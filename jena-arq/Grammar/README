@@ -1,0 +1,17 @@
+
+
+==
+To produce the HTML for the SPARQL Grammar:
+produce the SPARL 1.2 specific file
+
+    grammar
+
+which alsogenerates Java code and canbe used for checking.
+
+The run
+
+    sparql2html
+
+The output is in X12.html
+
+This replaces the table between "<!-- GRAMMAR -->" in the specific HTML.

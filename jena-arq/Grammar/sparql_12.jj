@@ -525,6 +525,18 @@ Element TriplesBlock(ElementPathBlock acc) : { }
   ( <DOT> (TriplesBlock(acc))? )?
     { return acc ; }
 }
+Node ReifiedTripleBlock(TripleCollector acc) : { Node reifId ; }
+{
+  reifId = ReifiedTriple(acc)
+  PropertyList(reifId, acc)
+  { return reifId ; }
+}
+Node ReifiedTripleBlockPath(TripleCollector acc) : { Node reifId ; }
+{
+  reifId = ReifiedTriple(acc)
+  PropertyListPath(reifId, acc)
+  { return reifId ; }
+}
 Element GraphPatternNotTriples() : { Element el = null ; }
 {
  (
@@ -639,7 +651,32 @@ Node DataBlockValue() : { Node n ; String iri ; }
 | n = NumericLiteral() { return n ; }
 | n = BooleanLiteral() { return n ; }
 | <UNDEF> { return null ; }
-| n = QuotedTripleData() { return n ; }
+| n = TripleTermData() { return n ; }
+}
+Node Reifier(TripleCollector acc, Node s, Node p, Node o) : { Token tok = null ; Node reifId = null ; }
+{
+    tok = <TILDE>
+    (reifId = VarOrReifierId() )?
+    { return reifId; }
+}
+Node ReifierData(TripleCollector acc, Node s, Node p, Node o) : { Token tok = null ; Node reifId = null ; }
+{
+    tok = <TILDE>
+    (reifId = ReifierId() )?
+    { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }
+    { return reifId; }
+}
+Node ReifierId() : { Node n = null ; String iri ; }
+{
+  ( iri = iri() { return createNode(iri) ; }
+  | n = BlankNode() { return n ; }
+  )
+}
+Node VarOrReifierId() : { Node n = null; }
+{
+   ( n = Var() { return n; }
+   | n = ReifierId() { return n; }
+   )
 }
 Element MinusGraphPattern() : { Element el ; }
 {
@@ -683,7 +720,7 @@ Expr FunctionCall() : { String fname ; Args a ; }
   {
      if ( AggregateRegistry.isRegistered(fname) ) {
          if ( ! getAllowAggregatesInExpressions() )
-            throwParseException("Aggregate expression not legal at this point : "+fname, -1, -1) ;
+            throwParseException("Aggregate expression not legal at this point : "+fname, token.beginLine, token.beginColumn) ;
          Aggregator agg = AggregatorFactory.createCustom(fname, a) ;
          Expr exprAgg = getQuery().allocAggregate(agg) ;
          return exprAgg ;
@@ -747,6 +784,8 @@ void TriplesSameSubject(TripleCollector acc) : { Node s ; }
   s = TriplesNode(tempAcc)
   PropertyList(s, tempAcc)
   { insert(acc, tempAcc) ; }
+|
+  ReifiedTripleBlock(acc)
 }
 void PropertyList(Node s, TripleCollector acc) : { }
 {
@@ -790,6 +829,8 @@ void TriplesSameSubjectPath(TripleCollector acc) : { Node s ; }
   s = TriplesNodePath(tempAcc)
   PropertyListPath(s, tempAcc)
   { insert(acc, tempAcc) ; }
+|
+  ReifiedTripleBlockPath(acc)
 }
 void PropertyListPath(Node s, TripleCollector acc) : { }
 {
@@ -918,9 +959,9 @@ long Integer() : {Token t ;}
 }
 Node TriplesNode(TripleCollectorMark acc) : { Node n ; }
 {
-  n = Collection(acc) { return n ; }
+   n = Collection(acc) { return n ; }
  |
-  n = BlankNodePropertyList(acc) { return n ; }
+   n = BlankNodePropertyList(acc) { return n ; }
 }
 Node BlankNodePropertyList(TripleCollector acc) : { Token t ; }
 {
@@ -932,9 +973,9 @@ Node BlankNodePropertyList(TripleCollector acc) : { Token t ; }
 }
 Node TriplesNodePath(TripleCollectorMark acc) : { Node n ; }
 {
-  n = CollectionPath(acc) { return n ; }
+   n = CollectionPath(acc) { return n ; }
  |
-  n = BlankNodePropertyListPath(acc) { return n ; }
+   n = BlankNodePropertyListPath(acc) { return n ; }
 }
 Node BlankNodePropertyListPath(TripleCollector acc) : { Token t ; }
 {
@@ -992,72 +1033,120 @@ Node CollectionPath(TripleCollectorMark acc) :
        insert(acc, lastCell, nRDFrest, nRDFnil) ;
      return listHead ; }
 }
-void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) : {}
+void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node reifId = null ; }
 {
   (
-    <L_ANN>
-      { Node pAnn = preConditionAnnotation(s, p, path, o, token.beginLine, token.beginColumn) ;
-        Node x = createQuotedTriple(s, pAnn, o, token.beginLine, token.beginColumn);
-      }
-      PropertyListPathNotEmpty(x, acc)
-    <R_ANN>
-  )?
+    { p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn); }
+    reifId = Reifier(acc, s, p, o)
+    { reifId = insertTripleReifier(acc, reifId, s, p, o, token.beginLine, token.beginColumn) ; }
+    { setReifierId(reifId); }
+  |
+    {
+      reifId = getOrAllocReifierId();
+      p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+    }
+    AnnotationBlockPath(acc, reifId)
+    { clearReifierId(); }
+  )*
+  { clearReifierId(); }
 }
-void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) : { }
+void AnnotationBlockPath(TripleCollector acc, Node reifId) : { }
+{
+   <L_ANN>
+      PropertyListPathNotEmpty(reifId, acc)
+   <R_ANN>
+}
+void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node reifId = null ; }
 {
   (
-    <L_ANN>
-      { Node pAnn = preConditionAnnotation(s, p, path, o, token.beginLine, token.beginColumn) ;
-        Node x = createQuotedTriple(s, p, o, token.beginLine, token.beginColumn);
-      }
-      PropertyListNotEmpty(x, acc)
-    <R_ANN>
-  )?
+    { p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn); }
+    reifId = Reifier(acc, s, p, o)
+    { reifId = insertTripleReifier(acc, reifId, s, p, o, token.beginLine, token.beginColumn) ; }
+    { setReifierId(reifId); }
+  |
+    {
+      reifId = getOrAllocReifierId();
+      p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+    }
+    AnnotationBlock(acc, reifId)
+    { clearReifierId(); }
+  )*
+}
+void AnnotationBlock(TripleCollector acc, Node reifId) : { }
+{
+   <L_ANN>
+      PropertyListNotEmpty(reifId, acc)
+   <R_ANN>
 }
 Node GraphNode(TripleCollectorMark acc) : { Node n ; }
 {
-  n = VarOrTerm() { return n ; }
+   n = VarOrTerm() { return n ; }
  |
-  n = TriplesNode(acc) { return n ; }
+   n = TriplesNode(acc) { return n ; }
+ |
+   n = ReifiedTriple(acc) { return n ; }
 }
 Node GraphNodePath(TripleCollectorMark acc) : { Node n ; }
 {
   n = VarOrTerm() { return n ; }
- |
+|
   n = TriplesNodePath(acc) { return n ; }
+|
+  n = ReifiedTriple(acc) { return n ; }
 }
 Node VarOrTerm() : { Node n = null ; String iri ; }
 {
-  ( n = Var()
+  ( n = Var() { return n ; }
   | iri = iri() { return createNode(iri) ; }
   | n = RDFLiteral() { return n ; }
   | n = NumericLiteral() { return n ; }
   | n = BooleanLiteral() { return n ; }
   | n = BlankNode() { return n ; }
   | <NIL> { return nRDFnil ; }
-  | n = QuotedTriple()
-)
-  { return n ; }
+  | n = TripleTerm() { return n; }
+  )
 }
-Node QuotedTriple() : { Node n = null ; Token t ; Node s , p , o ; }
+Node ReifiedTriple(TripleCollector acc) : { Node reifId = null ; Token tok ; Node s; Node p ; Node o ; }
 {
-  t = <LT2>
+  tok = <LT2>
   s = VarOrTerm()
   p = Verb()
   o = VarOrTerm()
-  { n = createQuotedTriple(s, p, o, t.beginLine, t.beginColumn); }
+  (reifId = Reifier(acc, s, p, o))?
+  { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }
   <GT2>
-  { return n; }
+  { return reifId; }
 }
-Node QuotedTripleData() : { Node n = null ; Token t ; String iri ; Node s , p , o ; }
+Node ReifiedTripleData(TripleCollector acc) : { Node reifId = null ; Token tok ; String iri ; Node s; Node p ; Node o ; }
 {
-  t = <LT2>
+  tok = <LT2>
   ( s = DataValueTerm() )
   ( iri = iri() { p = createNode(iri) ; } | <KW_A> { p = nRDFtype ; } )
   ( o = DataValueTerm() )
-  { n = createQuotedTriple(s, p, o, t.beginLine, t.beginColumn); }
+  (reifId = ReifierData(acc, s, p, o))?
+  { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }
   <GT2>
-  { return n; }
+  { return reifId; }
+}
+Node TripleTerm() : { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }
+{
+    openToken = <L_TRIPLE>
+    s = VarOrTerm()
+    p = Verb()
+    o = VarOrTerm()
+    { n = createTripleTerm(s, p, o, openToken.beginLine, openToken.beginColumn); }
+    <R_TRIPLE>
+    { return n ; }
+}
+Node TripleTermData() : { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }
+{
+    openToken = <L_TRIPLE>
+    s = DataValueTerm()
+    ( iri = iri() { p = createNode(iri) ; } | <KW_A> { p = nRDFtype ; } )
+    o = DataValueTerm()
+    { n = createTripleTerm(s, p, o, openToken.beginLine, openToken.beginColumn); }
+    <R_TRIPLE>
+    { return n ; }
 }
 Node DataValueTerm() : { Node n = null ; String iri ; Node s , p , o ; }
 {
@@ -1065,7 +1154,7 @@ Node DataValueTerm() : { Node n = null ; String iri ; Node s , p , o ; }
 | n = RDFLiteral() { return n ; }
 | n = NumericLiteral() { return n ; }
 | n = BooleanLiteral() { return n ; }
-| n = QuotedTripleData() { return n ; }
+| n = TripleTermData() { return n; }
 }
 Node VarOrIri() : {Node n = null ; String iri ; }
 {
@@ -1194,7 +1283,7 @@ Expr PrimaryExpression() : { Expr expr ; Node n ; }
   | n = NumericLiteral() { return asExpr(n) ; }
   | n = BooleanLiteral() { return asExpr(n) ; }
   | n = Var() { return asExpr(n) ; }
-  | n = ExprQuotedTriple() { return asExpr(n) ; }
+  | n = ExprTripleTerm() { return asExpr(n) ; }
   )
 }
 Node ExprVarOrTerm() : { Node n; String s;}
@@ -1204,17 +1293,17 @@ Node ExprVarOrTerm() : { Node n; String s;}
   | n = NumericLiteral()
   | n = BooleanLiteral()
   | n = Var()
-  | n = ExprQuotedTriple()
+  | n = ExprTripleTerm()
   )
   { return n; }
 }
-Node ExprQuotedTriple() : { Token t ; Node s,p,o,n; }
-{ t = <LT2>
+Node ExprTripleTerm() : { Token t ; Node s,p,o,n; }
+{ t = <L_TRIPLE>
   s = ExprVarOrTerm()
   p = Verb()
   o = ExprVarOrTerm()
-  { n = createQuotedTriple(s, p, o, t.beginLine, t.beginColumn); }
-  <GT2>
+  { n = createTripleTerm(s, p, o, t.beginLine, t.beginColumn); }
+  <R_TRIPLE>
   { return n; }
 }
 Expr BrackettedExpression() : { Expr expr ; }
@@ -1421,7 +1510,7 @@ Expr iriOrFunction() : { String iri ; Args a = null ; }
        return asExpr(createNode(iri)) ;
     if ( AggregateRegistry.isRegistered(iri) ) {
          if ( ! getAllowAggregatesInExpressions() )
-            throwParseException("Aggregate expression not legal at this point : "+iri, -1, -1) ;
+            throwParseException("Aggregate expression not legal at this point : "+iri, token.beginLine, token.beginColumn) ;
          Aggregator agg = AggregatorFactory.createCustom(iri, a) ;
          Expr exprAgg = getQuery().allocAggregate(agg) ;
          return exprAgg ;
@@ -1729,12 +1818,14 @@ TOKEN :
 | < LT: "<" >
 | < LE: "<=" >
 | < GE: ">=" >
-| < GT2: ">>" >
+| < L_TRIPLE: "<<(" >
+| < R_TRIPLE: ")>>" >
 | < LT2: "<<" >
+| < GT2: ">>" >
 | <L_ANN: "{|" >
 | <R_ANN: "|}" >
-| < BANG: "!" >
 | < TILDE: "~" >
+| < BANG: "!" >
 | < COLON: ":" >
 | < SC_OR: "||" >
 | < SC_AND: "&&" >
