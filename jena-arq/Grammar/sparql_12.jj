@@ -525,19 +525,17 @@ Element TriplesBlock(ElementPathBlock acc) : { }
   ( <DOT> (TriplesBlock(acc))? )?
     { return acc ; }
 }
-Node ReifiedTripleBlock(TripleCollector acc) : {
-   Node reifSubj = null ;
-} {
-  reifSubj = ReifiedTriple()
-  PropertyList(reifSubj, acc)
-  { return reifSubj ; }
+Node ReifiedTripleBlock(TripleCollector acc) : { Node reifId ; }
+{
+  reifId = ReifiedTriple(acc)
+  PropertyList(reifId, acc)
+  { return reifId ; }
 }
-Node ReifiedTripleBlockPath(TripleCollector acc) : {
-   Node reifSubj = null ;
-} {
-  reifSubj = ReifiedTriple()
-  PropertyListPath(reifSubj, acc)
-  { return reifSubj ; }
+Node ReifiedTripleBlockPath(TripleCollector acc) : { Node reifId ; }
+{
+  reifId = ReifiedTriple(acc)
+  PropertyListPath(reifId, acc)
+  { return reifId ; }
 }
 Element GraphPatternNotTriples() : { Element el = null ; }
 {
@@ -653,25 +651,19 @@ Node DataBlockValue() : { Node n ; String iri ; }
 | n = NumericLiteral() { return n ; }
 | n = BooleanLiteral() { return n ; }
 | <UNDEF> { return null ; }
-| n = ReifiedTripleData() { return n ; }
+| n = TripleTermData() { return n ; }
 }
-Node Reifier(TripleCollector acc, Node s, Node p, Node o) : { Token t = null ; Node reifSubj = null ; }
+Node Reifier(TripleCollector acc, Node s, Node p, Node o) : { Token tok = null ; Node reifId = null ; }
 {
-    t = <TILDE>
-    (reifSubj = VarOrReifierId() )?
-    { if ( reifSubj == null )
-        reifSubj = createBNode(t.beginLine, t.beginColumn) ;
-      return reifSubj ;
-    }
+    tok = <TILDE>
+    (reifId = VarOrReifierId() )?
+    { return reifId; }
 }
-Node ReifierData(TripleCollector acc, Node s, Node p, Node o) : { Token t = null ; Node reifSubj = null ; }
+Node ReifierData(TripleCollector acc, Node s, Node p, Node o) : { Token tok = null ; Node reifId = null ; }
 {
-    t = <TILDE>
-    (reifSubj = ReifierId() )?
-    { if ( reifSubj == null )
-        reifSubj = createBNode(t.beginLine, t.beginColumn) ;
-      return reifSubj ;
-    }
+    tok = <TILDE>
+    (reifId = ReifierId() )?
+    { return reifId; }
 }
 Node ReifierId() : { Node n = null ; String iri ; }
 {
@@ -1040,26 +1032,34 @@ Node CollectionPath(TripleCollectorMark acc) :
        insert(acc, lastCell, nRDFrest, nRDFnil) ;
      return listHead ; }
 }
-void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node reifSubj = null ; }
+void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node reifId = null ; }
 {
-  ( Reifier(acc, s, p, o) | AnnotationPathBlock(acc, reifSubj) ) *
+  (
+    Reifier(acc, s, p, o)
+  |
+    AnnotationPathBlock(acc, reifId)
+  )*
 }
-void AnnotationPathBlock(TripleCollector acc, Node reifSubj) : { }
+void AnnotationPathBlock(TripleCollector acc, Node reifId) : { }
 {
    <L_ANN>
-      { if ( reifSubj == null ) reifSubj = createBNode(token.beginLine, token.beginColumn); }
-      PropertyListPath(reifSubj, acc)
+      { if ( reifId == null ) reifId = createBNode(token.beginLine, token.beginColumn); }
+      PropertyListPath(reifId, acc)
    <R_ANN>
 }
-void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node reifSubj = null ; }
+void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node reifId = null ; }
 {
-  ( Reifier(acc, s, p, o) | AnnotationBlock(acc, reifSubj) ) *
+  (
+    Reifier(acc, s, p, o)
+  |
+    AnnotationBlock(acc, reifId)
+  ) *
 }
-void AnnotationBlock(TripleCollector acc, Node reifSubj) : { }
+void AnnotationBlock(TripleCollector acc, Node reifId) : { }
 {
    <L_ANN>
-      { if ( reifSubj == null ) reifSubj = createBNode(token.beginLine, token.beginColumn); }
-      PropertyList(reifSubj, acc)
+      { if ( reifId == null ) reifId = createBNode(token.beginLine, token.beginColumn); }
+      PropertyList(reifId, acc)
    <R_ANN>
 }
 Node GraphNode(TripleCollectorMark acc) : { Node n ; }
@@ -1068,7 +1068,7 @@ Node GraphNode(TripleCollectorMark acc) : { Node n ; }
  |
    n = TriplesNode(acc) { return n ; }
  |
-   n = ReifiedTriple() { return n ; }
+   n = ReifiedTriple(acc) { return n ; }
 }
 Node GraphNodePath(TripleCollectorMark acc) : { Node n ; }
 {
@@ -1076,7 +1076,7 @@ Node GraphNodePath(TripleCollectorMark acc) : { Node n ; }
 |
   n = TriplesNodePath(acc) { return n ; }
 |
-  n = ReifiedTriple() { return n ; }
+  n = ReifiedTriple(acc) { return n ; }
 }
 Node VarOrTerm() : { Node n = null ; String iri ; }
 {
@@ -1090,27 +1090,27 @@ Node VarOrTerm() : { Node n = null ; String iri ; }
   | n = TripleTerm() { return n; }
   )
 }
-Node ReifiedTriple() : { Node n = null ; Token t ; TripleCollector acc = null; Node s; Node p ; Node o ; }
+Node ReifiedTriple(TripleCollector acc) : { Node reifId = null ; Token tok ; Node s; Node p ; Node o ; }
 {
-  t = <LT2>
+  tok = <LT2>
   s = VarOrTerm()
   p = Verb()
   o = VarOrTerm()
-  { n = createReifiedTriple(s, p, o, t.beginLine, t.beginColumn); }
-  (Reifier(acc, s, p, o))?
+  (reifId = Reifier(acc, s, p, o))?
+  { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }
   <GT2>
-  { return n; }
+  { return reifId; }
 }
-Node ReifiedTripleData() : { Node n = null ; Token t ; String iri ; TripleCollector acc = null; Node s; Node p ; Node o ; }
+Node ReifiedTripleData(TripleCollector acc) : { Node reifId = null ; Token tok ; String iri ; Node s; Node p ; Node o ; }
 {
-  t = <LT2>
+  tok = <LT2>
   ( s = DataValueTerm() )
   ( iri = iri() { p = createNode(iri) ; } | <KW_A> { p = nRDFtype ; } )
   ( o = DataValueTerm() )
-  { n = createReifiedTriple(s, p, o, t.beginLine, t.beginColumn); }
-  (ReifierData(acc, s, p, o))?
+  (reifId = ReifierData(acc, s, p, o))?
+  { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }
   <GT2>
-  { return n; }
+  { return reifId; }
 }
 Node TripleTerm() : { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }
 {
@@ -1118,7 +1118,7 @@ Node TripleTerm() : { Node n = null ; Token openToken ; String iri ; Node s , p 
     s = VarOrTerm()
     p = Verb()
     o = VarOrTerm()
-    { n = createReifiedTriple(s, p, o, openToken.beginLine, openToken.beginColumn); }
+    { n = createTripleTerm(s, p, o, openToken.beginLine, openToken.beginColumn); }
     <R_TRIPLE>
     { return n ; }
 }
@@ -1128,7 +1128,7 @@ Node TripleTermData() : { Node n = null ; Token openToken ; String iri ; Node s 
     s = DataValueTerm()
     ( iri = iri() { p = createNode(iri) ; } | <KW_A> { p = nRDFtype ; } )
     o = DataValueTerm()
-    { n = createReifiedTriple(s, p, o, openToken.beginLine, openToken.beginColumn); }
+    { n = createTripleTerm(s, p, o, openToken.beginLine, openToken.beginColumn); }
     <R_TRIPLE>
     { return n ; }
 }
@@ -1138,7 +1138,6 @@ Node DataValueTerm() : { Node n = null ; String iri ; Node s , p , o ; }
 | n = RDFLiteral() { return n ; }
 | n = NumericLiteral() { return n ; }
 | n = BooleanLiteral() { return n ; }
-| n = ReifiedTripleData() { return n ; }
 | n = TripleTermData() { return n; }
 }
 Node VarOrIri() : {Node n = null ; String iri ; }
@@ -1287,7 +1286,7 @@ Node ExprReifiedTriple() : { Token t ; Node s,p,o,n; }
   s = ExprVarOrTerm()
   p = Verb()
   o = ExprVarOrTerm()
-  { n = createReifiedTriple(s, p, o, t.beginLine, t.beginColumn); }
+  { n = createTripleTerm(s, p, o, t.beginLine, t.beginColumn); }
   <GT2>
   { return n; }
 }

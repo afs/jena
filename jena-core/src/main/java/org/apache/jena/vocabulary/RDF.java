@@ -103,6 +103,9 @@ public class RDF {
     public static final Property    object          = property("object");
     public static final Property    type            = property("type");
     public static final Property    value           = property("value");
+    public static final Property    reifies         = property("reifies");
+
+
     /**
      * This property is used in facet restrictions.
      * The facet {@code rdf:langRange} can be used to refer to a subset of strings containing the language tag.
@@ -147,11 +150,17 @@ public class RDF {
         // Version that calculates the constant when called.
         public static Resource Alt()                { return resource( "Alt" ); }
         public static Resource Bag()                { return resource( "Bag" ); }
-        // Java8 bug : https://bugzilla.redhat.com/show_bug.cgi?id=1423421
-        // Can't have a method called Property() - it crashes the javadoc generation.
+
+        // This was a due to a Java8 bug : https://bugzilla.redhat.com/show_bug.cgi?id=1423421
+        //  Can't have a method name ending in "Property" - it crashes the javadoc generation.
         //  https://bugzilla.redhat.com/show_bug.cgi?id=1423421 ==>
         //  https://bugs.openjdk.java.net/browse/JDK-8061305
+
+        /** @deprecated Use {@link #Property()} */
+        @Deprecated(forRemoval = true)
         public static Resource _Property()          { return resource( "Property" ); }
+
+        public static Resource Property()           { return resource( "Property" ); }
         public static Resource Seq()                { return resource( "Seq" ); }
         public static Resource Statement()          { return resource( "Statement" ); }
         public static Resource List()               { return resource( "List" ); }
@@ -216,5 +225,6 @@ public class RDF {
         public static final Node direction      = RDF.direction.asNode();
         public static final Node PlainLiteral   = RDF.PlainLiteral.asNode();
         public static final Node langRange      = RDF.langRange.asNode();
+        public static final Node reifies        = RDF.reifies.asNode();
     }
 }

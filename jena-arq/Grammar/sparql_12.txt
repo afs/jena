@@ -324,7 +324,7 @@ NON-TERMINALS
 		|	NumericLiteral
 		|	BooleanLiteral
 		|	<UNDEF>
-		|	ReifiedTripleData
+		|	TripleTermData
 	Reifier	:=	<TILDE> ( VarOrReifierId )?
 	ReifierData	:=	<TILDE> ( ReifierId )?
 	ReifierId	:=	( iri | BlankNode )
@@ -392,7 +392,6 @@ NON-TERMINALS
 		|	RDFLiteral
 		|	NumericLiteral
 		|	BooleanLiteral
-		|	ReifiedTripleData
 		|	TripleTermData
 	VarOrIri	:=	( Var | iri )
 	Var	:=	( <VAR1> | <VAR2> )

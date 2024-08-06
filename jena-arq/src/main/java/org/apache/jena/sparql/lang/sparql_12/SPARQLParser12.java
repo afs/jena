@@ -1934,17 +1934,17 @@ if ( acc == null )
     throw new Error("Missing return statement in function");
 }
 
-  final public Node ReifiedTripleBlock(TripleCollector acc) throws ParseException {Node reifSubj = null ;
-    reifSubj = ReifiedTriple();
-    PropertyList(reifSubj, acc);
-{if ("" != null) return reifSubj ;}
+  final public Node ReifiedTripleBlock(TripleCollector acc) throws ParseException {Node reifId ;
+    reifId = ReifiedTriple(acc);
+    PropertyList(reifId, acc);
+{if ("" != null) return reifId ;}
     throw new Error("Missing return statement in function");
 }
 
-  final public Node ReifiedTripleBlockPath(TripleCollector acc) throws ParseException {Node reifSubj = null ;
-    reifSubj = ReifiedTriple();
-    PropertyListPath(reifSubj, acc);
-{if ("" != null) return reifSubj ;}
+  final public Node ReifiedTripleBlockPath(TripleCollector acc) throws ParseException {Node reifId ;
+    reifId = ReifiedTriple(acc);
+    PropertyListPath(reifId, acc);
+{if ("" != null) return reifId ;}
     throw new Error("Missing return statement in function");
 }
 
@@ -2092,7 +2092,7 @@ beginLine = t.beginLine; beginColumn = t.beginColumn; t = null;
       case STRING_LITERAL2:
       case STRING_LITERAL_LONG1:
       case STRING_LITERAL_LONG2:
-      case LT2:{
+      case L_TRIPLE:{
         ;
         break;
         }
@@ -2179,7 +2179,7 @@ startDataBlockValueRow(beginLine, beginColumn) ;
           case STRING_LITERAL2:
           case STRING_LITERAL_LONG1:
           case STRING_LITERAL_LONG2:
-          case LT2:{
+          case L_TRIPLE:{
             ;
             break;
             }
@@ -2252,8 +2252,8 @@ finishDataBlockValueRow(beginLine, beginColumn) ;
 {if ("" != null) return null ;}
       break;
       }
-    case LT2:{
-      n = ReifiedTripleData();
+    case L_TRIPLE:{
+      n = TripleTermData();
 {if ("" != null) return n ;}
       break;
       }
@@ -2265,8 +2265,8 @@ finishDataBlockValueRow(beginLine, beginColumn) ;
     throw new Error("Missing return statement in function");
 }
 
-  final public Node Reifier(TripleCollector acc, Node s, Node p, Node o) throws ParseException {Token t = null ; Node reifSubj = null ;
-    t = jj_consume_token(TILDE);
+  final public Node Reifier(TripleCollector acc, Node s, Node p, Node o) throws ParseException {Token tok = null ; Node reifId = null ;
+    tok = jj_consume_token(TILDE);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IRIref:
     case PNAME_NS:
@@ -2275,37 +2275,33 @@ finishDataBlockValueRow(beginLine, beginColumn) ;
     case VAR1:
     case VAR2:
     case ANON:{
-      reifSubj = VarOrReifierId();
+      reifId = VarOrReifierId();
       break;
       }
     default:
       jj_la1[79] = jj_gen;
       ;
     }
-if ( reifSubj == null )
-        reifSubj = createBNode(t.beginLine, t.beginColumn) ;
-      {if ("" != null) return reifSubj ;}
+{if ("" != null) return reifId;}
     throw new Error("Missing return statement in function");
 }
 
-  final public Node ReifierData(TripleCollector acc, Node s, Node p, Node o) throws ParseException {Token t = null ; Node reifSubj = null ;
-    t = jj_consume_token(TILDE);
+  final public Node ReifierData(TripleCollector acc, Node s, Node p, Node o) throws ParseException {Token tok = null ; Node reifId = null ;
+    tok = jj_consume_token(TILDE);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IRIref:
     case PNAME_NS:
     case PNAME_LN:
     case BLANK_NODE_LABEL:
     case ANON:{
-      reifSubj = ReifierId();
+      reifId = ReifierId();
       break;
       }
     default:
       jj_la1[80] = jj_gen;
       ;
     }
-if ( reifSubj == null )
-        reifSubj = createBNode(t.beginLine, t.beginColumn) ;
-      {if ("" != null) return reifSubj ;}
+{if ("" != null) return reifId;}
     throw new Error("Missing return statement in function");
 }
 
@@ -3440,7 +3436,7 @@ if ( lastCell != null )
     throw new Error("Missing return statement in function");
 }
 
-  final public void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) throws ParseException {Node reifSubj = null ;
+  final public void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) throws ParseException {Node reifId = null ;
     label_31:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -3459,7 +3455,7 @@ if ( lastCell != null )
         break;
         }
       case L_ANN:{
-        AnnotationPathBlock(acc, reifSubj);
+        AnnotationPathBlock(acc, reifId);
         break;
         }
       default:
@@ -3470,14 +3466,14 @@ if ( lastCell != null )
     }
 }
 
-  final public void AnnotationPathBlock(TripleCollector acc, Node reifSubj) throws ParseException {
+  final public void AnnotationPathBlock(TripleCollector acc, Node reifId) throws ParseException {
     jj_consume_token(L_ANN);
-if ( reifSubj == null ) reifSubj = createBNode(token.beginLine, token.beginColumn);
-    PropertyListPath(reifSubj, acc);
+if ( reifId == null ) reifId = createBNode(token.beginLine, token.beginColumn);
+    PropertyListPath(reifId, acc);
     jj_consume_token(R_ANN);
 }
 
-  final public void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) throws ParseException {Node reifSubj = null ;
+  final public void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) throws ParseException {Node reifId = null ;
     label_32:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -3496,7 +3492,7 @@ if ( reifSubj == null ) reifSubj = createBNode(token.beginLine, token.beginColum
         break;
         }
       case L_ANN:{
-        AnnotationBlock(acc, reifSubj);
+        AnnotationBlock(acc, reifId);
         break;
         }
       default:
@@ -3507,10 +3503,10 @@ if ( reifSubj == null ) reifSubj = createBNode(token.beginLine, token.beginColum
     }
 }
 
-  final public void AnnotationBlock(TripleCollector acc, Node reifSubj) throws ParseException {
+  final public void AnnotationBlock(TripleCollector acc, Node reifId) throws ParseException {
     jj_consume_token(L_ANN);
-if ( reifSubj == null ) reifSubj = createBNode(token.beginLine, token.beginColumn);
-    PropertyList(reifSubj, acc);
+if ( reifId == null ) reifId = createBNode(token.beginLine, token.beginColumn);
+    PropertyList(reifId, acc);
     jj_consume_token(R_ANN);
 }
 
@@ -3551,7 +3547,7 @@ if ( reifSubj == null ) reifSubj = createBNode(token.beginLine, token.beginColum
       break;
       }
     case LT2:{
-      n = ReifiedTriple();
+      n = ReifiedTriple(acc);
 {if ("" != null) return n ;}
       break;
       }
@@ -3600,7 +3596,7 @@ if ( reifSubj == null ) reifSubj = createBNode(token.beginLine, token.beginColum
       break;
       }
     case LT2:{
-      n = ReifiedTriple();
+      n = ReifiedTriple(acc);
 {if ("" != null) return n ;}
       break;
       }
@@ -3678,28 +3674,28 @@ if ( reifSubj == null ) reifSubj = createBNode(token.beginLine, token.beginColum
     throw new Error("Missing return statement in function");
 }
 
-  final public Node ReifiedTriple() throws ParseException {Node n = null ; Token t ; TripleCollector acc = null; Node s; Node p ; Node o ;
-    t = jj_consume_token(LT2);
+  final public Node ReifiedTriple(TripleCollector acc) throws ParseException {Node reifId = null ; Token tok ; Node s; Node p ; Node o ;
+    tok = jj_consume_token(LT2);
     s = VarOrTerm();
     p = Verb();
     o = VarOrTerm();
-n = createReifiedTriple(s, p, o, t.beginLine, t.beginColumn);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case TILDE:{
-      Reifier(acc, s, p, o);
+      reifId = Reifier(acc, s, p, o);
       break;
       }
     default:
       jj_la1[128] = jj_gen;
       ;
     }
+reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ;
     jj_consume_token(GT2);
-{if ("" != null) return n;}
+{if ("" != null) return reifId;}
     throw new Error("Missing return statement in function");
 }
 
-  final public Node ReifiedTripleData() throws ParseException {Node n = null ; Token t ; String iri ; TripleCollector acc = null; Node s; Node p ; Node o ;
-    t = jj_consume_token(LT2);
+  final public Node ReifiedTripleData(TripleCollector acc) throws ParseException {Node reifId = null ; Token tok ; String iri ; Node s; Node p ; Node o ;
+    tok = jj_consume_token(LT2);
     s = DataValueTerm();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IRIref:
@@ -3720,18 +3716,18 @@ p = nRDFtype ;
       throw new ParseException();
     }
     o = DataValueTerm();
-n = createReifiedTriple(s, p, o, t.beginLine, t.beginColumn);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case TILDE:{
-      ReifierData(acc, s, p, o);
+      reifId = ReifierData(acc, s, p, o);
       break;
       }
     default:
       jj_la1[130] = jj_gen;
       ;
     }
+reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ;
     jj_consume_token(GT2);
-{if ("" != null) return n;}
+{if ("" != null) return reifId;}
     throw new Error("Missing return statement in function");
 }
 
@@ -3740,7 +3736,7 @@ n = createReifiedTriple(s, p, o, t.beginLine, t.beginColumn);
     s = VarOrTerm();
     p = Verb();
     o = VarOrTerm();
-n = createReifiedTriple(s, p, o, openToken.beginLine, openToken.beginColumn);
+n = createTripleTerm(s, p, o, openToken.beginLine, openToken.beginColumn);
     jj_consume_token(R_TRIPLE);
 {if ("" != null) return n ;}
     throw new Error("Missing return statement in function");
@@ -3768,7 +3764,7 @@ p = nRDFtype ;
       throw new ParseException();
     }
     o = DataValueTerm();
-n = createReifiedTriple(s, p, o, openToken.beginLine, openToken.beginColumn);
+n = createTripleTerm(s, p, o, openToken.beginLine, openToken.beginColumn);
     jj_consume_token(R_TRIPLE);
 {if ("" != null) return n ;}
     throw new Error("Missing return statement in function");
@@ -3807,11 +3803,6 @@ n = createReifiedTriple(s, p, o, openToken.beginLine, openToken.beginColumn);
     case TRUE:
     case FALSE:{
       n = BooleanLiteral();
-{if ("" != null) return n ;}
-      break;
-      }
-    case LT2:{
-      n = ReifiedTripleData();
 {if ("" != null) return n ;}
       break;
       }
@@ -4459,7 +4450,7 @@ n = createNode(s);
     s = ExprVarOrTerm();
     p = Verb();
     o = ExprVarOrTerm();
-n = createReifiedTriple(s, p, o, t.beginLine, t.beginColumn);
+n = createTripleTerm(s, p, o, t.beginLine, t.beginColumn);
     jj_consume_token(GT2);
 {if ("" != null) return n;}
     throw new Error("Missing return statement in function");
@@ -5648,7 +5639,7 @@ checkString(lex, t.beginLine, t.beginColumn) ;
 	   jj_la1_4 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3fe00000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x427ff,0x427ff,0x1000,0x4000,0x1000,0x1000,0x1000,0x1000,0x1000,0x1000,0x40000,0x1,0x3,0x80000,0x0,0x0,0x10000,0x30000,0x3fe00000,0x0,0x0,0x3fe00000,0x3fe00000,0x3fe00000,0x0,0x0,0x3fe00000,0x0,0x0,0x3fe00000,0x3fe00000,0x0,0x0,0x1000,0x0,0x3fe00000,0x0,0x0,0x0,0x3fe00000,0x0,0x3fe00000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3fe00000,0x3fe00000,0x0,0x3fe00000,0x0,0x0,0x0,0x0,0x0,0x3fe00000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3fe00000,0x3fe00000,0x0,0x0,0x0,0x0,0x3fe00000,0x3fe00000,0x3fe00000,0x0,0x0,0x0,0x0,0x3fe00000,0x0,0x0,0x0,0x0,0x0,0x0,0x3f000000,0x3f000000,0x0,0x0,0x3f000000,0x0,0x0,0x3fe00000,0x3fe00000,0x3fe00000,0x0,0x0,0x0,0x0,0x0,0x0,0x3fe00000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3fe00000,0xe00000,0x7000000,0x38000000,0x0,0x0,0x0,0x0,0x0,};
 	}
 	private static void jj_la1_init_5() {
-	   jj_la1_5 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x200,0x200,0x200,0x0,0x0,0x14014be0,0x1000,0x0,0x0,0x0,0x1000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x200,0x0,0x200,0x200,0x200,0x0,0x200,0x200,0x0,0x0,0x0,0x0,0x20000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x14014be0,0x0,0x80000,0x14014be0,0x14014be0,0x14014be0,0x80000,0x0,0x14014be0,0x1000,0x80000,0x14014be0,0x14014be0,0x80000,0x1000,0x0,0xa00,0x100001e0,0x0,0xa00,0xa00,0x100001e0,0xa00,0x100001e0,0x10000,0x10000,0x10000,0x10000,0x0,0x200,0x0,0x40000,0xa00,0x40000,0xa00,0x14014be0,0x14014be0,0x80000,0x14014be0,0x0,0x20000,0x0,0x0,0x40000,0x14014be0,0x200,0x200,0x20000,0x200,0x200,0x40000,0x0,0x0,0x0,0x200,0x0,0x200,0x0,0x0,0x200,0x0,0x0,0x4200,0x4200,0x14014be0,0x14014be0,0x40000000,0x40000000,0x40000000,0x40000000,0x14014be0,0x14014be0,0x40109e0,0x0,0x0,0x0,0x0,0x140001e0,0x0,0x0,0x0,0x0,0x3f00000,0x3f00000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x100003e0,0x100003e0,0x100001e0,0xa00,0x0,0x40000,0x40000,0x40000,0x0,0x100003e0,0x0,0x0,0x0,0x0,0x0,0x0,0x20000,0x0,0xa00,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1e0,0x0,0x0,0x10000,};
+	   jj_la1_5 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x200,0x200,0x200,0x0,0x0,0x14014be0,0x1000,0x0,0x0,0x0,0x1000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x200,0x0,0x200,0x200,0x200,0x0,0x200,0x200,0x0,0x0,0x0,0x0,0x20000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x14014be0,0x0,0x80000,0x14014be0,0x14014be0,0x14014be0,0x80000,0x0,0x14014be0,0x1000,0x80000,0x14014be0,0x14014be0,0x80000,0x1000,0x0,0xa00,0x40001e0,0x0,0xa00,0xa00,0x40001e0,0xa00,0x40001e0,0x10000,0x10000,0x10000,0x10000,0x0,0x200,0x0,0x40000,0xa00,0x40000,0xa00,0x14014be0,0x14014be0,0x80000,0x14014be0,0x0,0x20000,0x0,0x0,0x40000,0x14014be0,0x200,0x200,0x20000,0x200,0x200,0x40000,0x0,0x0,0x0,0x200,0x0,0x200,0x0,0x0,0x200,0x0,0x0,0x4200,0x4200,0x14014be0,0x14014be0,0x40000000,0x40000000,0x40000000,0x40000000,0x14014be0,0x14014be0,0x40109e0,0x0,0x0,0x0,0x0,0x40001e0,0x0,0x0,0x0,0x0,0x3f00000,0x3f00000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x100003e0,0x100003e0,0x100001e0,0xa00,0x0,0x40000,0x40000,0x40000,0x0,0x100003e0,0x0,0x0,0x0,0x0,0x0,0x0,0x20000,0x0,0xa00,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1e0,0x0,0x0,0x10000,};
 	}
 	private static void jj_la1_init_6() {
 	   jj_la1_6 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80,0x0,0x0,0x0,0x0,0x0,0x80,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1002,0x1002,0x0,0x1002,0x1002,0x0,0x800,0x100,0x80a0,0x1002,0x80a0,0x2,0x800,0x1000,0x1000,0x0,0x1000,0x0,0x0,0x0,0x0,0x1,0x1,0x1,0x1,0x0,0x0,0x0,0x1,0x0,0x1,0x0,0x0,0x0,0x0,0x8,0x10,0x0,0x0,0x60,0x0,0x180,0x180,0x60,0x180,0x180,0x62,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xe2,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x200,0x200,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
