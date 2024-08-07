@@ -433,12 +433,12 @@ public class QueryParserBase {
         return activeLabelMap.asNode(label);
     }
 
-    protected Node preConditionAnnotation(Node s, Node p, Path path, Node o, int line, int column) {
+    protected Node preConditionReifier(Node s, Node p, Path path, Node o, int line, int column) {
         if ( p != null )
             return p;
         if ( path instanceof P_Link )
             return ((P_Link)path).getNode();
-        throwParseException("Only simple paths allowed with annotation syntax", line, column);
+        throwParseException("Only simple paths allowed with reifier syntax", line, column);
         return null;
     }
 
@@ -495,13 +495,29 @@ public class QueryParserBase {
         }
     }
 
-    protected Node insertTripleReifier(TripleCollector acc, Node reifier, Node s, Node p, Node o, int line, int column) {
+    protected Node insertTripleReifier(TripleCollector acc, Node reifierId, Node s, Node p, Node o, int line, int column) {
         Node tripleTerm = createTripleTerm(s, p, o, line, column);
-        if ( reifier == null )
-            reifier = createBNode(line, column);
-        Triple t = Triple.create(reifier, nRDFreifies, tripleTerm);
+        if ( reifierId == null )
+            reifierId = createBNode(line, column);
+        Triple t = Triple.create(reifierId, nRDFreifies, tripleTerm);
         acc.addTriple(t);
-        return reifier;
+        return reifierId;
+    }
+
+    private Node annotationReifierId = null;
+
+    protected void setReifierId(Node reifId) {
+        annotationReifierId = reifId;
+    }
+
+    protected Node getOrAllocReifierId() {
+        if ( annotationReifierId != null )
+            return annotationReifierId;
+        return createBNode(-1, -1);
+    }
+
+    protected void clearReifierId() {
+        annotationReifierId = null;
     }
 
     protected Expr asExpr(Node n) {

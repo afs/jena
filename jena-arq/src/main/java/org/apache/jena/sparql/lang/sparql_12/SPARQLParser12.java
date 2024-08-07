@@ -2301,6 +2301,7 @@ finishDataBlockValueRow(beginLine, beginColumn) ;
       jj_la1[80] = jj_gen;
       ;
     }
+reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ;
 {if ("" != null) return reifId;}
     throw new Error("Missing return statement in function");
 }
@@ -3451,11 +3452,17 @@ if ( lastCell != null )
       }
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case TILDE:{
-        Reifier(acc, s, p, o);
+p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+        reifId = Reifier(acc, s, p, o);
+reifId = insertTripleReifier(acc, reifId, s, p, o, token.beginLine, token.beginColumn) ;
+setReifierId(reifId);
         break;
         }
       case L_ANN:{
-        AnnotationPathBlock(acc, reifId);
+reifId = getOrAllocReifierId();
+      p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+        AnnotationBlockPath(acc, reifId);
+clearReifierId();
         break;
         }
       default:
@@ -3464,11 +3471,11 @@ if ( lastCell != null )
         throw new ParseException();
       }
     }
+clearReifierId();
 }
 
-  final public void AnnotationPathBlock(TripleCollector acc, Node reifId) throws ParseException {
+  final public void AnnotationBlockPath(TripleCollector acc, Node reifId) throws ParseException {
     jj_consume_token(L_ANN);
-if ( reifId == null ) reifId = createBNode(token.beginLine, token.beginColumn);
     PropertyListPath(reifId, acc);
     jj_consume_token(R_ANN);
 }
@@ -3488,11 +3495,17 @@ if ( reifId == null ) reifId = createBNode(token.beginLine, token.beginColumn);
       }
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case TILDE:{
-        Reifier(acc, s, p, o);
+p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+        reifId = Reifier(acc, s, p, o);
+reifId = insertTripleReifier(acc, reifId, s, p, o, token.beginLine, token.beginColumn) ;
+setReifierId(reifId);
         break;
         }
       case L_ANN:{
+reifId = getOrAllocReifierId();
+      p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
         AnnotationBlock(acc, reifId);
+clearReifierId();
         break;
         }
       default:
@@ -3505,7 +3518,6 @@ if ( reifId == null ) reifId = createBNode(token.beginLine, token.beginColumn);
 
   final public void AnnotationBlock(TripleCollector acc, Node reifId) throws ParseException {
     jj_consume_token(L_ANN);
-if ( reifId == null ) reifId = createBNode(token.beginLine, token.beginColumn);
     PropertyList(reifId, acc);
     jj_consume_token(R_ANN);
 }

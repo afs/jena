@@ -1055,6 +1055,7 @@ Node ReifierData(TripleCollector acc, Node s, Node p, Node o) : { Token tok = nu
     // ( tok = <VBAR> | t = <TILDE> )
     tok = <TILDE>
     (reifId = ReifierId() )?
+    { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }
     { return reifId; }
 }
 
@@ -1300,7 +1301,7 @@ void Object(Node s, Node p, Path path, TripleCollector acc): { Node o ; }
 {
   { ElementPathBlock tempAcc = new ElementPathBlock() ; int mark = tempAcc.mark() ; }
   o = GraphNode(tempAcc) 
-  { insert(tempAcc, mark, s, p, path, o) ;  insert(acc, tempAcc) ; }
+  { insert(tempAcc, mark, s, p, path, o) ; insert(acc, tempAcc) ; }
   Annotation(acc, s, p, path, o)
 }
 
@@ -1626,36 +1627,30 @@ Node CollectionPath(TripleCollectorMark acc) :
 
 // ---- RDF-star Annotation Syntax
 // Allow paths. Query graph patterns.
-void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) : {  Node reifId = null ; }
+void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node reifId = null ; }
 {
-//   (
-//     (
-//       reifId = Reifier(acc, s, p, o)
-//          ensure
-//       AnnotationPathBlock(acc, reifId)
-//     |
-//       { reifId = createBNode(token.beginLine, token.beginColumn); }
-//       AnnotationPathBlock(acc, null)
-//     )
-//     AnnotationPath(acc, s, p, path, o)
-//   )?
   // NEW-SYNTAX
-  // @@ Needs works
   (
-    Reifier(acc, s, p, o)
+    { p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn); }
+    reifId = Reifier(acc, s, p, o)
+    { reifId = insertTripleReifier(acc, reifId, s, p, o, token.beginLine, token.beginColumn) ; }
+    { setReifierId(reifId); }
   |
-    AnnotationPathBlock(acc, reifId)
+    {
+      reifId = getOrAllocReifierId();
+      p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+    }
+    AnnotationBlockPath(acc, reifId)
+    { clearReifierId(); }
   )*
-
+  { clearReifierId(); }
 }
 
-void AnnotationPathBlock(TripleCollector acc, Node reifId) : { }
+void AnnotationBlockPath(TripleCollector acc, Node reifId) : { }
 {
    // NEW-SYNTAX
    // Roll back into AnnotationPath
    <L_ANN>
-      // @@ Necessary?
-      { if ( reifId == null ) reifId = createBNode(token.beginLine, token.beginColumn); }
       PropertyListPath(reifId, acc)
    <R_ANN>
 }
@@ -1664,26 +1659,21 @@ void AnnotationPathBlock(TripleCollector acc, Node reifId) : { }
 // No paths. Construct templates.
 void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node reifId = null ; }
 {
-//   // NEW_SYNTAX
-//   (
-//     (
-//       reifId = Reifier(acc, s, p, o)
-//          ensure
-//       AnnotationBlock(acc, reifId)
-//     |
-//       { reifId = createBNode(token.beginLine, token.beginColumn); }
-//       AnnotationBlock(acc, null)
-//     )
-//     Annotation(acc, s, p, path, o)
-//   )?
-
   // NEW-SYNTAX
-  // @@ Needs works
   (
-    Reifier(acc, s, p, o)
+    { p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn); }
+    reifId = Reifier(acc, s, p, o)
+    // @@ Rewrite java?
+    { reifId = insertTripleReifier(acc, reifId, s, p, o, token.beginLine, token.beginColumn) ; }    
+    { setReifierId(reifId); }
   |
+    {
+      reifId = getOrAllocReifierId();
+      p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+    }
     AnnotationBlock(acc, reifId)
-  ) *
+    { clearReifierId(); }
+  )*
 }
 
 void AnnotationBlock(TripleCollector acc, Node reifId) : { }
@@ -1692,7 +1682,7 @@ void AnnotationBlock(TripleCollector acc, Node reifId) : { }
    // Roll back into Annotation?
    <L_ANN>
       // @@ Necessary?
-      { if ( reifId == null ) reifId = createBNode(token.beginLine, token.beginColumn); }
+      //{ if ( reifId == null ) reifId = createBNode(token.beginLine, token.beginColumn); }
       PropertyList(reifId, acc)
    <R_ANN>
 }
@@ -1747,7 +1737,7 @@ Node ReifiedTriple(TripleCollector acc) :  { Node reifId = null ; Token tok ; No
   o = VarOrTerm()
   // NEW-SYNTAX
   (reifId = Reifier(acc, s, p, o))?
-  { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }
+  { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }    
   <GT2>
   { return reifId; }
 }
@@ -1765,7 +1755,7 @@ Node ReifiedTripleData(TripleCollector acc) : { Node reifId = null ; Token tok ;
   ( o = DataValueTerm() )
   // NEW-SYNTAX
   (reifId = ReifierData(acc, s, p, o))?
-  { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }
+  { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }    
   <GT2>
   { return reifId; }
 }

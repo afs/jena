@@ -373,8 +373,8 @@ NON-TERMINALS
 	BlankNodePropertyListPath	:=	<LBRACKET> PropertyListPathNotEmpty <RBRACKET>
 	Collection	:=	<LPAREN> ( GraphNode )+ <RPAREN>
 	CollectionPath	:=	<LPAREN> ( GraphNodePath )+ <RPAREN>
-	AnnotationPath	:=	( Reifier | AnnotationPathBlock )*
-	AnnotationPathBlock	:=	<L_ANN> PropertyListPath <R_ANN>
+	AnnotationPath	:=	( Reifier | AnnotationBlockPath )*
+	AnnotationBlockPath	:=	<L_ANN> PropertyListPath <R_ANN>
 	Annotation	:=	( Reifier | AnnotationBlock )*
 	AnnotationBlock	:=	<L_ANN> PropertyList <R_ANN>
 	GraphNode	:=	VarOrTerm

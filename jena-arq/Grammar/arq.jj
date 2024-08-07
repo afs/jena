@@ -758,6 +758,7 @@ Node ReifierData(TripleCollector acc, Node s, Node p, Node o) : { Token tok = nu
 {
     tok = <TILDE>
     (reifId = ReifierId() )?
+    { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }
     { return reifId; }
 }
 Node ReifierId() : { Node n = null ; String iri ; }
@@ -1200,30 +1201,45 @@ Node CollectionPath(TripleCollectorMark acc) :
 void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node reifId = null ; }
 {
   (
-    Reifier(acc, s, p, o)
+    { p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn); }
+    reifId = Reifier(acc, s, p, o)
+    { reifId = insertTripleReifier(acc, reifId, s, p, o, token.beginLine, token.beginColumn) ; }
+    { setReifierId(reifId); }
   |
-    AnnotationPathBlock(acc, reifId)
+    {
+      reifId = getOrAllocReifierId();
+      p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+    }
+    AnnotationBlockPath(acc, reifId)
+    { clearReifierId(); }
   )*
+  { clearReifierId(); }
 }
-void AnnotationPathBlock(TripleCollector acc, Node reifId) : { }
+void AnnotationBlockPath(TripleCollector acc, Node reifId) : { }
 {
    <L_ANN>
-      { if ( reifId == null ) reifId = createBNode(token.beginLine, token.beginColumn); }
       PropertyListPath(reifId, acc)
    <R_ANN>
 }
 void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node reifId = null ; }
 {
   (
-    Reifier(acc, s, p, o)
+    { p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn); }
+    reifId = Reifier(acc, s, p, o)
+    { reifId = insertTripleReifier(acc, reifId, s, p, o, token.beginLine, token.beginColumn) ; }
+    { setReifierId(reifId); }
   |
+    {
+      reifId = getOrAllocReifierId();
+      p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+    }
     AnnotationBlock(acc, reifId)
-  ) *
+    { clearReifierId(); }
+  )*
 }
 void AnnotationBlock(TripleCollector acc, Node reifId) : { }
 {
    <L_ANN>
-      { if ( reifId == null ) reifId = createBNode(token.beginLine, token.beginColumn); }
       PropertyList(reifId, acc)
    <R_ANN>
 }
