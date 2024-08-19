@@ -35,8 +35,11 @@ public enum TokenType {
     DOT, COMMA, SEMICOLON, COLON, DIRECTIVE,
     // LT, GT, LE, GE are only visible if IRI processing is not enabled.
     LT, GT, LE, GE, LOGICAL_AND, LOGICAL_OR,    // && and ||
-    LT2, GT2,                                   // << and >>
 
+    // << and >> : Used in RDF-star
+    LT2, GT2,
+    // RDF-star triple terms <<( ... )>>
+    L_TRIPLE, R_TRIPLE,
     // RDF-star annotation syntax {|...|}
     L_ANN, R_ANN,
 

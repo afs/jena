@@ -342,13 +342,13 @@ public class FmtUtils {
             result.append("ANY");
         } else if ( n.isNodeTriple() ) {
             Triple t = n.getTriple();
-            result.append("<< ");
+            result.append("<<( ");
             stringForNode(result, t.getSubject(), context);
             result.append(" ");
             stringForNode(result, t.getPredicate(), context);
             result.append(" ");
             stringForNode(result, t.getObject(), context);
-            result.append(" >>");
+            result.append(" )>>");
         } else if ( n.isNodeGraph() ) {
             Log.warn(FmtUtils.class, "Can not turn a graph term node into a string");
             result.append(" { graph }");

@@ -54,13 +54,13 @@ public abstract class NodeFormatterBase implements NodeFormatter
 
     protected void formatNodeTriple(AWriter w, Node n) {
         Triple t = n.getTriple();
-        w.print("<< ");
+        w.print("<<( ");
         format(w, t.getSubject());
         w.print(" ");
         format(w, t.getPredicate());
         w.print(" ");
         format(w, t.getObject());
-        w.print(" >>");
+        w.print(" )>>");
     }
 
     @Override

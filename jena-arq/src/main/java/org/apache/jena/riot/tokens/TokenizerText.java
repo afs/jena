@@ -191,26 +191,32 @@ public final class TokenizerText implements Tokenizer
 
         int ch = reader.peekChar();
 
-        // ---- IRI, unless it's <<.
+        // ---- IRI, unless it's << or <<(
         // [spc] check is for LT.
         if ( ch == CH_LT ) {
             // Look ahead on char
             reader.readChar();
             int chPeek = reader.peekChar();
             if ( chPeek != '<' ) {
+                // '<' not '<<'
                 token.setImage(readIRI());
                 token.setType(TokenType.IRI);
                 if ( Checking )
                     checkURI(token.getImage());
                 return token;
             }
-            if ( chPeek == '<' ) {
-                reader.readChar();
+            // '<<' so far - maybe '<<('
+            int chPeek2 = reader.readChar();
+            if ( chPeek2 != '(' ) {
                 token.setType(TokenType.LT2);
                 //token.setImage("<<");
                 return token;
             }
-            fatal("Internal error - parsed '%c' after '<'", chPeek);
+            // <<(
+            reader.readChar();
+            token.setType(TokenType.L_TRIPLE);
+            //token.setImage("<<(");
+            return token;
         }
 
         // ---- Literal
@@ -384,7 +390,36 @@ public final class TokenizerText implements Tokenizer
             case CH_RBRACE:     reader.readChar(); token.setType(TokenType.RBRACE);    /*token.setImage(CH_RBRACE);*/ return token;
 
             case CH_LPAREN:     reader.readChar(); token.setType(TokenType.LPAREN);    /*token.setImage(CH_LPAREN);*/ return token;
-            case CH_RPAREN:     reader.readChar(); token.setType(TokenType.RPAREN);    /*token.setImage(CH_RPAREN);*/ return token;
+
+            // Can be ')' or ')>>'
+            case CH_RPAREN: {
+                // The ')'
+                int peek1 = reader.readChar();
+
+                int peek2 = reader.readChar();
+                if ( peek2 != '>') {
+                    // Includes EOF.
+                    if ( peek2 != EOF )
+                        reader.pushbackChar(peek2);
+                    token.setType(TokenType.RPAREN);
+                    return token;
+                }
+                int peek3 = reader.readChar();
+                if ( peek3 != '>') {
+                    // Includes EOF.
+                    if ( peek3 != EOF ) {
+                        reader.pushbackChar(peek3);
+                        reader.pushbackChar(peek2);
+                    }
+                    token.setType(TokenType.RPAREN);
+                    return token;
+                }
+                // It is ')>>'
+                token.setType(TokenType.R_TRIPLE);
+                /*token.setImage(")>>");*/
+                return token;
+            }
+
             case CH_LBRACKET:   reader.readChar(); token.setType(TokenType.LBRACKET);  /*token.setImage(CH_LBRACKET);*/ return token;
             case CH_RBRACKET:   reader.readChar(); token.setType(TokenType.RBRACKET);  /*token.setImage(CH_RBRACKET);*/ return token;
             case CH_EQUALS:     reader.readChar(); token.setType(TokenType.EQUALS);    /*token.setImage(CH_EQUALS);*/ return token;
