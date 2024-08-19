@@ -45,7 +45,7 @@ public class Tags
     public static final String tagQuad            = "quad";
     public static final String tagTriplePath      = "path";
     // RDF Star quoted triple : Node_Triple
-    public static final String tagQTriple         = "qtriple";
+    public static final String tagTripleTerm      = "tripleterm";
 
     public static final String tagBase            = "base";
     public static final String tagPrefix          = "prefix";
@@ -166,10 +166,12 @@ public class Tags
     public static final String tagNot             = "not";
     public static final String tagStr             = "str";
     public static final String tagStrLang         = "strlang";
+    public static final String tagStrLangDir      = "strlangdir";
     public static final String tagStrDatatype     = "strdt";
     public static final String tagRand            = "rand";
 
     public static final String tagLang            = "lang";
+    public static final String tagLangDir         = "langdir";
     public static final String tagLangMatches     = "langMatches";
     public static final String tagSameTerm        = "sameTerm";
     public static final String tagDatatype        = "datatype";
@@ -180,6 +182,11 @@ public class Tags
     public static final String tagIsURI           = "isURI";
     public static final String tagIsBlank         = "isBlank";
     public static final String tagIsLiteral       = "isLiteral";
+    public static final String tagIsNumeric       = "isNumeric";
+
+    public static final String tagHasLang         = "hasLang";
+    public static final String tagHasLangDir      = "hasLangDir";
+
     public static final String tagRegex           = "regex";
     public static final String tagExists          = "exists";
     public static final String tagNotExists       = "notexists";
@@ -223,7 +230,6 @@ public class Tags
     public static final String tagNumRound        = "round";
     public static final String tagNumCeiling      = "ceil";
     public static final String tagNumFloor        = "floor";
-    public static final String tagIsNumeric       = "isNumeric";
 
     public static final String tagBNode           = "bnode";
     public static final String tagIri             = "iri";

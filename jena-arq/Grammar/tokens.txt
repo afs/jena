@@ -12,7 +12,11 @@
 
 <VAR1>       ::= '?' <VARNAME>
 <VAR2>       ::= '$' <VARNAME>
-<LANGTAG>    ::= '@' [a-zA-Z]+ ('-' [a-zA-Z0-9]+)*
+
+// SPARQL 1.1
+// <LANGTAG>    ::= '@' [a-zA-Z]+ ('-' [a-zA-Z0-9]+)*
+// SPARQL 1.2
+<LANG_DIR>    ::= '@' [a-zA-Z]+ ('-' [a-zA-Z0-9]+)* ('--' [a-zA-Z]+)?
 
 <INTEGER>	::= [0-9]+
 <DECIMAL>   ::= ( [0-9]* '.' [0-9]+ )
@@ -114,10 +118,14 @@
 [<BNODE>]      ::= 'BNODE'
 [<LITERAL>]    ::= 'LITERAL'
 [<DTYPE>]      ::= 'DATATYPE'
+[<isLANG>]     ::= 'isLANG'
+[<isLANGDIR>]  ::= 'isLANGDIR'
 [<LANG>]       ::= 'LANG'
-[<LANGMATCHES>] ::= 'LANGMATCHES'
+[<LANGMATCHES>]  ::= 'LANGMATCHES'
+[<LANGDIR>]    ::= 'LANGDIR'
 
 [<STRLANG>]     ::= 'STRLANG'
+[<STRLANGDIR>]  ::= 'STRLANGDIR'
 [<STRDT>]       ::= 'STRDT'
 [<IN>]          ::= 'IN'
 
@@ -174,6 +182,8 @@
 [<IS_BLANK>]   ::= 'isBLANK'
 [<IS_LITERAL>] ::= 'isLITERAL'
 [<IS_NUMERIC>] ::= 'isNUMERIC'
+[<HAS_LANG>]     ::= 'hasLANG'
+[<HAS_LANGDIR>]  ::= 'hasLANGDIR'
 [<SAME_TERM>]  ::= 'sameTerm'
 [<REGEX>]      ::= 'REGEX'
 [<TRUE>]       ::= 'true'
@@ -238,10 +248,14 @@
 [<DOT>]        ::= '.'
 [<GT>]         ::= '>'
 [<LT>]         ::= '<'
+[<L_TRIPLE>]   ::= '<<('
+[<R_TRIPLE>]   ::= ')>>'
 [<GT2>]        ::= '>>'
 [<LT2>]        ::= '<<'
 [<L_ANN>]      ::= '{|'
 [<R_ANN>]      ::= '|}'
+[<TILDE>]      ::= '~'
+
 [<BANG>]       ::= '!'
 [<HOOK>]       ::= '?'
 [<COLON>]      ::= ':'

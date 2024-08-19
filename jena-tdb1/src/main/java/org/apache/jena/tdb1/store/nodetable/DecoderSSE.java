@@ -73,7 +73,7 @@ class DecoderSSE
         Token x = nextToken(tokens);
         if ( x.getType() != TokenType.GT2 )
             exception(x, "Triple term not terminated by >>: %s");
-        return NodeFactory.createTripleNode(t);
+        return NodeFactory.createTripleTerm(t);
     }
 
     // Parse three terms and produce a triple.

@@ -1,0 +1,25 @@
+==== SPARQL Parser
+
+Run
+
+    grammar
+
+This produces the curent SPARQL grammar and the ARQ (SPARQL with extensions) parsers.
+
+
+==
+
+To produce the HTML for the SPARQL Grammar for the W3C spec:
+produce the SPARQL 1.2 specific file
+
+    grammar
+
+which also generates Java code and can be used for checking.
+
+Then run
+
+    sparql2html
+
+The output is in X12.html
+
+This replaces the table between "<!-- GRAMMAR -->" in the specific HTML.
