@@ -1062,25 +1062,20 @@ Node DataBlockValue() : { Node n ; String iri ; }
 // ---- Reifier, various cases.
 // May return null.
 
-Node Reifier(TripleCollector acc, Node s, Node p, Node o) : { Token tok = null ; Node reifId = null ; }
+Node Reifier() : { Token tok = null ; Node reifId = null ; }
 {
     // NEW-SYNTAX
-    // Possible use of <VBAR> of reifiers 
-    //    ( tok = <VBAR> | tok = <TILDE> )
     tok = <TILDE>
     (reifId = VarOrReifierId() )?
     { return reifId; }
 }
 
 // No variables.
-Node ReifierData(TripleCollector acc, Node s, Node p, Node o) : { Token tok = null ; Node reifId = null ; }
+Node ReifierData() : { Token tok = null ; Node reifId = null ; }
 {
     // NEW-SYNTAX
-    // Possible use of <VBAR> of reifiers 
-    // ( tok = <VBAR> | t = <TILDE> )
     tok = <TILDE>
     (reifId = ReifierId() )?
-    { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }
     { return reifId; }
 }
 
@@ -1669,16 +1664,16 @@ void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) : { 
   // NEW-SYNTAX
   (
     { p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn); }
-    reifId = Reifier(acc, s, p, o)
+    reifId = Reifier()
     { reifId = insertTripleReifier(acc, reifId, s, p, o, token.beginLine, token.beginColumn) ; }
     { setReifierId(reifId); }
   |
     {
-      reifId = getOrAllocReifierId();
       p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+      reifId = getOrAllocReifierId(acc, s, p, o, token.beginLine, token.beginColumn);
     }
-    AnnotationBlockPath(acc, reifId)
     { clearReifierId(); }
+    AnnotationBlockPath(acc, reifId)
   )*
   { clearReifierId(); }
 }
@@ -1686,7 +1681,6 @@ void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) : { 
 void AnnotationBlockPath(TripleCollector acc, Node reifId) : { }
 {
    // NEW-SYNTAX
-   // Roll back into AnnotationPath
    <L_ANN>
       PropertyListPathNotEmpty(reifId, acc)
    <R_ANN>
@@ -1699,17 +1693,17 @@ void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node
   // NEW-SYNTAX
   (
     { p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn); }
-    reifId = Reifier(acc, s, p, o)
+    reifId = Reifier()
     // @@ Rewrite java?
     { reifId = insertTripleReifier(acc, reifId, s, p, o, token.beginLine, token.beginColumn) ; }    
     { setReifierId(reifId); }
   |
     {
-      reifId = getOrAllocReifierId();
       p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+      reifId = getOrAllocReifierId(acc, s, p, o, token.beginLine, token.beginColumn);
     }
-    AnnotationBlock(acc, reifId)
     { clearReifierId(); }
+    AnnotationBlock(acc, reifId)
   )*
 }
 
@@ -1718,8 +1712,6 @@ void AnnotationBlock(TripleCollector acc, Node reifId) : { }
    // NEW-SYNTAX
    // Roll back into Annotation?
    <L_ANN>
-      // @@ Necessary?
-      //{ if ( reifId == null ) reifId = createBNode(token.beginLine, token.beginColumn); }
       PropertyListNotEmpty(reifId, acc)
    <R_ANN>
 }
@@ -1764,16 +1756,12 @@ Node VarOrTerm() : { Node n = null ; String iri ; }
 
 Node ReifiedTriple(TripleCollector acc) :  { Node reifId = null ; Token tok ; Node s; Node p ; Node o ; }
 {
+  // NEW-SYNTAX
   tok = <LT2>
-#ifdef ARQ
-  // Leading reifier
-  // (LOOKAHEAD(2) VarOrTerm() <VBAR> )?
-#endif
   s = VarOrTerm()
   p = Verb()
   o = VarOrTerm()
-  // NEW-SYNTAX
-  (reifId = Reifier(acc, s, p, o))?
+  (reifId = Reifier())?
   { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }    
   <GT2>
   { return reifId; }
@@ -1791,13 +1779,13 @@ Node ReifiedTripleData(TripleCollector acc) : { Node reifId = null ; Token tok ;
   ( iri = iri() { p = createNode(iri) ; } | <KW_A> { p = nRDFtype ; } )
   ( o = DataValueTerm() )
   // NEW-SYNTAX
-  (reifId = ReifierData(acc, s, p, o))?
+  ( reifId = ReifierData() )?
   { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }    
   <GT2>
   { return reifId; }
 }
 
-Node TripleTerm() :  { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }
+Node TripleTerm() : { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }
 {
     openToken = <L_TRIPLE>
     s = VarOrTerm()
@@ -2894,8 +2882,8 @@ TOKEN :
 | < R_TRIPLE: ")>>" >
 | < LT2:     "<<" >
 | < GT2:     ">>" >
-| <L_ANN:    "{|" >
-| <R_ANN:    "|}" >
+| < L_ANN:    "{|" >
+| < R_ANN:    "|}" >
 
 | < TILDE:   "~" >
 | < BANG:    "!" >

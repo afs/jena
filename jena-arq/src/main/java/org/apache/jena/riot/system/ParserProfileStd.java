@@ -232,12 +232,12 @@ public class ParserProfileStd implements ParserProfile {
     }
 
     @Override
-    public Node createTripleNode(Node subject, Node predicate, Node object, long line, long col) {
+    public Node createTripleTerm(Node subject, Node predicate, Node object, long line, long col) {
         return NodeFactory.createTripleNode(subject, predicate, object);
     }
 
     @Override
-    public Node createTripleNode(Triple triple, long line, long col) {
+    public Node createTripleTerm(Triple triple, long line, long col) {
         return NodeFactory.createTripleNode(triple);
     }
 

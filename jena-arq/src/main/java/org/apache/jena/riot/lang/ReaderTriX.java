@@ -387,7 +387,7 @@ public class ReaderTriX implements ReaderRIOT {
                 Node s = term(parser, profile);
                 Node p = term(parser, profile);
                 Node o = term(parser, profile);
-                Node n = profile.createTripleNode(s, p, o, line, col);
+                Node n = profile.createTripleTerm(s, p, o, line, col);
                 return n;
             }
             default: {

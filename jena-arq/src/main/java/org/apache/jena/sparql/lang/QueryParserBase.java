@@ -510,10 +510,12 @@ public class QueryParserBase {
         annotationReifierId = reifId;
     }
 
-    protected Node getOrAllocReifierId() {
+    protected Node getOrAllocReifierId(TripleCollector acc, Node s, Node p, Node o, int line, int column) {
         if ( annotationReifierId != null )
             return annotationReifierId;
-        return createBNode(-1, -1);
+        Node reifierId = createBNode(-1, -1);
+        insertTripleReifier(acc, reifierId, s, p, o, line, column);
+        return reifierId;
     }
 
     protected void clearReifierId() {

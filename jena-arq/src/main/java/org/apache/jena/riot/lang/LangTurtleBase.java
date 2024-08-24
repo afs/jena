@@ -224,6 +224,7 @@ public abstract class LangTurtleBase extends LangBase {
             return;
         }
 
+        // XXX Update for RDF 1.2
         // <<>> subject position. Rule [10]
         if ( lookingAt(LT2) ) {
             Node subject = parseTripleTerm();
@@ -235,17 +236,9 @@ public abstract class LangTurtleBase extends LangBase {
         exception(peekToken(), "Out of place: %s", peekToken());
     }
 
-    // Parse a << >> : RDF-star
-    // XXX Update grammar extract to RDF-star CG report.
-    /* The Turtle grammar is:
-            tripleX ::= ’<<’ subjectX predicate objectX ’>>’
-            subjectX ::= iri | BlankNode | tripleX
-            objectX ::= iri | BlankNode | literal | tripleX
-            [10x]    subject ::= iri | BlankNode | collection | tripleX
-            [12x]    object ::= iri | BlankNode | collection | blankNodePropertyList | literal | tripleX
-       i.e. no compounds inside <<>>
-     */
+    // XXX Parse a << >> : RDF-star
 
+    // XXX Update for RDF 1.2
     // Assumes looking at << (LT2) on entry
     // node() or nodeX
     private Node parseTripleTerm() {
@@ -261,7 +254,7 @@ public abstract class LangTurtleBase extends LangBase {
             exception(peekToken(), "Expected >>, found %s", peekToken().text());
         nextToken();
 
-        return profile.createTripleNode(s, p, o, token.getLine(), token.getColumn());
+        return profile.createTripleTerm(s, p, o, token.getLine(), token.getColumn());
     }
 
     private Node subjectX() {
@@ -413,6 +406,7 @@ public abstract class LangTurtleBase extends LangBase {
         return n;
     }
 
+    // XXX Update for RDF 1.2
     protected final void objectList(Node subject, Node predicate) {
         for (;;) {
             // object ::=
@@ -423,7 +417,7 @@ public abstract class LangTurtleBase extends LangBase {
                 Token tNext = nextToken();
                 if ( lookingAt(R_ANN) )
                     exception(tNext, "Empty annotation");
-                Node x = profile.createTripleNode(subject, predicate, object, currLine, currCol);
+                Node x = profile.createTripleTerm(subject, predicate, object, currLine, currCol);
                 predicateObjectList(x);
                 expect("Missing end annotation", R_ANN);
             }

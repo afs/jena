@@ -2265,7 +2265,7 @@ finishDataBlockValueRow(beginLine, beginColumn) ;
     throw new Error("Missing return statement in function");
 }
 
-  final public Node Reifier(TripleCollector acc, Node s, Node p, Node o) throws ParseException {Token tok = null ; Node reifId = null ;
+  final public Node Reifier() throws ParseException {Token tok = null ; Node reifId = null ;
     tok = jj_consume_token(TILDE);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IRIref:
@@ -2286,7 +2286,7 @@ finishDataBlockValueRow(beginLine, beginColumn) ;
     throw new Error("Missing return statement in function");
 }
 
-  final public Node ReifierData(TripleCollector acc, Node s, Node p, Node o) throws ParseException {Token tok = null ; Node reifId = null ;
+  final public Node ReifierData() throws ParseException {Token tok = null ; Node reifId = null ;
     tok = jj_consume_token(TILDE);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IRIref:
@@ -2301,7 +2301,6 @@ finishDataBlockValueRow(beginLine, beginColumn) ;
       jj_la1[80] = jj_gen;
       ;
     }
-reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ;
 {if ("" != null) return reifId;}
     throw new Error("Missing return statement in function");
 }
@@ -3453,16 +3452,16 @@ if ( lastCell != null )
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case TILDE:{
 p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
-        reifId = Reifier(acc, s, p, o);
+        reifId = Reifier();
 reifId = insertTripleReifier(acc, reifId, s, p, o, token.beginLine, token.beginColumn) ;
 setReifierId(reifId);
         break;
         }
       case L_ANN:{
-reifId = getOrAllocReifierId();
-      p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
-        AnnotationBlockPath(acc, reifId);
+p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+      reifId = getOrAllocReifierId(acc, s, p, o, token.beginLine, token.beginColumn);
 clearReifierId();
+        AnnotationBlockPath(acc, reifId);
         break;
         }
       default:
@@ -3496,16 +3495,16 @@ clearReifierId();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case TILDE:{
 p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
-        reifId = Reifier(acc, s, p, o);
+        reifId = Reifier();
 reifId = insertTripleReifier(acc, reifId, s, p, o, token.beginLine, token.beginColumn) ;
 setReifierId(reifId);
         break;
         }
       case L_ANN:{
-reifId = getOrAllocReifierId();
-      p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
-        AnnotationBlock(acc, reifId);
+p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+      reifId = getOrAllocReifierId(acc, s, p, o, token.beginLine, token.beginColumn);
 clearReifierId();
+        AnnotationBlock(acc, reifId);
         break;
         }
       default:
@@ -3693,7 +3692,7 @@ clearReifierId();
     o = VarOrTerm();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case TILDE:{
-      reifId = Reifier(acc, s, p, o);
+      reifId = Reifier();
       break;
       }
     default:
@@ -3730,7 +3729,7 @@ p = nRDFtype ;
     o = DataValueTerm();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case TILDE:{
-      reifId = ReifierData(acc, s, p, o);
+      reifId = ReifierData();
       break;
       }
     default:

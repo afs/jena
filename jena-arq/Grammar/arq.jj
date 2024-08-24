@@ -770,17 +770,16 @@ Node DataBlockValue() : { Node n ; String iri ; }
 | <UNDEF> { return null ; }
 | n = TripleTermData() { return n ; }
 }
-Node Reifier(TripleCollector acc, Node s, Node p, Node o) : { Token tok = null ; Node reifId = null ; }
+Node Reifier() : { Token tok = null ; Node reifId = null ; }
 {
     tok = <TILDE>
     (reifId = VarOrReifierId() )?
     { return reifId; }
 }
-Node ReifierData(TripleCollector acc, Node s, Node p, Node o) : { Token tok = null ; Node reifId = null ; }
+Node ReifierData() : { Token tok = null ; Node reifId = null ; }
 {
     tok = <TILDE>
     (reifId = ReifierId() )?
-    { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }
     { return reifId; }
 }
 Node ReifierId() : { Node n = null ; String iri ; }
@@ -1235,16 +1234,16 @@ void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) : { 
 {
   (
     { p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn); }
-    reifId = Reifier(acc, s, p, o)
+    reifId = Reifier()
     { reifId = insertTripleReifier(acc, reifId, s, p, o, token.beginLine, token.beginColumn) ; }
     { setReifierId(reifId); }
   |
     {
-      reifId = getOrAllocReifierId();
       p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+      reifId = getOrAllocReifierId(acc, s, p, o, token.beginLine, token.beginColumn);
     }
-    AnnotationBlockPath(acc, reifId)
     { clearReifierId(); }
+    AnnotationBlockPath(acc, reifId)
   )*
   { clearReifierId(); }
 }
@@ -1258,16 +1257,16 @@ void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node
 {
   (
     { p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn); }
-    reifId = Reifier(acc, s, p, o)
+    reifId = Reifier()
     { reifId = insertTripleReifier(acc, reifId, s, p, o, token.beginLine, token.beginColumn) ; }
     { setReifierId(reifId); }
   |
     {
-      reifId = getOrAllocReifierId();
       p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn);
+      reifId = getOrAllocReifierId(acc, s, p, o, token.beginLine, token.beginColumn);
     }
-    AnnotationBlock(acc, reifId)
     { clearReifierId(); }
+    AnnotationBlock(acc, reifId)
   )*
 }
 void AnnotationBlock(TripleCollector acc, Node reifId) : { }
@@ -1310,7 +1309,7 @@ Node ReifiedTriple(TripleCollector acc) : { Node reifId = null ; Token tok ; Nod
   s = VarOrTerm()
   p = Verb()
   o = VarOrTerm()
-  (reifId = Reifier(acc, s, p, o))?
+  (reifId = Reifier())?
   { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }
   <GT2>
   { return reifId; }
@@ -1321,7 +1320,7 @@ Node ReifiedTripleData(TripleCollector acc) : { Node reifId = null ; Token tok ;
   ( s = DataValueTerm() )
   ( iri = iri() { p = createNode(iri) ; } | <KW_A> { p = nRDFtype ; } )
   ( o = DataValueTerm() )
-  (reifId = ReifierData(acc, s, p, o))?
+  ( reifId = ReifierData() )?
   { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }
   <GT2>
   { return reifId; }
@@ -2107,8 +2106,8 @@ TOKEN :
 | < R_TRIPLE: ")>>" >
 | < LT2: "<<" >
 | < GT2: ">>" >
-| <L_ANN: "{|" >
-| <R_ANN: "|}" >
+| < L_ANN: "{|" >
+| < R_ANN: "|}" >
 | < TILDE: "~" >
 | < BANG: "!" >
 | < COLON: ":" >
