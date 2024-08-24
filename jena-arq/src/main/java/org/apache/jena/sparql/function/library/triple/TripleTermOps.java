@@ -26,7 +26,7 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
 
-public class EmbeddedTripleFunctions {
+public class TripleTermOps {
     /**
      * Create a triple term.
      * Throws {@link ExprEvalException} if the predicate argument is not a URI.
@@ -37,7 +37,7 @@ public class EmbeddedTripleFunctions {
         if ( ! p.isURI() )
             throw new ExprEvalException("triple: Predicate not a URI: "+nv2);
         Node o = nv3.asNode();
-        Node t = NodeFactory.createTripleNode(s, p, o);
+        Node t = NodeFactory.createTripleTerm(s, p, o);
         return NodeValue.makeNode(t);
     }
 

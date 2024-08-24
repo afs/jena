@@ -163,7 +163,7 @@ public class ItemLift {
         Node p = liftQuotedTripleToNode(list.get(2));
         Node o = liftQuotedTripleToNode(list.get(3));
         Triple triple = Triple.create(s, p, o);
-        return NodeFactory.createTripleNode(triple);
+        return NodeFactory.createTripleTerm(triple);
     }
 
     // ---- Symbols

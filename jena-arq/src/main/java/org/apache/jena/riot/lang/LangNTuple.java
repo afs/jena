@@ -111,13 +111,13 @@ public abstract class LangNTuple<X> extends LangBase implements Iterator<X>
         return profile.createTriple(s, p, o, sToken.getLine(), sToken.getColumn());
     }
 
-    // Looking at "<<" (LT2)
+    // Looking at "<<(" (L_TRIPLE)
     final protected Node parseTripleTerm() {
         Triple t = parseTriple();
         Token x = nextToken();
         if ( x.getType() != TokenType.GT2 )
             exception(x, "Triple term not terminated by >>: %s", x);
-        return NodeFactory.createTripleNode(t);
+        return NodeFactory.createTripleTerm(t);
     }
 
     protected final void checkIRIOrBNode(Token token) {

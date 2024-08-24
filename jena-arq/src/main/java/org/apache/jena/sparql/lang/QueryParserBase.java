@@ -291,7 +291,7 @@ public class QueryParserBase {
     }
 
     protected Node createTripleTerm(Node s, Node p, Node o, int line, int column) {
-        return NodeFactory.createTripleNode(s, p, o);
+        return NodeFactory.createTripleTerm(s, p, o);
     }
 
     // ---- IRIs and Nodes

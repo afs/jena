@@ -113,7 +113,7 @@ public class Rename {
         if ( node.isNodeTriple() ) {
             Triple t1 = node.getTriple();
             Triple t2 = NodeTransformLib.transform(n->Rename.reverseVarRename(n, varPrefix, repeatedly), t1);
-            return Objects.equals(t1, t2) ? node : NodeFactory.createTripleNode(t2);
+            return Objects.equals(t1, t2) ? node : NodeFactory.createTripleTerm(t2);
         }
 
         if ( !Var.isVar(node) )
@@ -173,7 +173,7 @@ public class Rename {
             if ( node.isNodeTriple() ) {
                 Triple t1 = node.getTriple();
                 Triple t2 = NodeTransformLib.transform(this, t1);
-                return Objects.equals(t1, t2) ? node : NodeFactory.createTripleNode(t2);
+                return Objects.equals(t1, t2) ? node : NodeFactory.createTripleTerm(t2);
             } else if ( !Var.isVar(node) ) {
                 return node;
             }

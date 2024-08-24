@@ -182,7 +182,7 @@ public class Substitute {
             return n;
 
         // Change. Create new.
-        return NodeFactory.createTripleNode(s1, p1, o1);
+        return NodeFactory.createTripleTerm(s1, p1, o1);
     }
 
     /** Substitute for a node that makes up a triple in a Node_Triple. Recursively. */

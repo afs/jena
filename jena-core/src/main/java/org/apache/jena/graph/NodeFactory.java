@@ -347,7 +347,7 @@ public class NodeFactory {
         return createTripleTerm(s, p, o);
     }
 
-    /**
+    /** 
      * Create a triple node (RDF-star)
      * @deprecated Use {@link #createTripleTerm(Triple)}
      */

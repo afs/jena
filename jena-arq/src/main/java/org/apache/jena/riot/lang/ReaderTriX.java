@@ -278,7 +278,7 @@ public class ReaderTriX implements ReaderRIOT {
                                                 staxError(parser.getLocation(), "Misaligned embedded triple.");
                                             //System.out.println("Embedded: Terms: "+terms.size());
                                             // Embedded triple.
-                                            Node nt = NodeFactory.createTripleNode(s, p, o);
+                                            Node nt = NodeFactory.createTripleTerm(s, p, o);
                                             push(terms, nt);
                                             embeddedTripleDepth--;
                                             if ( embeddedTripleDepth == 0 )

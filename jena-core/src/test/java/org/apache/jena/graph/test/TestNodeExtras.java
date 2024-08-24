@@ -35,9 +35,9 @@ public class TestNodeExtras {
 
     private static Triple triple9 = Triple.create(NodeFactory.createBlankNode(),p,o);
 
-    private static Node newTripleTerm(Triple triple)             { return NodeFactory.createTripleNode(triple); }
+    private static Node newTripleTerm(Triple triple)             { return NodeFactory.createTripleTerm(triple); }
 
-    private static Node newTripleTerm(Node s, Node p , Node o)   { return NodeFactory.createTripleNode(s,p,o); }
+    private static Node newTripleTerm(Node s, Node p , Node o)   { return NodeFactory.createTripleTerm(s,p,o); }
 
     private static Node_Graph newGraphTerm(Graph graph)          { return new Node_Graph(graph); }
 

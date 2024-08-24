@@ -271,7 +271,7 @@ public class RDFStar {
         // If its a new triple, this node is based on the replacement t2.
         Node_Triple nt = ( t2 == null )
             ? (Node_Triple)x
-            : (Node_Triple)NodeFactory.createTripleNode(t2);
+            : (Node_Triple)NodeFactory.createTripleTerm(t2);
         return cache.get(nt, key->genReif(key, output));
     }
 
@@ -288,7 +288,7 @@ public class RDFStar {
                 Node s = G.getOneSP(graph, reif, rdfSubject);
                 Node p = G.getOneSP(graph, reif, rdfPredicate);
                 Node o = G.getOneSP(graph, reif, rdfObject);
-                Node tripleTerm = NodeFactory.createTripleNode(s,p,o);
+                Node tripleTerm = NodeFactory.createTripleTerm(s,p,o);
                 map.put(reif, tripleTerm);
             }
         };
@@ -337,7 +337,7 @@ public class RDFStar {
                     Node o1 = translate(o, map);
                     if ( s == s1 && o == o1 )
                         return x1;
-                    x1 = NodeFactory.createTripleNode(s1, p, o1);
+                    x1 = NodeFactory.createTripleTerm(s1, p, o1);
                 }
                 return x1;
             }
@@ -397,7 +397,7 @@ public class RDFStar {
         Node p = pReifTriple.getObject();
         Node o = oReifTriple.getObject();
 
-        Node nodeTriple = NodeFactory.createTripleNode(s, p, o);
+        Node nodeTriple = NodeFactory.createTripleTerm(s, p, o);
         if ( false )
             inserts.add(Triple.create(s, p, o));
 

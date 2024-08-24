@@ -267,7 +267,7 @@ public class RDFPatchReaderText implements PatchProcessor {
             Token tok2 = nextToken(tokenizer);
             if ( ! tok2.hasType(GT2) )
                 exception(tok2, "Expected token type: "+GT2+": got "+tok2);
-            return NodeFactory.createTripleNode(s, p, o);
+            return NodeFactory.createTripleTerm(s, p, o);
         }
         return tokenToNode(tok);
     }
