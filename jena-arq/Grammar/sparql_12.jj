@@ -1095,15 +1095,16 @@ Node GraphNodePath(TripleCollectorMark acc) : { Node n ; }
 }
 Node VarOrTerm() : { Node n = null ; String iri ; }
 {
-  ( n = Var() { return n ; }
+  ( n = Var()
   | iri = iri() { return createNode(iri) ; }
-  | n = RDFLiteral() { return n ; }
-  | n = NumericLiteral() { return n ; }
-  | n = BooleanLiteral() { return n ; }
-  | n = BlankNode() { return n ; }
+  | n = RDFLiteral()
+  | n = NumericLiteral()
+  | n = BooleanLiteral()
+  | n = BlankNode()
   | <NIL> { return nRDFnil ; }
   | n = TripleTerm() { return n; }
   )
+  { return n; }
 }
 Node ReifiedTriple(TripleCollector acc) : { Node reifId = null ; Token tok ; Node s; Node p ; Node o ; }
 {
@@ -1297,7 +1298,8 @@ Node ExprVarOrTerm() : { Node n; String s;}
   { return n; }
 }
 Node ExprTripleTerm() : { Token t ; Node s,p,o,n; }
-{ t = <L_TRIPLE>
+{
+  t = <L_TRIPLE>
   s = ExprVarOrTerm()
   p = Verb()
   o = ExprVarOrTerm()

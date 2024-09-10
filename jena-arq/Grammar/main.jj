@@ -892,7 +892,6 @@ Element TriplesBlock(ElementPathBlock acc) : { }
 
 Node ReifiedTripleBlock(TripleCollector acc) : { Node reifId ; }
 {
-  // NEW-SYNTAX
   reifId = ReifiedTriple(acc)
   PropertyList(reifId, acc)   // Maybe empty
   { return reifId ; }
@@ -900,7 +899,6 @@ Node ReifiedTripleBlock(TripleCollector acc) : { Node reifId ; }
 
 Node ReifiedTripleBlockPath(TripleCollector acc) : { Node reifId ; }
 {
-  // NEW-SYNTAX
   reifId = ReifiedTriple(acc)
   PropertyListPath(reifId, acc)   // Maybe empty
   { return reifId ; }
@@ -1054,7 +1052,6 @@ Node DataBlockValue() : { Node n ; String iri ; }
 | n = NumericLiteral()  { return n ; }
 | n = BooleanLiteral()  { return n ; }
 | <UNDEF>               { return null ; }
-  // NEW-SYNTAX
 | n = TripleTermData()      { return n ; }
 
 }
@@ -1064,7 +1061,6 @@ Node DataBlockValue() : { Node n ; String iri ; }
 
 Node Reifier() : { Token tok = null ; Node reifId = null ; }
 {
-    // NEW-SYNTAX
     tok = <TILDE>
     (reifId = VarOrReifierId() )?
     { return reifId; }
@@ -1073,7 +1069,6 @@ Node Reifier() : { Token tok = null ; Node reifId = null ; }
 // No variables.
 Node ReifierData() : { Token tok = null ; Node reifId = null ; }
 {
-    // NEW-SYNTAX
     tok = <TILDE>
     (reifId = ReifierId() )?
     { return reifId; }
@@ -1661,7 +1656,6 @@ Node CollectionPath(TripleCollectorMark acc) :
 // Allow paths. Query graph patterns.
 void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node reifId = null ; }
 {
-  // NEW-SYNTAX
   (
     { p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn); }
     reifId = Reifier()
@@ -1680,7 +1674,6 @@ void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) : { 
 
 void AnnotationBlockPath(TripleCollector acc, Node reifId) : { }
 {
-   // NEW-SYNTAX
    <L_ANN>
       PropertyListPathNotEmpty(reifId, acc)
    <R_ANN>
@@ -1690,7 +1683,6 @@ void AnnotationBlockPath(TripleCollector acc, Node reifId) : { }
 // No paths. Construct templates.
 void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node reifId = null ; }
 {
-  // NEW-SYNTAX
   (
     { p = preConditionReifier(s, p, path, o, token.beginLine, token.beginColumn); }
     reifId = Reifier()
@@ -1709,7 +1701,6 @@ void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) : { Node
 
 void AnnotationBlock(TripleCollector acc, Node reifId) : { }
 {
-   // NEW-SYNTAX
    // Roll back into Annotation?
    <L_ANN>
       PropertyListNotEmpty(reifId, acc)
@@ -1718,9 +1709,8 @@ void AnnotationBlock(TripleCollector acc, Node reifId) : { }
 
 // -------- Nodes in a graph pattern or template
 
-// Object position RDF term.
+// Object position RDF term, elemnt of a list
 // No paths in TriplesNode
-// NEW-SYNTAX Rename?
 Node GraphNode(TripleCollectorMark acc) : { Node n ; }
 {
    n = VarOrTerm() { return n ; }
@@ -1742,21 +1732,21 @@ Node GraphNodePath(TripleCollectorMark acc) : { Node n ; }
 
 Node VarOrTerm() : { Node n = null ; String iri ; }
 {
-  ( n = Var()             { return n ; }
+  ( n = Var()
   | iri = iri()           { return createNode(iri) ; }
-  | n = RDFLiteral()      { return n ; }
-  | n = NumericLiteral()  { return n ; }
-  | n = BooleanLiteral()  { return n ; }
-  | n = BlankNode()       { return n ; }
+  | n = RDFLiteral()
+  | n = NumericLiteral()
+  | n = BooleanLiteral()
+  | n = BlankNode()
   //  <LPAREN> <RPAREN>     { return nRDFnil ; }
   | <NIL>  { return nRDFnil ; }
   | n = TripleTerm()      { return n; }
   )
+  { return n; }
 }
 
 Node ReifiedTriple(TripleCollector acc) :  { Node reifId = null ; Token tok ; Node s; Node p ; Node o ; }
 {
-  // NEW-SYNTAX
   tok = <LT2>
   s = VarOrTerm()
   p = Verb()
@@ -1771,14 +1761,9 @@ Node ReifiedTriple(TripleCollector acc) :  { Node reifId = null ; Token tok ; No
 Node ReifiedTripleData(TripleCollector acc) : { Node reifId = null ; Token tok ; String iri ; Node s; Node p ; Node o ; }
 {
   tok = <LT2>
-#ifdef ARQ
-  // Leading reifier
-  // ( LOOKAHEAD(2) VarOrTerm() <VBAR> )?
-#endif
   ( s = DataValueTerm() )
   ( iri = iri() { p = createNode(iri) ; } | <KW_A> { p = nRDFtype ; } )
   ( o = DataValueTerm() )
-  // NEW-SYNTAX
   ( reifId = ReifierData() )?
   { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }    
   <GT2>
@@ -1788,10 +1773,10 @@ Node ReifiedTripleData(TripleCollector acc) : { Node reifId = null ; Token tok ;
 Node TripleTerm() : { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }
 {
     openToken = <L_TRIPLE>
+    // @@ Need alt name. ttVarOrTerm
     s = VarOrTerm()
     p = Verb()
     o = VarOrTerm()
-    // NEW-SYNTAX FIXME
     { n = createTripleTerm(s, p, o, openToken.beginLine, openToken.beginColumn); }
     <R_TRIPLE>
     { return n ; }
@@ -1800,10 +1785,10 @@ Node TripleTerm() : { Node n = null ; Token openToken ; String iri ; Node s , p 
 Node TripleTermData() :  { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }
 {
     openToken = <L_TRIPLE>
+    // @@ Need alt name. ttDataValueTerm
     s = DataValueTerm()
     ( iri = iri() { p = createNode(iri) ; } | <KW_A> { p = nRDFtype ; } )
     o = DataValueTerm()
-    // NEW-SYNTAX
     { n = createTripleTerm(s, p, o, openToken.beginLine, openToken.beginColumn); }
     <R_TRIPLE>
     { return n ; }
@@ -1818,6 +1803,7 @@ Node DataValueTerm() : {  Node n = null ; String iri ; Node s , p , o ; }
 | n = NumericLiteral()   { return n ; }
 | n = BooleanLiteral()   { return n ; }
 | n = TripleTermData()   { return n; }
+//| n = ReifiedTripleData(acc) { return n; }
 }
 
 // e.g. Property (if no bNodes) + DESCRIBE
@@ -1975,7 +1961,7 @@ Expr PrimaryExpression() : { Expr expr ; Node n ; }
   ( expr = BrackettedExpression() { return expr ; }
   | expr = BuiltInCall()   { return expr ; }  
   | expr = iriOrFunction() { return expr ; }
-// NOT  | n = VarOrTerm()    { return asExpr(n) ; }
+// NOT  | n = ExprVarOrTerm()    { return asExpr(n) ; }
 // Because of iriOrFunction
 // Can't use iri() here
   | n = RDFLiteral()      { return asExpr(n) ; }
@@ -2004,7 +1990,8 @@ Node ExprVarOrTerm() : { Node n; String s;}
 }
 
 Node ExprTripleTerm() : { Token t ; Node s,p,o,n; }
-{ t = <L_TRIPLE>
+{
+  t = <L_TRIPLE>
   s = ExprVarOrTerm()
   p = Verb()
   o = ExprVarOrTerm()

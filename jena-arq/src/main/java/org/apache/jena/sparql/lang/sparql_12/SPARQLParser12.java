@@ -3624,7 +3624,6 @@ clearReifierId();
     case VAR1:
     case VAR2:{
       n = Var();
-{if ("" != null) return n ;}
       break;
       }
     case IRIref:
@@ -3639,7 +3638,6 @@ clearReifierId();
     case STRING_LITERAL_LONG1:
     case STRING_LITERAL_LONG2:{
       n = RDFLiteral();
-{if ("" != null) return n ;}
       break;
       }
     case INTEGER:
@@ -3652,19 +3650,16 @@ clearReifierId();
     case DECIMAL_NEGATIVE:
     case DOUBLE_NEGATIVE:{
       n = NumericLiteral();
-{if ("" != null) return n ;}
       break;
       }
     case TRUE:
     case FALSE:{
       n = BooleanLiteral();
-{if ("" != null) return n ;}
       break;
       }
     case BLANK_NODE_LABEL:
     case ANON:{
       n = BlankNode();
-{if ("" != null) return n ;}
       break;
       }
     case NIL:{
@@ -3682,6 +3677,7 @@ clearReifierId();
       jj_consume_token(-1);
       throw new ParseException();
     }
+{if ("" != null) return n;}
     throw new Error("Missing return statement in function");
 }
 
