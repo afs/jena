@@ -234,6 +234,7 @@ public class Chars
     public static final char CH_RSLASH       = '\\' ;
     public static final char CH_PERCENT      = '%' ;
     public static final char CH_VBAR         = '|' ;
+    public static final char CH_TILDE        = '~' ;
 
     // Byte versions of the above
     public static final byte B_NL            = NL ;
@@ -272,6 +273,7 @@ public class Chars
     public static final byte B_RSLASH        = '\\' ;
     public static final byte B_PERCENT       = '%' ;
     public static final byte B_VBAR          = '|' ;
+    public static final byte B_TILDE         = '~' ;
 
     // String versions - a few compound "chars" as well.
     public static final String S_LBRACKET     = "[" ;

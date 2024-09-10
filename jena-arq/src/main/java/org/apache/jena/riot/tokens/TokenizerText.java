@@ -196,8 +196,8 @@ public final class TokenizerText implements Tokenizer
         if ( ch == CH_LT ) {
             // Look ahead on char
             reader.readChar();
-            int chPeek = reader.peekChar();
-            if ( chPeek != '<' ) {
+            int chPeek2 = reader.peekChar();
+            if ( chPeek2 != '<' ) {
                 // '<' not '<<'
                 token.setImage(readIRI());
                 token.setType(TokenType.IRI);
@@ -205,14 +205,15 @@ public final class TokenizerText implements Tokenizer
                     checkURI(token.getImage());
                 return token;
             }
+            reader.readChar();
             // '<<' so far - maybe '<<('
-            int chPeek2 = reader.readChar();
-            if ( chPeek2 != '(' ) {
+            int chPeek3 = reader.peekChar();
+            if ( chPeek3 != '(' ) {
                 token.setType(TokenType.LT2);
                 //token.setImage("<<");
                 return token;
             }
-            // <<(
+            // It is <<(
             reader.readChar();
             token.setType(TokenType.L_TRIPLE);
             //token.setImage("<<(");
@@ -394,27 +395,27 @@ public final class TokenizerText implements Tokenizer
             // Can be ')' or ')>>'
             case CH_RPAREN: {
                 // The ')'
-                int peek1 = reader.readChar();
-
-                int peek2 = reader.readChar();
+                reader.readChar();
+                int peek2 = reader.peekChar();
                 if ( peek2 != '>') {
                     // Includes EOF.
                     if ( peek2 != EOF )
-                        reader.pushbackChar(peek2);
+                        reader.pushbackChar(peek2); // XXX ????
                     token.setType(TokenType.RPAREN);
                     return token;
                 }
-                int peek3 = reader.readChar();
+                reader.readChar();
+                int peek3 = reader.peekChar();
                 if ( peek3 != '>') {
                     // Includes EOF.
-                    if ( peek3 != EOF ) {
+                    if ( peek3 != EOF )
                         reader.pushbackChar(peek3);
-                        reader.pushbackChar(peek2);
-                    }
+                    reader.pushbackChar(peek2);
                     token.setType(TokenType.RPAREN);
                     return token;
                 }
                 // It is ')>>'
+                reader.readChar();
                 token.setType(TokenType.R_TRIPLE);
                 /*token.setImage(")>>");*/
                 return token;
@@ -449,8 +450,10 @@ public final class TokenizerText implements Tokenizer
             case CH_STAR:       reader.readChar(); token.setType(TokenType.STAR);      /*token.setImage(CH_STAR);*/ return token;
             case CH_EMARK:      reader.readChar(); token.setType(TokenType.EMARK);     /*token.setImage(CH_EMARK);*/ return token;
 
+            case CH_TILDE:      reader.readChar(); token.setType(TokenType.TILDE);     /*token.setImage(CH_TILDE);*/ return token;
+
             // VAR overrides
-            //case CH_QMARK:      reader.readChar(); token.setType(TokenType.QMARK);      /*token.setImage(CH_EMARK);*/ return token;
+            //case CH_QMARK:      reader.readChar(); token.setType(TokenType.QMARK);   /*token.setImage(CH_EMARK);*/ return token;
 
             // XXX Multi-character symbols
             // Two character tokens && || GE >= , LE <=

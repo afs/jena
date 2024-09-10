@@ -75,11 +75,11 @@ public class Node_Triple extends Node {
 
     @Override
     public String toString(PrefixMapping pm) {
-        return "<< " + triple.toString() + " >>";
+        return "<<( " + triple.toString() + " )>>";
     }
 
     @Override
     public String toString() {
-        return triple.toString();
+        return "<<( "+ triple.toString() + " )>>";
     }
 }

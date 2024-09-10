@@ -1270,7 +1270,21 @@ public class TestTokenizer {
     }
 
     @Test
-    public void token_rdf_star_1() {
+    public void token_rdf_star_reified_1() {
+        Tokenizer tokenizer = tokenizer("<<") ;
+        testNextToken(tokenizer, TokenType.LT2) ;
+        assertFalse(tokenizer.hasNext()) ;
+    }
+
+    @Test
+    public void token_rdf_star_reified_2() {
+        Tokenizer tokenizer = tokenizer("<<") ;
+        testNextToken(tokenizer, TokenType.LT2) ;
+        assertFalse(tokenizer.hasNext()) ;
+    }
+
+    @Test
+    public void token_rdf_star_reified_3() {
         Tokenizer tokenizer = tokenizer("<<>>") ;
         testNextToken(tokenizer, TokenType.LT2) ;
         testNextToken(tokenizer, TokenType.GT2) ;
@@ -1278,15 +1292,84 @@ public class TestTokenizer {
     }
 
     @Test
-    public void token_rdf_star_2() {
+    public void token_rdf_star_reified_4() {
         Tokenizer tokenizer = tokenizer("<< >>") ;
         testNextToken(tokenizer, TokenType.LT2) ;
         testNextToken(tokenizer, TokenType.GT2) ;
         assertFalse(tokenizer.hasNext()) ;
     }
 
+//    @Test
+//    public void token_rdf_star_reified_5() {
+//        Tokenizer tokenizer = tokenizer("< <> >") ;
+//        testNextToken(tokenizer, TokenType.LT) ;
+//        testNextToken(tokenizer, TokenType.IRI) ;
+//        testNextToken(tokenizer, TokenType.GT) ;
+//        assertFalse(tokenizer.hasNext()) ;
+//    }
+
     @Test
-    public void token_rdf_star_3() {
+    public void token_rdf_star_reified_6() {
+        Tokenizer tokenizer = tokenizer("<< <> >>") ;
+        testNextToken(tokenizer, TokenType.LT2) ;
+        testNextToken(tokenizer, TokenType.IRI) ;
+        testNextToken(tokenizer, TokenType.GT2) ;
+        assertFalse(tokenizer.hasNext()) ;
+    }
+
+    @Test
+    public void token_rdf_star_reified_7() {
+        Tokenizer tokenizer = tokenizer("<< <>>>") ;
+        testNextToken(tokenizer, TokenType.LT2) ;
+        testNextToken(tokenizer, TokenType.IRI) ;
+        testNextToken(tokenizer, TokenType.GT2) ;
+        assertFalse(tokenizer.hasNext()) ;
+    }
+
+    @Test
+    public void token_rdf_star_tripleTerm_1() {
+        Tokenizer tokenizer = tokenizer("<<(") ;
+        testNextToken(tokenizer, TokenType.L_TRIPLE);
+        assertFalse(tokenizer.hasNext()) ;
+    }
+
+    @Test
+    public void token_rdf_star_tripleTerm_2() {
+        Tokenizer tokenizer = tokenizer(")>>") ;
+        testNextToken(tokenizer, TokenType.R_TRIPLE);
+        assertFalse(tokenizer.hasNext());
+    }
+
+    @Test
+    public void token_rdf_star_tripleTerm_3() {
+        Tokenizer tokenizer = tokenizer("<<( )>>") ;
+        testNextToken(tokenizer, TokenType.L_TRIPLE);
+        testNextToken(tokenizer, TokenType.R_TRIPLE);
+        assertFalse(tokenizer.hasNext()) ;
+    }
+
+    @Test
+    public void token_rdf_star_tripleTerm_4() {
+        Tokenizer tokenizer = tokenizer("<<()>>") ;
+        testNextToken(tokenizer, TokenType.L_TRIPLE);
+
+        Token t9 = tokenizer.peek();
+
+        testNextToken(tokenizer, TokenType.R_TRIPLE);
+        assertFalse(tokenizer.hasNext()) ;
+    }
+
+    public void token_rdf_star_tripleTerm_5() {
+        Tokenizer tokenizer = tokenizer("<< () >>") ;
+        testNextToken(tokenizer, TokenType.LT2);
+        testNextToken(tokenizer, TokenType.LPAREN);
+        testNextToken(tokenizer, TokenType.RPAREN);
+        testNextToken(tokenizer, TokenType.GT2);
+        assertFalse(tokenizer.hasNext()) ;
+    }
+
+    @Test
+    public void token_rdf_star_occurence1() {
         Tokenizer tokenizer = tokenizer("<<:s x:p 123>> :q ") ;
         testNextToken(tokenizer, TokenType.LT2) ;
         testNextToken(tokenizer, TokenType.PREFIXED_NAME, "", "s") ;
@@ -1298,12 +1381,23 @@ public class TestTokenizer {
     }
 
     @Test
-    public void token_rdf_star_4() {
-        Tokenizer tokenizer = tokenizer("<<<>>>") ;
+    public void token_rdf_star_inner_IRI() {
+        Tokenizer tokenizer = tokenizer("<<<>>>") ;         // which is <<  <>  >>
         testNextToken(tokenizer, TokenType.LT2) ;
         Token t = testNextToken(tokenizer, TokenType.IRI) ;
         assertEquals("", t.getImage());
         testNextToken(tokenizer, TokenType.GT2) ;
         assertFalse(tokenizer.hasNext()) ;
     }
+
+    @Test
+    public void token_rdf_star_inner_triple_term() {
+        Tokenizer tokenizer = tokenizer("<<<<()>>>>") ;     // which is << <<( )>>  >>
+        testNextToken(tokenizer, TokenType.LT2) ;
+        testNextToken(tokenizer, TokenType.L_TRIPLE) ;
+        testNextToken(tokenizer, TokenType.R_TRIPLE);
+        testNextToken(tokenizer, TokenType.GT2) ;
+        assertFalse(tokenizer.hasNext()) ;
+    }
+
 }

@@ -58,6 +58,12 @@ public class LangEngine {
         return peekIter.peek();
     }
 
+    // Development!
+    protected final void printNextToken() {
+        Token token = peekToken();
+        System.out.println(token);
+    }
+
     // Set when we get to EOF to record line/col of the EOF.
     private Token tokenEOF = null;
 
