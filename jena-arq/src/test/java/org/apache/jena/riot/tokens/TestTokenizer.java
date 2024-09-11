@@ -1352,19 +1352,33 @@ public class TestTokenizer {
     public void token_rdf_star_tripleTerm_4() {
         Tokenizer tokenizer = tokenizer("<<()>>") ;
         testNextToken(tokenizer, TokenType.L_TRIPLE);
-
-        Token t9 = tokenizer.peek();
-
         testNextToken(tokenizer, TokenType.R_TRIPLE);
         assertFalse(tokenizer.hasNext()) ;
     }
 
+    // Not triple term syntax
     public void token_rdf_star_tripleTerm_5() {
         Tokenizer tokenizer = tokenizer("<< () >>") ;
         testNextToken(tokenizer, TokenType.LT2);
         testNextToken(tokenizer, TokenType.LPAREN);
         testNextToken(tokenizer, TokenType.RPAREN);
         testNextToken(tokenizer, TokenType.GT2);
+        assertFalse(tokenizer.hasNext()) ;
+    }
+
+    public void token_rdf_star_tripleTerm_6() {
+        Tokenizer tokenizer = tokenizer(")>> .") ;
+        testNextToken(tokenizer, TokenType.R_TRIPLE);
+        testNextToken(tokenizer, TokenType.KEYWORD);
+        assertFalse(tokenizer.hasNext()) ;
+    }
+
+    // Not triple term syntax
+    public void token_rdf_star_tripleTerm_7() {
+        Tokenizer tokenizer = tokenizer("().") ;
+        testNextToken(tokenizer, TokenType.LPAREN);
+        testNextToken(tokenizer, TokenType.RPAREN);
+        testNextToken(tokenizer, TokenType.DOT);
         assertFalse(tokenizer.hasNext()) ;
     }
 

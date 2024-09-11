@@ -133,22 +133,6 @@ public final class TokenizerText implements Tokenizer
         return token;
     }
 
-//    private TokenChecker getChecker() {
-//        return checker;
-//    }
-//
-//    private void setChecker(TokenChecker checker) {
-//        this.checker = checker;
-//    }
-//
-//    private ErrorHandler getErrorHandler() {
-//        return errorHandler;
-//    }
-//
-//    private void setErrorHandler(ErrorHandler handler) {
-//        this.errorHandler = handler;
-//    }
-
     @Override
     public void close() {
         IO.close(reader);
@@ -399,17 +383,12 @@ public final class TokenizerText implements Tokenizer
                 int peek2 = reader.peekChar();
                 if ( peek2 != '>') {
                     // Includes EOF.
-                    if ( peek2 != EOF )
-                        reader.pushbackChar(peek2); // XXX ????
                     token.setType(TokenType.RPAREN);
                     return token;
                 }
                 reader.readChar();
                 int peek3 = reader.peekChar();
                 if ( peek3 != '>') {
-                    // Includes EOF.
-                    if ( peek3 != EOF )
-                        reader.pushbackChar(peek3);
                     reader.pushbackChar(peek2);
                     token.setType(TokenType.RPAREN);
                     return token;
