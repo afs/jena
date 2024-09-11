@@ -1748,23 +1748,18 @@ Node VarOrTerm() : { Node n = null ; String iri ; }
 Node ReifiedTriple(TripleCollector acc) :  { Node reifId = null ; Token tok ; Node s; Node p ; Node o ; }
 {
   tok = <LT2>
-  s = VarOrTerm()
+  (
+     s = VarOrTerm()
+  |
+     s = ReifiedTriple(acc)
+  )
   p = Verb()
-  o = VarOrTerm()
+  (
+    o = VarOrTerm()
+  |
+    o =  ReifiedTriple(acc)
+  )
   (reifId = Reifier())?
-  { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }    
-  <GT2>
-  { return reifId; }
-}
-
-// No variables.
-Node ReifiedTripleData(TripleCollector acc) : { Node reifId = null ; Token tok ; String iri ; Node s; Node p ; Node o ; }
-{
-  tok = <LT2>
-  ( s = DataValueTerm() )
-  ( iri = iri() { p = createNode(iri) ; } | <KW_A> { p = nRDFtype ; } )
-  ( o = DataValueTerm() )
-  ( reifId = ReifierData() )?
   { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }    
   <GT2>
   { return reifId; }
@@ -1803,7 +1798,6 @@ Node DataValueTerm() : {  Node n = null ; String iri ; Node s , p , o ; }
 | n = NumericLiteral()   { return n ; }
 | n = BooleanLiteral()   { return n ; }
 | n = TripleTermData()   { return n; }
-//| n = ReifiedTripleData(acc) { return n; }
 }
 
 // e.g. Property (if no bNodes) + DESCRIBE
