@@ -458,12 +458,9 @@ public abstract class LangTurtleBase extends LangBase {
     // and '=' (owl:sameAs),
     /** Get predicate - return null for "illegal" */
     protected final Node predicate() {
-        Token t = peekToken();
-
-        if ( t.hasType(TokenType.KEYWORD) ) {
-            nextToken();
-            Token tErr = t;
-            String image = peekToken().getImage();
+        if ( lookingAt(TokenType.KEYWORD) ) {
+            Token kwToken = nextToken();
+            String image = kwToken.getImage();
             if ( image.equals(KW_A) )
                 return NodeConst.nodeRDFType;
             // N3-isms
@@ -472,12 +469,13 @@ public abstract class LangTurtleBase extends LangBase {
             // Relationship between two formulae in N3.
 //            if ( !isStrictMode() && image.equals(KW_LOG_IMPLIES) )
 //                return log:implies;
-            exception(tErr, "Unrecognized keyword: " + image);
+            exception(kwToken, "Unrecognized keyword: " + image);
         }
 
+        Token token = peekToken();
         Node n = node();
         if ( n == null || !n.isURI() )
-            exception(t, "Expected IRI for predicate: got: %s", t);
+            exception(token, "Expected IRI for predicate: got: %s", token);
         return n;
     }
 

@@ -114,7 +114,6 @@ public class LangTriG extends LangTurtleBase {
         } else if ( token.isNode() ) {
             // Either :s :p :o or :g { ... }
             Node n = node() ;
-            nextToken() ;
             token = peekToken() ;
             if ( lookingAt(LBRACE) )
                 graphNode = n ;
@@ -173,7 +172,6 @@ public class LangTriG extends LangTurtleBase {
 //            // { ... }
 //            if ( token.isNode() ) {
 //                graphNode = node() ;
-//                nextToken() ;
 //            }
 //        }
 //

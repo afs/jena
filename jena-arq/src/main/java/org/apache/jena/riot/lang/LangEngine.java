@@ -59,7 +59,11 @@ public class LangEngine {
     }
 
     // Development!
-    protected final void printNextToken() {
+    protected final void printToken() {
+        if ( tokenEOF != null ) {
+            System.out.println("<EOF>");
+            return;
+        }
         Token token = peekToken();
         System.out.println(token);
     }
