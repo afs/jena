@@ -851,6 +851,37 @@ public class TestTokenizer {
     }
 
     @Test
+    public void tokenLiteralLangDir_1() {
+        tokenizeAndTestExact("'X'  @a--ltr", TokenType.LITERAL_LANG, "X", "a--ltr") ;
+    }
+
+    @Test
+    public void tokenLiteralLangDir_3() {
+        tokenizeAndTestExact("'X'  @en-GB--ltr", TokenType.LITERAL_LANG, "X", "en-GB--ltr") ;
+    }
+
+    @Test
+    public void tokenLiteralLangDir_4() {
+        // Not checked at this point.
+        tokenizeAndTestExact("'X'  @a--AB", TokenType.LITERAL_LANG, "X", "a--AB") ;
+    }
+
+    @Test(expected = RiotParseException.class)
+    public void tokenLiteralLangDir_bad_1() {
+        tokenFirst("'X'@a--ltr--ltr") ;
+    }
+
+    @Test(expected = RiotParseException.class)
+    public void tokenLiteralLangDir_bad_2() {
+        tokenFirst("'X'@--ltr") ;
+    }
+
+    @Test(expected = RiotParseException.class)
+    public void tokenLiteralLangDir__bad_3() {
+        tokenFirst("'X'@en--ltr-en") ;
+    }
+
+    @Test
     public void directive_1() {
         tokenizeAndTestExact("@prefix", TokenType.DIRECTIVE, "prefix") ;
     }
