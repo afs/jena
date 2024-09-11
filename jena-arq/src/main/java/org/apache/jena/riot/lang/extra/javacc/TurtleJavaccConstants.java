@@ -125,41 +125,43 @@ public interface TurtleJavaccConstants {
   /** RegularExpression Id. */
   int TILDE = 53;
   /** RegularExpression Id. */
-  int PNAME_NS = 54;
+  int VBAR = 54;
   /** RegularExpression Id. */
-  int PNAME_LN = 55;
+  int PNAME_NS = 55;
   /** RegularExpression Id. */
-  int BLANK_NODE_LABEL = 56;
+  int PNAME_LN = 56;
   /** RegularExpression Id. */
-  int LANG_DIR = 57;
+  int BLANK_NODE_LABEL = 57;
   /** RegularExpression Id. */
-  int A2Z = 58;
+  int LANG_DIR = 58;
   /** RegularExpression Id. */
-  int A2ZN = 59;
+  int A2Z = 59;
   /** RegularExpression Id. */
-  int SURROGATE_PAIR = 60;
+  int A2ZN = 60;
   /** RegularExpression Id. */
-  int PN_CHARS_BASE = 61;
+  int SURROGATE_PAIR = 61;
   /** RegularExpression Id. */
-  int PN_CHARS_U = 62;
+  int PN_CHARS_BASE = 62;
   /** RegularExpression Id. */
-  int PN_CHARS = 63;
+  int PN_CHARS_U = 63;
   /** RegularExpression Id. */
-  int PN_PREFIX = 64;
+  int PN_CHARS = 64;
   /** RegularExpression Id. */
-  int PN_LOCAL = 65;
+  int PN_PREFIX = 65;
   /** RegularExpression Id. */
-  int VARNAME = 66;
+  int PN_LOCAL = 66;
   /** RegularExpression Id. */
-  int PN_LOCAL_ESC = 67;
+  int VARNAME = 67;
   /** RegularExpression Id. */
-  int PLX = 68;
+  int PN_LOCAL_ESC = 68;
   /** RegularExpression Id. */
-  int HEX = 69;
+  int PLX = 69;
   /** RegularExpression Id. */
-  int PERCENT = 70;
+  int HEX = 70;
   /** RegularExpression Id. */
-  int UNKNOWN = 71;
+  int PERCENT = 71;
+  /** RegularExpression Id. */
+  int UNKNOWN = 72;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -220,6 +222,7 @@ public interface TurtleJavaccConstants {
     "\"{|\"",
     "\"|}\"",
     "\"~\"",
+    "\"|\"",
     "<PNAME_NS>",
     "<PNAME_LN>",
     "<BLANK_NODE_LABEL>",

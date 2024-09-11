@@ -322,13 +322,14 @@ String IRIREF() : { Token t ; }
 }
 
 
-Node Reifier() : { Node n; String iriStr; }
+Node Reifier() : { Node n = null; String iriStr; Token t; }
 {
-  <TILDE>
+  t = <TILDE>
   (
     iriStr = iri() { n = createURI(iriStr, token.beginLine, token.beginColumn) ; }
   | n = BlankNode()
-  )
+  )?
+  { if ( n == null ) n = createBNode(t.beginLine, t.beginColumn) ; }
   { return n ; }
 }
 
@@ -500,11 +501,12 @@ TOKEN :
 | < L_ANN:     "{|" >
 | < R_ANN:     "|}" >
 | < TILDE:     "~"  >
+| < VBAR:      "|" >
 
 |  <PNAME_NS: (<PN_PREFIX>)? ":" >
 |  <PNAME_LN: <PNAME_NS> <PN_LOCAL> >
 |  <BLANK_NODE_LABEL: "_:" (<PN_CHARS_U> | ["0"-"9"]) ((<PN_CHARS>|".")* <PN_CHARS>)?  >
-|  <LANG_DIR: <AT> (<A2Z>)+("-" (<A2ZN>)+)* ( "--" (<A2Z>)* ) >
+|  <LANG_DIR: <AT> (<A2Z>)+("-" (<A2ZN>)+)* ( "--" (<A2Z>)* )? >
 |  <#A2Z: ["a"-"z","A"-"Z"]>
 |  <#A2ZN: ["a"-"z","A"-"Z","0"-"9"]>
 

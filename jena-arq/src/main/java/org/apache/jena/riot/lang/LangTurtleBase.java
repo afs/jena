@@ -310,6 +310,9 @@ public abstract class LangTurtleBase extends LangBase {
     }
 
     protected Node possibleReifier(Node s, Node p, Node o, long line, long column) {
+        if ( lookingAt(TokenType.VBAR) )
+            exception(peekToken(), "Bad syntax: reifiers are '~', not '|'");
+
         if ( ! lookingAt(TokenType.TILDE) )
             return profile.createBlankNode(currentGraph, line, column);
         // XXX Check BNF
@@ -318,17 +321,33 @@ public abstract class LangTurtleBase extends LangBase {
 
     protected Node Reifier(Node s, Node p, Node o, long line, long column) {
         // Tilde
-        nextToken();
-        // URI or bNode
-
+        Token tildeToken = nextToken();
         Token tokenReif = peekToken();
 
-        // XXX   and use elsewhere : nodeURIorBLankNode()
-        Node reif = tokenAsNode(tokenReif);
+        if ( lookingAt(TokenType.LITERAL_DT) || lookingAt(TokenType.LITERAL_LANG) ) {
+            nextToken();
+            exception(tildeToken, "Reifiers are URIs or blank nodes: found %s", tokenReif);
+        }
 
-        if ( ! (reif.isURI() || reif.isBlank()) )
-            exception(tokenReif, "Reifiers are URis or blank nodes: found %s", tokenReif);
-        nextToken();
+        Node reif;
+        // URI or bNode
+        if ( lookingAtIRIorBNode() ) {
+            // XXX   and use elsewhere : nodeURIorBLankNode()
+            nextToken();
+            reif = tokenAsNode(tokenReif);
+        } else if ( lookingAt(LBRACKET) ) {
+            // ANON
+            nextToken();
+            Token t = peekToken();
+            if ( ! lookingAt(RBRACKET) )
+                exception(peekToken(), "Bad %s in RDF triple. Expected ] after [", "riefier", peekToken().text());
+            nextToken();
+            reif = profile.createBlankNode(currentGraph, t.getLine(), t.getColumn());
+        } else {
+            // Just "~" No reifier id
+            // or some syntax error we will detect later.
+            reif = profile.createBlankNode(currentGraph, tildeToken.getLine(), tildeToken.getColumn());
+        }
         return reif;
     }
 
@@ -374,6 +393,7 @@ public abstract class LangTurtleBase extends LangBase {
         //    can cope with zero length, covering grammar token ANON and rule [7] predicateObjectList cases
         // But here, in RDF-star, only [] is legal.
 
+        // XXX Generalize and reuse in Reifier.
         // []
         if ( lookingAt(LBRACKET) ) {
             nextToken();
@@ -423,6 +443,14 @@ public abstract class LangTurtleBase extends LangBase {
             expect("Triples not terminated by DOT", DOT);
         else
             expectOrEOF("Triples not terminated by DOT", DOT);
+    }
+
+    protected final boolean lookingAtIRIorBNode() {
+        if ( eof() )
+            return false;
+        Token t = peekToken();
+        // Does not cover "[ ]"
+        return t.isIRI() || t.isBNode();
     }
 
     protected final void predicateObjectList(Node subject) {
@@ -535,7 +563,7 @@ public abstract class LangTurtleBase extends LangBase {
 
     private void possibleAnnotations(Node subject, Node predicate, Node object) {
         for(;;) {
-            if ( !lookingAt(TokenType.TILDE) && !lookingAt(L_ANN) )
+            if ( !lookingAt(TokenType.TILDE) && !lookingAt(L_ANN) && /*old style, not adopted*/ !lookingAt(TokenType.VBAR) )
                 return;
 
             Token tokenReifer = peekToken();

@@ -687,26 +687,39 @@ checkString(lex, t.beginLine, t.beginColumn) ;
     throw new Error("Missing return statement in function");
 }
 
-  final public Node Reifier() throws ParseException {Node n; String iriStr;
-    jj_consume_token(TILDE);
+  final public Node Reifier() throws ParseException {Node n = null; String iriStr; Token t;
+    t = jj_consume_token(TILDE);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IRIref:
-    case PNAME_NS:
-    case PNAME_LN:{
-      iriStr = iri();
-n = createURI(iriStr, token.beginLine, token.beginColumn) ;
-      break;
-      }
     case ANON:
+    case PNAME_NS:
+    case PNAME_LN:
     case BLANK_NODE_LABEL:{
-      n = BlankNode();
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case IRIref:
+      case PNAME_NS:
+      case PNAME_LN:{
+        iriStr = iri();
+n = createURI(iriStr, token.beginLine, token.beginColumn) ;
+        break;
+        }
+      case ANON:
+      case BLANK_NODE_LABEL:{
+        n = BlankNode();
+        break;
+        }
+      default:
+        jj_la1[26] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
       break;
       }
     default:
-      jj_la1[26] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
+      jj_la1[27] = jj_gen;
+      ;
     }
+if ( n == null ) n = createBNode(t.beginLine, t.beginColumn) ;
 {if ("" != null) return n ;}
     throw new Error("Missing return statement in function");
 }
@@ -728,7 +741,7 @@ n = createURI(iriStr, token.beginLine, token.beginColumn) ;
       break;
       }
     default:
-      jj_la1[27] = jj_gen;
+      jj_la1[28] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -740,7 +753,7 @@ n = createURI(iriStr, token.beginLine, token.beginColumn) ;
       break;
       }
     default:
-      jj_la1[28] = jj_gen;
+      jj_la1[29] = jj_gen;
       ;
     }
 reifId = emitTripleReifier(tok.beginLine, tok.beginColumn, reifId, s, p, o);
@@ -775,7 +788,7 @@ o = createURI(iri, token.beginLine, token.beginColumn) ;
       break;
       }
     default:
-      jj_la1[29] = jj_gen;
+      jj_la1[30] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -815,7 +828,7 @@ o = createURI(iri, token.beginLine, token.beginColumn) ;
       break;
       }
     default:
-      jj_la1[30] = jj_gen;
+      jj_la1[31] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -834,7 +847,7 @@ o = createURI(iri, token.beginLine, token.beginColumn) ;
         break;
         }
       default:
-        jj_la1[31] = jj_gen;
+        jj_la1[32] = jj_gen;
         break label_5;
       }
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -851,7 +864,7 @@ clearReifierId();
         break;
         }
       default:
-        jj_la1[32] = jj_gen;
+        jj_la1[33] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -873,7 +886,7 @@ clearReifierId();
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[33];
+  final private int[] jj_la1 = new int[34];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -883,13 +896,13 @@ clearReifierId();
 	   jj_la1_init_2();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x21e00,0x10000,0x21e00,0x1800,0x600,0x20100,0x20100,0x20000,0x0,0x20100,0x0,0x20100,0x20000,0x80e26000,0x80e06000,0x80e26000,0xe00000,0x1800,0x1800,0x1800,0x1800,0x6000,0x80000000,0x20000,0x0,0x0,0x20000,0x20000,0x0,0x20000,0x80e26000,0x0,0x0,};
+	   jj_la1_0 = new int[] {0x21e00,0x10000,0x21e00,0x1800,0x600,0x20100,0x20100,0x20000,0x0,0x20100,0x0,0x20100,0x20000,0x80e26000,0x80e06000,0x80e26000,0xe00000,0x1800,0x1800,0x1800,0x1800,0x6000,0x80000000,0x20000,0x0,0x0,0x20000,0x20000,0x20000,0x0,0x20000,0x80e26000,0x0,0x0,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x1c20288,0x0,0x1c20288,0x0,0x0,0xc00000,0xc00000,0x1c20288,0x400,0xc00000,0x800,0xc00000,0x1c00208,0x1c2828f,0x7,0x1c2828f,0x0,0x2002000,0x2002000,0x2000000,0x0,0x0,0x7,0xc00000,0xc00000,0x1000200,0x1c00200,0x1c20208,0x200000,0x1c00200,0x1c08207,0x280000,0x280000,};
+	   jj_la1_1 = new int[] {0x3820288,0x0,0x3820288,0x0,0x0,0x1800000,0x1800000,0x3820288,0x400,0x1800000,0x800,0x1800000,0x3800208,0x382828f,0x7,0x382828f,0x0,0x4002000,0x4002000,0x4000000,0x0,0x0,0x7,0x1800000,0x1800000,0x2000200,0x3800200,0x3800200,0x3820208,0x200000,0x3800200,0x3808207,0x280000,0x280000,};
 	}
 	private static void jj_la1_init_2() {
-	   jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+	   jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
 	}
 
   /** Constructor with InputStream. */
@@ -903,7 +916,7 @@ clearReifierId();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 33; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 34; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -917,7 +930,7 @@ clearReifierId();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 33; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 34; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -927,7 +940,7 @@ clearReifierId();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 33; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 34; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -945,7 +958,7 @@ clearReifierId();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 33; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 34; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -954,7 +967,7 @@ clearReifierId();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 33; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 34; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -963,7 +976,7 @@ clearReifierId();
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 33; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 34; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -1014,12 +1027,12 @@ clearReifierId();
   /** Generate ParseException. */
   public ParseException generateParseException() {
 	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[72];
+	 boolean[] la1tokens = new boolean[73];
 	 if (jj_kind >= 0) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
 	 }
-	 for (int i = 0; i < 33; i++) {
+	 for (int i = 0; i < 34; i++) {
 	   if (jj_la1[i] == jj_gen) {
 		 for (int j = 0; j < 32; j++) {
 		   if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -1034,7 +1047,7 @@ clearReifierId();
 		 }
 	   }
 	 }
-	 for (int i = 0; i < 72; i++) {
+	 for (int i = 0; i < 73; i++) {
 	   if (la1tokens[i]) {
 		 jj_expentry = new int[1];
 		 jj_expentry[0] = i;
