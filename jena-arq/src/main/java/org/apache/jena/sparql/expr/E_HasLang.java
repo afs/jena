@@ -21,18 +21,22 @@ package org.apache.jena.sparql.expr;
 import org.apache.jena.sparql.expr.nodevalue.NodeFunctions;
 import org.apache.jena.sparql.sse.Tags;
 
-public class E_IsLang extends ExprFunction1 {
-    private static final String symbol = Tags.tagIsLang;
+/**
+ * Does the argument have a language tag?
+ * It tests for a language tag for both {@code rdf:langString} and {@code rdf:dirLangString}.
+ */
+public class E_HasLang extends ExprFunction1 {
+    private static final String symbol = Tags.tagHasLang;
 
-    public E_IsLang(Expr expr) {
+    public E_HasLang(Expr expr) {
         super(expr, symbol);
     }
 
     @Override
     public NodeValue eval(NodeValue v) {
-        return NodeFunctions.isLang(v);
+        return NodeFunctions.hasLang(v);
     }
 
     @Override
-    public Expr copy(Expr expr) { return new E_IsLang(expr); }
+    public Expr copy(Expr expr) { return new E_HasLang(expr); }
 }

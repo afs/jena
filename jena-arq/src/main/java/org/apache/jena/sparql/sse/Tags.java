@@ -171,6 +171,7 @@ public class Tags
     public static final String tagRand            = "rand";
 
     public static final String tagLang            = "lang";
+    public static final String tagLangDir         = "langdir";
     public static final String tagLangMatches     = "langMatches";
     public static final String tagSameTerm        = "sameTerm";
     public static final String tagDatatype        = "datatype";
@@ -181,9 +182,10 @@ public class Tags
     public static final String tagIsURI           = "isURI";
     public static final String tagIsBlank         = "isBlank";
     public static final String tagIsLiteral       = "isLiteral";
-    public static final String tagIsLang          = "isLang";
-    public static final String tagIsLangDir       = "isLangDir";
     public static final String tagIsNumeric       = "isNumeric";
+
+    public static final String tagHasLang         = "hasLang";
+    public static final String tagHasLangDir      = "hasLangDir";
 
     public static final String tagRegex           = "regex";
     public static final String tagExists          = "exists";

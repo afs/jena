@@ -1401,10 +1401,10 @@ Expr BuiltInCall() : { Expr expr ;
     { return new E_IsLiteral(expr) ; }
   | <IS_NUMERIC> <LPAREN> expr = Expression() <RPAREN>
     { return new E_IsNumeric(expr) ; }
-  | <IS_LANG> <LPAREN> expr = Expression() <RPAREN>
-    { return new E_IsLang(expr) ; }
-  | <IS_LANGDIR> <LPAREN> expr = Expression() <RPAREN>
-    { return new E_IsLangDir(expr) ; }
+  | <HAS_LANG> <LPAREN> expr = Expression() <RPAREN>
+    { return new E_HasLang(expr) ; }
+  | <HAS_LANGDIR> <LPAREN> expr = Expression() <RPAREN>
+    { return new E_HasLangDir(expr) ; }
   |
     expr = RegexExpression() { return expr ; }
   | expr = ExistsFunc() { return expr ; }
@@ -1711,8 +1711,8 @@ TOKEN [IGNORE_CASE] :
 | < IS_BLANK: "isBlank" >
 | < IS_LITERAL: "isLiteral" >
 | < IS_NUMERIC: "isNumeric" >
-| < IS_LANG: "isLang" >
-| < IS_LANGDIR: "isLangDir" >
+| < HAS_LANG: "hasLang" >
+| < HAS_LANGDIR: "hasLangDir" >
 | < REGEX: "regex" >
 | < SAME_TERM: "sameTerm" >
 | < RAND: "RAND" >

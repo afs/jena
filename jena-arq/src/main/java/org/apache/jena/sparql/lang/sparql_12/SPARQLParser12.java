@@ -529,8 +529,8 @@ finishWherePattern() ;
       case IS_BLANK:
       case IS_LITERAL:
       case IS_NUMERIC:
-      case IS_LANG:
-      case IS_LANGDIR:
+      case HAS_LANG:
+      case HAS_LANGDIR:
       case REGEX:
       case SAME_TERM:
       case RAND:
@@ -612,8 +612,8 @@ finishWherePattern() ;
     case IS_BLANK:
     case IS_LITERAL:
     case IS_NUMERIC:
-    case IS_LANG:
-    case IS_LANGDIR:
+    case HAS_LANG:
+    case HAS_LANGDIR:
     case REGEX:
     case SAME_TERM:
     case RAND:
@@ -733,8 +733,8 @@ setAllowAggregatesInExpressions(true) ;
       case IS_BLANK:
       case IS_LITERAL:
       case IS_NUMERIC:
-      case IS_LANG:
-      case IS_LANGDIR:
+      case HAS_LANG:
+      case HAS_LANGDIR:
       case REGEX:
       case SAME_TERM:
       case RAND:
@@ -835,8 +835,8 @@ setAllowAggregatesInExpressions(true) ;
       case IS_BLANK:
       case IS_LITERAL:
       case IS_NUMERIC:
-      case IS_LANG:
-      case IS_LANGDIR:
+      case HAS_LANG:
+      case HAS_LANGDIR:
       case REGEX:
       case SAME_TERM:
       case RAND:
@@ -946,8 +946,8 @@ direction = Query.ORDER_DESCENDING ;
     case IS_BLANK:
     case IS_LITERAL:
     case IS_NUMERIC:
-    case IS_LANG:
-    case IS_LANGDIR:
+    case HAS_LANG:
+    case HAS_LANGDIR:
     case REGEX:
     case SAME_TERM:
     case RAND:
@@ -1021,8 +1021,8 @@ direction = Query.ORDER_DESCENDING ;
       case IS_BLANK:
       case IS_LITERAL:
       case IS_NUMERIC:
-      case IS_LANG:
-      case IS_LANGDIR:
+      case HAS_LANG:
+      case HAS_LANGDIR:
       case REGEX:
       case SAME_TERM:
       case RAND:
@@ -2456,8 +2456,8 @@ el2.addElement(el) ;
     case IS_BLANK:
     case IS_LITERAL:
     case IS_NUMERIC:
-    case IS_LANG:
-    case IS_LANGDIR:
+    case HAS_LANG:
+    case HAS_LANGDIR:
     case REGEX:
     case SAME_TERM:
     case RAND:
@@ -4272,8 +4272,8 @@ expr1 = new E_Divide(expr1, expr2) ;
     case IS_BLANK:
     case IS_LITERAL:
     case IS_NUMERIC:
-    case IS_LANG:
-    case IS_LANGDIR:
+    case HAS_LANG:
+    case HAS_LANGDIR:
     case REGEX:
     case SAME_TERM:
     case RAND:
@@ -4378,8 +4378,8 @@ expr1 = new E_Divide(expr1, expr2) ;
     case IS_BLANK:
     case IS_LITERAL:
     case IS_NUMERIC:
-    case IS_LANG:
-    case IS_LANGDIR:
+    case HAS_LANG:
+    case HAS_LANGDIR:
     case REGEX:
     case SAME_TERM:
     case RAND:
@@ -5003,20 +5003,20 @@ n = createTripleTerm(s, p, o, t.beginLine, t.beginColumn);
 {if ("" != null) return new E_IsNumeric(expr) ;}
       break;
       }
-    case IS_LANG:{
-      jj_consume_token(IS_LANG);
+    case HAS_LANG:{
+      jj_consume_token(HAS_LANG);
       jj_consume_token(LPAREN);
       expr = Expression();
       jj_consume_token(RPAREN);
-{if ("" != null) return new E_IsLang(expr) ;}
+{if ("" != null) return new E_HasLang(expr) ;}
       break;
       }
-    case IS_LANGDIR:{
-      jj_consume_token(IS_LANGDIR);
+    case HAS_LANGDIR:{
+      jj_consume_token(HAS_LANGDIR);
       jj_consume_token(LPAREN);
       expr = Expression();
       jj_consume_token(RPAREN);
-{if ("" != null) return new E_IsLangDir(expr) ;}
+{if ("" != null) return new E_HasLangDir(expr) ;}
       break;
       }
     case REGEX:{
@@ -5229,8 +5229,8 @@ distinct = true ;
       case IS_BLANK:
       case IS_LITERAL:
       case IS_NUMERIC:
-      case IS_LANG:
-      case IS_LANGDIR:
+      case HAS_LANG:
+      case HAS_LANGDIR:
       case REGEX:
       case SAME_TERM:
       case RAND:

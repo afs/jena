@@ -205,9 +205,9 @@ public interface ARQParserConstants {
   /** RegularExpression Id. */
   int IS_NUMERIC = 102;
   /** RegularExpression Id. */
-  int IS_LANG = 103;
+  int HAS_LANG = 103;
   /** RegularExpression Id. */
-  int IS_LANGDIR = 104;
+  int HAS_LANGDIR = 104;
   /** RegularExpression Id. */
   int REGEX = 105;
   /** RegularExpression Id. */
@@ -589,8 +589,8 @@ public interface ARQParserConstants {
     "\"isBlank\"",
     "\"isLiteral\"",
     "\"isNumeric\"",
-    "\"isLang\"",
-    "\"isLangDir\"",
+    "\"hasLang\"",
+    "\"hasLangDir\"",
     "\"regex\"",
     "\"sameTerm\"",
     "\"RAND\"",

@@ -45,7 +45,10 @@ public class NodeUtils
         return NodeFactory.createURI(iri);
     }
 
-    /** Return true if the node is a literal and has a language tag */
+    /**
+     * Return true if the node is a literal and has a language tag.
+     * It may be a rdf:langString or rdf:dirLangString.
+     */
     public static boolean hasLang(Node node) {
         if ( !node.isLiteral() )
             return false;

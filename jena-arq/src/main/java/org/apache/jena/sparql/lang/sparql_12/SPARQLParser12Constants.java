@@ -181,9 +181,9 @@ public interface SPARQLParser12Constants {
   /** RegularExpression Id. */
   int IS_NUMERIC = 90;
   /** RegularExpression Id. */
-  int IS_LANG = 91;
+  int HAS_LANG = 91;
   /** RegularExpression Id. */
-  int IS_LANGDIR = 92;
+  int HAS_LANGDIR = 92;
   /** RegularExpression Id. */
   int REGEX = 93;
   /** RegularExpression Id. */
@@ -541,8 +541,8 @@ public interface SPARQLParser12Constants {
     "\"isBlank\"",
     "\"isLiteral\"",
     "\"isNumeric\"",
-    "\"isLang\"",
-    "\"isLangDir\"",
+    "\"hasLang\"",
+    "\"hasLangDir\"",
     "\"regex\"",
     "\"sameTerm\"",
     "\"RAND\"",

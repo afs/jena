@@ -22,20 +22,20 @@ import org.apache.jena.sparql.expr.nodevalue.NodeFunctions;
 import org.apache.jena.sparql.sse.Tags ;
 
 
-public class E_IsLangDir extends ExprFunction1
+public class E_HasLangDir extends ExprFunction1
 {
-    private static final String symbol = Tags.tagIsLangDir;
+    private static final String symbol = Tags.tagHasLangDir;
 
-    public E_IsLangDir(Expr expr)
+    public E_HasLangDir(Expr expr)
     {
         super(expr, symbol) ;
     }
 
     @Override
     public NodeValue eval(NodeValue v) {
-        return NodeFunctions.isLangDir(v);
+        return NodeFunctions.hasLangDir(v);
     }
 
     @Override
-    public Expr copy(Expr expr) { return new E_IsLangDir(expr) ; }
+    public Expr copy(Expr expr) { return new E_HasLangDir(expr) ; }
 }

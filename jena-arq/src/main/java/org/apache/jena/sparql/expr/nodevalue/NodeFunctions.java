@@ -253,20 +253,20 @@ public class NodeFunctions {
 
     // -------- lang
 
-    public static NodeValue isLang(NodeValue nv) {
-        return NodeValue.booleanReturn(isLang(nv.asNode())) ;
+    public static NodeValue hasLang(NodeValue nv) {
+        return NodeValue.booleanReturn(hasLang(nv.asNode())) ;
     }
 
-    public static boolean isLang(Node node) {
+    public static boolean hasLang(Node node) {
         return NodeUtils.hasLang(node);
     }
 
-    public static NodeValue isLangDir(NodeValue nv) {
-        return NodeValue.booleanReturn(isLangDir(nv.asNode())) ;
+    public static NodeValue hasLangDir(NodeValue nv) {
+        return NodeValue.booleanReturn(hasLangDir(nv.asNode())) ;
     }
 
-    public static boolean isLangDir(Node node) {
-        return NodeUtils.hasLang(node);
+    public static boolean hasLangDir(Node node) {
+        return NodeUtils.hasLangDir(node);
     }
 
     public static NodeValue lang(NodeValue nv) {

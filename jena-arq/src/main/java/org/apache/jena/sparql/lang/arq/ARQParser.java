@@ -226,8 +226,8 @@ setAllowAggregatesInExpressions(true) ;
     case IS_BLANK:
     case IS_LITERAL:
     case IS_NUMERIC:
-    case IS_LANG:
-    case IS_LANGDIR:
+    case HAS_LANG:
+    case HAS_LANGDIR:
     case REGEX:
     case SAME_TERM:
     case RAND:
@@ -339,8 +339,8 @@ getQuery().addResultVar(v) ;
         case IS_BLANK:
         case IS_LITERAL:
         case IS_NUMERIC:
-        case IS_LANG:
-        case IS_LANGDIR:
+        case HAS_LANG:
+        case HAS_LANGDIR:
         case REGEX:
         case SAME_TERM:
         case RAND:
@@ -516,8 +516,8 @@ getQuery().setQueryResultStar(false) ;
         case IS_BLANK:
         case IS_LITERAL:
         case IS_NUMERIC:
-        case IS_LANG:
-        case IS_LANGDIR:
+        case HAS_LANG:
+        case HAS_LANGDIR:
         case REGEX:
         case SAME_TERM:
         case RAND:
@@ -976,8 +976,8 @@ finishWherePattern() ;
       case IS_BLANK:
       case IS_LITERAL:
       case IS_NUMERIC:
-      case IS_LANG:
-      case IS_LANGDIR:
+      case HAS_LANG:
+      case HAS_LANGDIR:
       case REGEX:
       case SAME_TERM:
       case RAND:
@@ -1074,8 +1074,8 @@ finishWherePattern() ;
     case IS_BLANK:
     case IS_LITERAL:
     case IS_NUMERIC:
-    case IS_LANG:
-    case IS_LANGDIR:
+    case HAS_LANG:
+    case HAS_LANGDIR:
     case REGEX:
     case SAME_TERM:
     case RAND:
@@ -1210,8 +1210,8 @@ setAllowAggregatesInExpressions(true) ;
       case IS_BLANK:
       case IS_LITERAL:
       case IS_NUMERIC:
-      case IS_LANG:
-      case IS_LANGDIR:
+      case HAS_LANG:
+      case HAS_LANGDIR:
       case REGEX:
       case SAME_TERM:
       case RAND:
@@ -1327,8 +1327,8 @@ setAllowAggregatesInExpressions(true) ;
       case IS_BLANK:
       case IS_LITERAL:
       case IS_NUMERIC:
-      case IS_LANG:
-      case IS_LANGDIR:
+      case HAS_LANG:
+      case HAS_LANGDIR:
       case REGEX:
       case SAME_TERM:
       case RAND:
@@ -1453,8 +1453,8 @@ direction = Query.ORDER_DESCENDING ;
     case IS_BLANK:
     case IS_LITERAL:
     case IS_NUMERIC:
-    case IS_LANG:
-    case IS_LANGDIR:
+    case HAS_LANG:
+    case HAS_LANGDIR:
     case REGEX:
     case SAME_TERM:
     case RAND:
@@ -1543,8 +1543,8 @@ direction = Query.ORDER_DESCENDING ;
       case IS_BLANK:
       case IS_LITERAL:
       case IS_NUMERIC:
-      case IS_LANG:
-      case IS_LANGDIR:
+      case HAS_LANG:
+      case HAS_LANGDIR:
       case REGEX:
       case SAME_TERM:
       case RAND:
@@ -1684,8 +1684,8 @@ direction = Query.ORDER_DESCENDING ;
     case IS_BLANK:
     case IS_LITERAL:
     case IS_NUMERIC:
-    case IS_LANG:
-    case IS_LANGDIR:
+    case HAS_LANG:
+    case HAS_LANGDIR:
     case REGEX:
     case SAME_TERM:
     case RAND:
@@ -1774,8 +1774,8 @@ direction = Query.ORDER_DESCENDING ;
       case IS_BLANK:
       case IS_LITERAL:
       case IS_NUMERIC:
-      case IS_LANG:
-      case IS_LANGDIR:
+      case HAS_LANG:
+      case HAS_LANGDIR:
       case REGEX:
       case SAME_TERM:
       case RAND:
@@ -3440,8 +3440,8 @@ el2.addElement(el) ;
     case IS_BLANK:
     case IS_LITERAL:
     case IS_NUMERIC:
-    case IS_LANG:
-    case IS_LANGDIR:
+    case HAS_LANG:
+    case HAS_LANGDIR:
     case REGEX:
     case SAME_TERM:
     case RAND:
@@ -5383,8 +5383,8 @@ expr1 = new E_OpNumericIntegerDivide(expr1, expr2) ;
     case IS_BLANK:
     case IS_LITERAL:
     case IS_NUMERIC:
-    case IS_LANG:
-    case IS_LANGDIR:
+    case HAS_LANG:
+    case HAS_LANGDIR:
     case REGEX:
     case SAME_TERM:
     case RAND:
@@ -5504,8 +5504,8 @@ expr1 = new E_OpNumericIntegerDivide(expr1, expr2) ;
     case IS_BLANK:
     case IS_LITERAL:
     case IS_NUMERIC:
-    case IS_LANG:
-    case IS_LANGDIR:
+    case HAS_LANG:
+    case HAS_LANGDIR:
     case REGEX:
     case SAME_TERM:
     case RAND:
@@ -6232,20 +6232,20 @@ a.add(expr) ;
 {if ("" != null) return new E_IsNumeric(expr) ;}
       break;
       }
-    case IS_LANG:{
-      jj_consume_token(IS_LANG);
+    case HAS_LANG:{
+      jj_consume_token(HAS_LANG);
       jj_consume_token(LPAREN);
       expr = Expression();
       jj_consume_token(RPAREN);
-{if ("" != null) return new E_IsLang(expr) ;}
+{if ("" != null) return new E_HasLang(expr) ;}
       break;
       }
-    case IS_LANGDIR:{
-      jj_consume_token(IS_LANGDIR);
+    case HAS_LANGDIR:{
+      jj_consume_token(HAS_LANGDIR);
       jj_consume_token(LPAREN);
       expr = Expression();
       jj_consume_token(RPAREN);
-{if ("" != null) return new E_IsLangDir(expr) ;}
+{if ("" != null) return new E_HasLangDir(expr) ;}
       break;
       }
     case REGEX:{
@@ -6469,8 +6469,8 @@ distinct = true ;
       case IS_BLANK:
       case IS_LITERAL:
       case IS_NUMERIC:
-      case IS_LANG:
-      case IS_LANGDIR:
+      case HAS_LANG:
+      case HAS_LANGDIR:
       case REGEX:
       case SAME_TERM:
       case RAND:
@@ -6925,8 +6925,8 @@ if ( scs == null )
           case IS_BLANK:
           case IS_LITERAL:
           case IS_NUMERIC:
-          case IS_LANG:
-          case IS_LANGDIR:
+          case HAS_LANG:
+          case HAS_LANGDIR:
           case REGEX:
           case SAME_TERM:
           case RAND:
@@ -8337,14 +8337,14 @@ checkString(lex, t.beginLine, t.beginColumn) ;
 
   private boolean jj_3R_BuiltInCall_1626_5_109()
  {
-    if (jj_scan_token(IS_LANGDIR)) return true;
+    if (jj_scan_token(HAS_LANGDIR)) return true;
     if (jj_scan_token(LPAREN)) return true;
     return false;
   }
 
   private boolean jj_3R_BuiltInCall_1624_5_108()
  {
-    if (jj_scan_token(IS_LANG)) return true;
+    if (jj_scan_token(HAS_LANG)) return true;
     if (jj_scan_token(LPAREN)) return true;
     return false;
   }
