@@ -18,6 +18,7 @@
 
 package org.apache.jena.sparql.expr;
 
+import org.apache.jena.sparql.expr.nodevalue.NodeFunctions;
 import org.apache.jena.sparql.sse.Tags ;
 
 
@@ -29,15 +30,12 @@ public class E_IsLangDir extends ExprFunction1
     {
         super(expr, symbol) ;
     }
-    
+
     @Override
-    public NodeValue eval(NodeValue v)
-    { 
-        if ( v.isNumber() )
-            return NodeValue.TRUE ;
-        return NodeValue.FALSE ;
+    public NodeValue eval(NodeValue v) {
+        return NodeFunctions.isLangDir(v);
     }
-    
+
     @Override
-    public Expr copy(Expr expr) { return new E_IsLangDir(expr) ; } 
+    public Expr copy(Expr expr) { return new E_IsLangDir(expr) ; }
 }

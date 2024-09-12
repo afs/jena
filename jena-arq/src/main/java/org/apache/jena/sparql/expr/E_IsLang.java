@@ -18,6 +18,7 @@
 
 package org.apache.jena.sparql.expr;
 
+import org.apache.jena.sparql.expr.nodevalue.NodeFunctions;
 import org.apache.jena.sparql.sse.Tags;
 
 public class E_IsLang extends ExprFunction1 {
@@ -29,7 +30,7 @@ public class E_IsLang extends ExprFunction1 {
 
     @Override
     public NodeValue eval(NodeValue v) {
-        throw new UnsupportedOperationException();
+        return NodeFunctions.isLang(v);
     }
 
     @Override

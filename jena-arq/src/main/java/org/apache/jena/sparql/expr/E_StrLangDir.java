@@ -18,6 +18,7 @@
 
 package org.apache.jena.sparql.expr;
 
+import org.apache.jena.sparql.expr.nodevalue.NodeFunctions;
 import org.apache.jena.sparql.sse.Tags;
 
 /** Create a literal from lexical form and language tag */
@@ -30,8 +31,7 @@ public class E_StrLangDir extends ExprFunction3 {
 
     @Override
     public NodeValue eval(NodeValue v1, NodeValue v2, NodeValue v3) {
-        //return NodeFunctions.strLangDir(v1, v2, v3);
-        throw new UnsupportedOperationException();
+        return NodeFunctions.strLangDir(v1, v2, v3);
     }
 
     @Override

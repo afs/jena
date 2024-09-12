@@ -286,7 +286,23 @@ public class QueryParserBase {
         return NodeFactory.createLiteralLang(lexicalForm, langTag2);
     }
 
-    protected long integerValue(String s) {
+//     protected String langFromToken(String image) {
+//         int idx = image.indexOf("--");
+//         if ( idx < 0 )
+//             // No direction; remove @
+//             return image.substring(1);
+//         return image.substring(1, idx);
+//     }
+//
+//     protected String dirFromToken(String image) {
+//         int idx = image.indexOf("--");
+//         if ( idx < 0 )
+//             return null;
+//         // Not checked for value
+//         return image.substring(idx+2);
+// 	}
+
+	protected long integerValue(String s) {
         try {
             if ( s.startsWith("+") )
                 s = s.substring(1);
