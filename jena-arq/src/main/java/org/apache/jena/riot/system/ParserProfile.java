@@ -58,6 +58,9 @@ public interface ParserProfile {
     /** Create a literal for a string+language */
     public Node createLangLiteral(String lexical, String langTag, long line, long col);
 
+    /** Create a literal for a string+language+text direction */
+    public Node createLangDirLiteral(String lexical, String langTag, String direction, long line, long col);
+
     /** Create a literal for a string */
     public Node createStringLiteral(String lexical, long line, long col);
 

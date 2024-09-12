@@ -214,6 +214,13 @@ public class ParserProfileStd implements ParserProfile {
     }
 
     @Override
+    public Node createLangDirLiteral(String lexical, String langTag, String direction, long line, long col) {
+        if ( checking )
+            Checker.checkLiteral(lexical, langTag, direction, null, errorHandler, line, col);
+        return factory.createLangDirLiteral(lexical, langTag, direction);
+    }
+
+    @Override
     public Node createStringLiteral(String lexical, long line, long col) {
         // No checks
         return factory.createStringLiteral(lexical);

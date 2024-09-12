@@ -23,8 +23,10 @@ import java.util.regex.Pattern;
 
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.datatypes.xsd.impl.RDFDirLangString;
 import org.apache.jena.datatypes.xsd.impl.RDFLangString;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.TextDirection;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.iri.IRI;
 import org.apache.jena.iri.IRIComponents;
@@ -200,24 +202,40 @@ public class Checker {
             errorHandler(errorHandler).error("Not a literal: " + node, line, col);
             return false;
         }
-
-        return checkLiteral(node.getLiteralLexicalForm(), node.getLiteralLanguage(), node.getLiteralDatatype(), errorHandler, line, col);
+        return checkLiteral(node.getLiteralLexicalForm(), node.getLiteralLanguage(), node.getLiteralTextDirection(), node.getLiteralDatatype(), errorHandler, line, col);
     }
 
     public static boolean checkLiteral(String lexicalForm, RDFDatatype datatype, ErrorHandler errorHandler, long line, long col) {
-        return checkLiteral(lexicalForm, null, datatype, errorHandler, line, col);
+        return checkLiteral(lexicalForm, null, (TextDirection)null, datatype, errorHandler, line, col);
     }
 
     public static boolean checkLiteral(String lexicalForm, String lang, ErrorHandler errorHandler, long line, long col) {
-        return checkLiteral(lexicalForm, lang, null, errorHandler, line, col);
+        return checkLiteral(lexicalForm, lang, (TextDirection)null, null, errorHandler, line, col);
     }
 
+    /** @deprecated Use {@link #checkLiteral(String, String, ErrorHandler, long, long)} */
+    @Deprecated
     public static boolean checkLiteral(String lexicalForm, String lang, RDFDatatype datatype, ErrorHandler errorHandler, long line, long col) {
+        return checkLiteral(lexicalForm, lang, (TextDirection)null, datatype, errorHandler, line, col);
+    }
+
+    public static boolean checkLiteral(String lexicalForm, String lang, String direction, RDFDatatype datatype, ErrorHandler errorHandler, long line, long col) {
+        TextDirection textDir = null;
+        if ( direction != null ) {
+            textDir = TextDirection.createOrNull(direction);
+            if ( textDir == null )
+                errorHandler(errorHandler).error("Language direction not valid: " + direction, line, col);
+        }
+        return checkLiteral(lexicalForm, lang, direction, datatype, errorHandler, line, col);
+    }
+
+    public static boolean checkLiteral(String lexicalForm, String lang, TextDirection direction, RDFDatatype datatype, ErrorHandler errorHandler, long line, long col) {
         boolean hasLang = ( lang != null && !lang.isEmpty() );
+        boolean hasTextDirection = direction != null;
         boolean hasDatatype = datatype != null;
 
         if ( !hasDatatype && !hasLang) {
-            // This will become an xsd:string or rdf:langString.
+            // This will become an xsd:string
             // No further checking needed.
             return true;
         }
@@ -233,16 +251,25 @@ public class Checker {
             // No datatype is acceptable - NodeFactory deal with that case.
             if ( hasDatatype ) {
                 // Jena is using the RDF 1.1 or later standard...
-                if ( ! datatype.equals( RDFLangString.rdfLangString ) ) {
-                    errorHandler(errorHandler).error("Literal has language but wrong datatype", line, col);
+                if ( hasTextDirection && ! datatype.equals( RDFDirLangString.rdfDirLangString ) ) {
+                    errorHandler(errorHandler).error("Literal has language and text direction but wrong datatype: "+datatype, line, col);
+                    return false;
+                }
+                else if ( ! datatype.equals( RDFLangString.rdfLangString ) ) {
+                    errorHandler(errorHandler).error("Literal has language but wrong datatype: "+datatype, line, col);
                     return false;
                 }
             }
             return true;
+        } else {
+            // No lang => no text direction
+            if ( hasTextDirection )
+                errorHandler(errorHandler).error("Language direction without language", line, col);
+            // Fallthrough
         }
 
-        // If the Literal has a datatype (but no language)...
-        if ( datatype.equals( XSDDatatype.XSDstring) )
+        // If the Literal has a datatype (but no language or text direction)...
+        if ( datatype.equals(XSDDatatype.XSDstring) )
             // Simple literals are always well-formed...
             return true;
         return validateByDatatype(lexicalForm, datatype, errorHandler, line, col);

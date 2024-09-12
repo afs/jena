@@ -73,6 +73,11 @@ public class ParserProfileWrapper implements ParserProfile
     }
 
     @Override
+    public Node createLangDirLiteral(String lexical, String langTag, String direction, long line, long col) {
+        return get().createLangDirLiteral(lexical, langTag, direction, line, col);
+    }
+
+    @Override
     public Node createStringLiteral(String lexical, long line, long col) {
         return get().createStringLiteral(lexical, line, col);
     }
