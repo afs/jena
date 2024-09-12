@@ -21,21 +21,18 @@ package org.apache.jena.sparql.expr;
 import org.apache.jena.sparql.expr.nodevalue.NodeFunctions;
 import org.apache.jena.sparql.sse.Tags;
 
+public class E_LangDir extends ExprFunction1 {
+    private static final String symbol = Tags.tagLang;
 
-public class E_IsNumeric extends ExprFunction1
-{
-    private static final String symbol = Tags.tagIsNumeric;
-
-    public E_IsNumeric(Expr expr)
-    {
+    public E_LangDir(Expr expr) {
         super(expr, symbol);
     }
 
     @Override
     public NodeValue eval(NodeValue v) {
-        return NodeFunctions.isNumeric(v);
+        return NodeFunctions.langdir(v);
     }
 
     @Override
-    public Expr copy(Expr expr) { return new E_IsNumeric(expr); }
+    public Expr copy(Expr expr) { return new E_LangDir(expr); }
 }

@@ -32,6 +32,7 @@ import javax.xml.datatype.Duration;
 import org.apache.jena.datatypes.xsd.XSDDatatype ;
 import org.apache.jena.graph.Node ;
 import org.apache.jena.graph.NodeFactory ;
+import org.apache.jena.graph.TextDirection;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.irix.IRIException;
 import org.apache.jena.irix.IRIs;
@@ -246,7 +247,27 @@ public class NodeFunctions {
         return NodeFactory.createURI(s) ;
     }
 
+    public static NodeValue isNumeric(NodeValue nv) {
+        return NodeValue.booleanReturn( nv.isNumber() );
+    }
+
     // -------- lang
+
+    public static NodeValue isLang(NodeValue nv) {
+        return NodeValue.booleanReturn(isLang(nv.asNode())) ;
+    }
+
+    public static boolean isLang(Node node) {
+        return NodeUtils.hasLang(node);
+    }
+
+    public static NodeValue isLangDir(NodeValue nv) {
+        return NodeValue.booleanReturn(isLangDir(nv.asNode())) ;
+    }
+
+    public static boolean isLangDir(Node node) {
+        return NodeUtils.hasLang(node);
+    }
 
     public static NodeValue lang(NodeValue nv) {
         if ( nv.isLangString() )
@@ -263,8 +284,27 @@ public class NodeFunctions {
 
         String s = node.getLiteralLanguage() ;
         if ( s == null )
-            s = "" ;
+            return "" ;
         return s ;
+    }
+
+    public static NodeValue langdir(NodeValue nv) {
+        if ( nv.isLangString() )
+            return NodeValue.makeString(nv.getLangDir()) ;
+        if ( nv.isLiteral() )
+            return NodeValue.nvEmptyString ;
+        NodeValue.raise(new ExprTypeException("lang: Not a literal: " + nv.asQuotedString())) ;
+        return null;
+    }
+
+    public static String langdir(Node node) {
+        if ( !node.isLiteral() )
+            NodeValue.raise(new ExprTypeException("lang: Not a literal: " + FmtUtils.stringForNode(node))) ;
+
+        TextDirection textDir = node.getLiteralTextDirection() ;
+        if ( textDir == null )
+            return "";
+        return textDir.direction();
     }
 
     // -------- langMatches
@@ -502,6 +542,27 @@ public class NodeFunctions {
             throw new ExprEvalException("Empty lang tag") ;
         return NodeValue.makeLangString(lex, lang) ;
     }
+
+    public static NodeValue strLangDir(NodeValue v1, NodeValue v2, NodeValue v3) {
+        if ( !v1.isString() )
+            throw new ExprEvalException("Not a string (arg 1): " + v1) ;
+        if ( !v2.isString() )
+            throw new ExprEvalException("Not a string (arg 2): " + v2) ;
+        if ( !v2.isString() )
+            throw new ExprEvalException("Not a string (arg 3): " + v2) ;
+        String lex = v1.asString() ;
+        String lang = v2.asString() ;
+        if ( lang.isEmpty() )
+            throw new ExprEvalException("Empty lang tag") ;
+        String textDirStr = v3.asString();
+        if ( textDirStr.isEmpty() )
+            throw new ExprEvalException("Empty initial text direction") ;
+        TextDirection textDir = TextDirection.createOrNull(v3.asString());
+        if ( textDir == null )
+            throw new ExprEvalException("Invalid initial text direction: '"+textDirStr+"'") ;
+        return NodeValue.makeDirLangString(lex, lang, textDir);
+    }
+
 
     /** A duration, tided */
     public static Duration duration(int seconds) {

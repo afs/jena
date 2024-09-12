@@ -166,6 +166,7 @@ public class Tags
     public static final String tagNot             = "not";
     public static final String tagStr             = "str";
     public static final String tagStrLang         = "strlang";
+    public static final String tagStrLangDir      = "strlangdir";
     public static final String tagStrDatatype     = "strdt";
     public static final String tagRand            = "rand";
 
@@ -180,6 +181,10 @@ public class Tags
     public static final String tagIsURI           = "isURI";
     public static final String tagIsBlank         = "isBlank";
     public static final String tagIsLiteral       = "isLiteral";
+    public static final String tagIsLang          = "isLang";
+    public static final String tagIsLangDir       = "isLangDir";
+    public static final String tagIsNumeric       = "isNumeric";
+
     public static final String tagRegex           = "regex";
     public static final String tagExists          = "exists";
     public static final String tagNotExists       = "notexists";
@@ -223,7 +228,6 @@ public class Tags
     public static final String tagNumRound        = "round";
     public static final String tagNumCeiling      = "ceil";
     public static final String tagNumFloor        = "floor";
-    public static final String tagIsNumeric       = "isNumeric";
 
     public static final String tagBNode           = "bnode";
     public static final String tagIri             = "iri";

@@ -30,6 +30,7 @@ import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.TextDirection;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.irix.IRIException;
 import org.apache.jena.irix.IRIx;
@@ -226,17 +227,63 @@ public class QueryParserBase {
         }
     }
 
-    protected Node createLiteral(String lexicalForm, String langTag, String datatypeURI) {
+    // ---- Literals
+    // Strings, lang strings, dirlang strings and datatyped literals.
+
+    protected Node createLiteralString(String lexicalForm, int line, int column) {
+        return NodeFactory.createLiteralString(lexicalForm);
+    }
+
+    protected Node createLiteralDT(String lexicalForm, String datatypeURI, int line, int column) {
+        // Can't have type and lang tag in parsing.
+        return createLiteralAny(lexicalForm, null, null, datatypeURI, line, column);
+    }
+
+    protected Node createLiteralLang(String lexicalForm, String langTagDir, int line, int column) {
+        // Can't have type and lang tag in parsing.
+        return createLiteralAny(lexicalForm, langTagDir, null, null, line, column);
+    }
+
+    /**
+     * Create a literal, given all possible component parts.
+     */
+    private Node createLiteralAny(String lexicalForm, String langTag, String textDirStr, String datatypeURI, int line, int column) {
         Node n = null;
         // Can't have type and lang tag in parsing.
         if ( datatypeURI != null ) {
+            if ( langTag != null || textDirStr != null )
+                throw new ARQInternalErrorException("Datatype with lang/langDir");
             RDFDatatype dType = TypeMapper.getInstance().getSafeTypeByName(datatypeURI);
             n = NodeFactory.createLiteralDT(lexicalForm, dType);
-        } else if ( langTag != null && !langTag.isEmpty() )
-            n = NodeFactory.createLiteralLang(lexicalForm, langTag);
-        else
-            n = NodeFactory.createLiteralString(lexicalForm);
-        return n;
+            return n;
+        }
+
+        // datatypeURI is null
+        if ( langTag == null && textDirStr == null )
+            return NodeFactory.createLiteralString(lexicalForm);
+
+         // Strip '@'
+        langTag = langTag.substring(1);
+
+        // See if we split langTag into language tag and text direction.
+        String textDirStr2 = textDirStr;
+        String langTag2 = langTag;
+        if ( textDirStr == null ) {
+            int idx = langTag.indexOf("--");
+            if ( idx >= 0 ) {
+                textDirStr2 = langTag.substring(idx+2);
+                langTag2 = langTag.substring(0, idx);
+            }
+        }
+
+        if ( langTag2 != null && textDirStr2 != null ) {
+            TextDirection textDir = TextDirection.createOrNull(textDirStr2);
+            if ( textDir == null )
+                throw new QueryParseException("Illegal text direction: '"+textDirStr2+"'", line, column);
+            return NodeFactory.createLiteralDirLang(lexicalForm, langTag2, textDirStr2);
+        }
+        // langTag != null, textDirStr == null.
+        return NodeFactory.createLiteralLang(lexicalForm, langTag2);
     }
 
     protected long integerValue(String s) {
@@ -523,14 +570,6 @@ public class QueryParserBase {
     }
 
     protected Expr asExpr(Node n) {
-        return ExprLib.nodeToExpr(n);
-    }
-
-    protected Expr asExprNoSign(Node n) {
-        String lex = n.getLiteralLexicalForm();
-        String lang = n.getLiteralLanguage();
-        String dtURI = n.getLiteralDatatypeURI();
-        n = createLiteral(lex, lang, dtURI);
         return ExprLib.nodeToExpr(n);
     }
 

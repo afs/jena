@@ -2007,12 +2007,16 @@ Expr BuiltInCall() : { Expr expr ;
   |
     <STR> <LPAREN> expr = Expression() <RPAREN>
     { return new E_Str(expr) ; }
+    
   | <LANG> <LPAREN> expr = Expression() <RPAREN>
     { return new E_Lang(expr) ; }
 
   | <LANGMATCHES> 
        <LPAREN> expr1 = Expression() <COMMA> expr2 = Expression() <RPAREN>
     { return new E_LangMatches(expr1, expr2) ; }
+
+  | <LANGDIR>  <LPAREN> expr = Expression() <RPAREN>
+    { return new E_LangDir(expr) ; }
 
   | <DTYPE> <LPAREN> expr = Expression() <RPAREN>
     { return new E_Datatype(expr) ; }
@@ -2157,6 +2161,11 @@ Expr BuiltInCall() : { Expr expr ;
   | <STRLANG> <LPAREN> expr1 = Expression() <COMMA> expr2 = Expression() <RPAREN>
     { return new E_StrLang(expr1, expr2) ; }
 
+  | <STRLANGDIR> <LPAREN> expr1 = Expression() <COMMA>
+                          expr2 = Expression() <COMMA>
+                          expr3 = Expression() <RPAREN>
+    { return new E_StrLangDir(expr1, expr2, expr3) ; }
+
   | <STRDT> <LPAREN> expr1 = Expression() <COMMA> expr2 = Expression() <RPAREN>
     { return new E_StrDatatype(expr1, expr2) ; }
 
@@ -2177,6 +2186,13 @@ Expr BuiltInCall() : { Expr expr ;
 
   | <IS_NUMERIC> <LPAREN> expr = Expression() <RPAREN>
     { return new E_IsNumeric(expr) ; }
+
+  | <IS_LANG>    <LPAREN> expr = Expression() <RPAREN>
+    { return new E_IsLang(expr) ; }
+    
+  | <IS_LANGDIR> <LPAREN> expr = Expression() <RPAREN>
+    { return new E_IsLangDir(expr) ; }
+    
   | // Regular expression matcher
     expr = RegexExpression() { return expr ; }
 
@@ -2184,10 +2200,12 @@ Expr BuiltInCall() : { Expr expr ;
 
   | expr = NotExistsFunc()   { return expr ; }
 
-| <IS_TRIPLE>  <LPAREN> expr = Expression() <RPAREN>
+  | <IS_TRIPLE>  <LPAREN> expr = Expression() <RPAREN>
     { return new E_IsTriple(expr) ; }
 
-  | <TRIPLE>  <LPAREN> expr1 = Expression() <COMMA> expr2 = Expression() <COMMA> expr3 = Expression() <RPAREN>
+  | <TRIPLE>  <LPAREN> expr1 = Expression() <COMMA>
+                       expr2 = Expression() <COMMA>
+                       expr3 = Expression() <RPAREN>
     { return new E_TripleFn(expr1, expr2, expr3) ; }
 
   | <SUBJECT>  <LPAREN> expr = Expression() <RPAREN>
@@ -2414,17 +2432,18 @@ Expr VarOrFunction() : { Var v ; ExprList a = null ; }
 #endif
 
 
-Node RDFLiteral() : { Token t ; String lex = null ; }
+Node RDFLiteral() : { Token t ; String lex = null ; String uri = null ; }
 {
   lex = String()
   // Optional lang tag and datatype.
-  { String lang = null ; String uri = null ; }
   (
-    ( t = <LANGTAG>  { lang = stripChars(t.image, 1) ; } )
+    t = <LANG_DIR>
+    { return createLiteralLang(lex, t.image, token.beginLine, token.beginColumn); }
   |
-    ( <DATATYPE> uri = iri() )
+     <DATATYPE> uri = iri()
+     { return createLiteralDT(lex, uri, token.beginLine, token.beginColumn); }
   )?
-    { return createLiteral(lex, lang, uri) ; }
+  { return createLiteralString(lex, token.beginLine, token.beginColumn) ; }
 } 
 
 
@@ -2564,7 +2583,7 @@ TOKEN:
 |  <BLANK_NODE_LABEL: "_:" (<PN_CHARS_U> | ["0"-"9"]) ((<PN_CHARS>|".")* <PN_CHARS>)?  >
 |  <VAR1: "?" <VARNAME> >
 |  <VAR2: "$" <VARNAME> >
-|  <LANGTAG: <AT> (<A2Z>)+("-" (<A2ZN>)+)* >
+|  <LANG_DIR: <AT> (<A2Z>)+("-" (<A2ZN>)+)* ( "--" (<A2Z>)* )? >
 |  <#A2Z: ["a"-"z","A"-"Z"]>
 |  <#A2ZN: ["a"-"z","A"-"Z","0"-"9"]>
 }
@@ -2678,15 +2697,20 @@ TOKEN [IGNORE_CASE] :
 
 |  < STR:         "str" >
 |  < STRLANG:     "strlang" >
+|  < STRLANGDIR:  "strlangdir" >
+
 |  < STRDT:       "strdt" >
 |  < DTYPE:       "datatype" >
 |  < LANG:        "lang" >
 |  < LANGMATCHES: "langmatches" >
+|  < LANGDIR:     "langdir" >
 |  < IS_URI:      "isURI" >
 |  < IS_IRI:      "isIRI" >
 |  < IS_BLANK:    "isBlank" >
 |  < IS_LITERAL:  "isLiteral" >
 |  < IS_NUMERIC:  "isNumeric" >
+|  < IS_LANG:     "isLang" >   
+|  < IS_LANGDIR:  "isLangDir" >   
 |  < REGEX:       "regex" >
 |  < SAME_TERM:   "sameTerm" >
 

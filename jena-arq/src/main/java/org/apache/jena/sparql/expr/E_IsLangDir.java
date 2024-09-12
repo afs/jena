@@ -16,11 +16,28 @@
  * limitations under the License.
  */
 
-package org.apache.jena.sparql.lang.sparql_12;
-import org.apache.jena.sparql.lang.SPARQLParserBase ;
+package org.apache.jena.sparql.expr;
 
-class SPARQLParser12Base
-        extends SPARQLParserBase
-        implements SPARQLParser12Constants
+import org.apache.jena.sparql.sse.Tags ;
+
+
+public class E_IsLangDir extends ExprFunction1
 {
+    private static final String symbol = Tags.tagIsNumeric ;
+
+    public E_IsLangDir(Expr expr)
+    {
+        super(expr, symbol) ;
+    }
+    
+    @Override
+    public NodeValue eval(NodeValue v)
+    { 
+        if ( v.isNumber() )
+            return NodeValue.TRUE ;
+        return NodeValue.FALSE ;
+    }
+    
+    @Override
+    public Expr copy(Expr expr) { return new E_IsLangDir(expr) ; } 
 }

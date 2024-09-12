@@ -18,24 +18,20 @@
 
 package org.apache.jena.sparql.expr;
 
-import org.apache.jena.sparql.expr.nodevalue.NodeFunctions;
 import org.apache.jena.sparql.sse.Tags;
 
-
-public class E_IsNumeric extends ExprFunction1
-{
+public class E_IsLang extends ExprFunction1 {
     private static final String symbol = Tags.tagIsNumeric;
 
-    public E_IsNumeric(Expr expr)
-    {
+    public E_IsLang(Expr expr) {
         super(expr, symbol);
     }
 
     @Override
     public NodeValue eval(NodeValue v) {
-        return NodeFunctions.isNumeric(v);
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public Expr copy(Expr expr) { return new E_IsNumeric(expr); }
+    public Expr copy(Expr expr) { return new E_IsLang(expr); }
 }

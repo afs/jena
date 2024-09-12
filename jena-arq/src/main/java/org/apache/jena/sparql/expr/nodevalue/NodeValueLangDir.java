@@ -27,29 +27,42 @@ import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.FmtUtils;
 
 /**
- * A NodeValue that is a lang tagged literal (rdf:langString).
- * A string + language tag which is not ""
+ * A NodeValue that is a lang tagged literal with initial text direction (rdf:dirLangString).
+ * A string + language tag which is not "" + initial text direction which is "ltr" or "rtl".
  */
-public class NodeValueLang extends NodeValue {
+public class NodeValueLangDir extends NodeValue {
     // We could extend NodeValueString for the machinery
     // but it get confusing as then it is a NodeValueString
     // but isString is false.
 
     private final String string;
     private final String lang;
+    private final TextDirection textDir;
 
-    public NodeValueLang(String lex, String lang) {
+    public NodeValueLangDir(String lex, String lang, String textDirStr) {
         this.string = Objects.requireNonNull(lex);
         this.lang = Objects.requireNonNull(lang);
         if ( lang.isEmpty() )
             throw new IllegalArgumentException("lang is the empty string");
+        Objects.requireNonNull(textDirStr);
+        this.textDir = TextDirection.createOrNull(textDirStr);
+        if ( textDir == null )
+            throw new IllegalArgumentException("text direction is not valid : '"+textDirStr+"'");
     }
 
-    public NodeValueLang(Node n) {
+    public NodeValueLangDir(String lex, String lang, TextDirection textDir) {
+        this.string = Objects.requireNonNull(lex);
+        this.lang = Objects.requireNonNull(lang);
+        if ( lang.isEmpty() )
+            throw new IllegalArgumentException("lang is the empty string");
+        this.textDir = Objects.requireNonNull(textDir);
+    }
+
+    public NodeValueLangDir(Node n) {
         super(Objects.requireNonNull(n));
         this.string = n.getLiteralLexicalForm();
         this.lang = n.getLiteralLanguage();
-        TextDirection textDir = n.getLiteralTextDirection();
+        this.textDir = n.getLiteralTextDirection();
     }
 
     @Override
@@ -64,7 +77,7 @@ public class NodeValueLang extends NodeValue {
     public String getLang()     { return lang; }
 
     @Override
-    public String getLangDir()  { return ""; }
+    public String getLangDir()  { return textDir.direction(); }
 
     @Override
     public String asString()    { return string; }
