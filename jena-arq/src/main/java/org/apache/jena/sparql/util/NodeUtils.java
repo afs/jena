@@ -198,4 +198,11 @@ public class NodeUtils
      */
     public static boolean isLangString(Node n) { return Util.isLangString(n); }
 
+    /**
+     * A Node is a language string if it has a language tag.
+     * (RDF 1.0 and RDF 1.1)
+     */
+    public static boolean isLangDirString(Node n) { return Util.isLangDirString(n); }
+
+
 }

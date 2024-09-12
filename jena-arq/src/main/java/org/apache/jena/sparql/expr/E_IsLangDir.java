@@ -24,7 +24,7 @@ import org.apache.jena.sparql.sse.Tags ;
 
 public class E_IsLangDir extends ExprFunction1
 {
-    private static final String symbol = Tags.tagIsNumeric ;
+    private static final String symbol = Tags.tagIsLangDir;
 
     public E_IsLangDir(Expr expr)
     {

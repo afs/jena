@@ -112,6 +112,8 @@ public class NodeFactory {
 
     /**
      * Make a literal with specified language. The lexical form must not be null.
+     * <p>
+     * If the {@code lang} contains "--" it is interpreted as including a text direction.
      *
      * @param string  the lexical form of the literal
      * @param lang    the optional language tag
@@ -120,10 +122,15 @@ public class NodeFactory {
         Objects.requireNonNull(string, "null lexical form for literal");
         if ( isEmpty(lang) )
             return new Node_Literal(string);
-        else {
-           String langFmt = formatLanguageTag(lang);
-           return new Node_Literal(string, langFmt);
+
+        int idx = lang.indexOf("--");
+        if ( idx >= 0 ) {
+            String textDir = lang.substring(idx+2);
+            lang = lang.substring(0, idx);
+            return createLiteralDirLang(string, lang, textDir);
         }
+        String langFmt = formatLanguageTag(lang);
+        return new Node_Literal(string, langFmt);
     }
 
     /**
@@ -162,8 +169,9 @@ public class NodeFactory {
      * Build a literal node.
      * <p>
      * This is a convenience operation for passing in language and datatype without
-     * needing the caller to differentiate between the xsd:string, rdf:langString and other
-     * datatype cases.
+     * needing the caller to differentiate between the xsd:string, rdf:langString, rdf:langDirString
+     * and other datatype cases.
+     * <p>
      * It calls {@link #createLiteralString(String)},
      * {@link #createLiteralDirLang(String, String, String)} or
      * {@link #createLiteralDT(String, RDFDatatype)}
@@ -174,7 +182,7 @@ public class NodeFactory {
      * @param dtype the type of the literal or null.
      */
     public static Node createLiteral(String lex, String lang, RDFDatatype dtype) {
-        return createLiteral(lex, lang, Node.noTextDirection, dtype);
+        return createLiteralInternal(lex, lang, Node.noTextDirection, dtype);
     }
 
     /**
@@ -183,6 +191,7 @@ public class NodeFactory {
      * This is a convenience operation for passing in language and datatype without
      * needing the caller to differentiate between the xsd:string, rdf:langString, and other
      * datatype cases.
+     * <p>
      * It calls {@link #createLiteralString(String)},
      * {@link #createLiteralDirLang(String, String, String)} or
      * {@link #createLiteralDT(String, RDFDatatype)}
@@ -195,7 +204,7 @@ public class NodeFactory {
      */
     public static Node createLiteral(String lex, String lang, String textDir, RDFDatatype dtype) {
         TextDirection textDirEnum = initialTextDirection(textDir);
-        return createLiteral(lex, lang, textDirEnum, dtype);
+        return createLiteralInternal(lex, lang, textDirEnum, dtype);
     }
 
     /**
@@ -215,6 +224,14 @@ public class NodeFactory {
      * @param dtype the type of the literal or null.
      */
     public static Node createLiteral(String lex, String lang, TextDirection textDir, RDFDatatype dtype) {
+        return createLiteralInternal(lex, lang, textDir, dtype);
+    }
+
+    /**
+     * Make a literal from any legal combination language tag, text direction and datatype.
+     * Any of these can be null when not needed.
+     */
+   private static Node createLiteralInternal(String lex, String lang, TextDirection textDir, RDFDatatype dtype) {
         Objects.requireNonNull(lex, "null lexical form for literal");
         boolean hasLang = ! isEmpty(lang);
         if ( hasLang ) {
@@ -228,8 +245,10 @@ public class NodeFactory {
                         throw new JenaException("Datatype is not rdf:dirLangString but a language and initial text direction was given");
                 }
             }
-
-            return createLiteralDirLang(lex, langFmt, textDir);
+            if ( textDir == null )
+                return createLiteralLang(lex, langFmt);
+            else
+                return createLiteralDirLang(lex, langFmt, textDir);
         }
 
         if ( dtype == null )
@@ -347,7 +366,7 @@ public class NodeFactory {
         return createTripleTerm(s, p, o);
     }
 
-    /** 
+    /**
      * Create a triple node (RDF-star)
      * @deprecated Use {@link #createTripleTerm(Triple)}
      */

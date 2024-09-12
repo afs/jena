@@ -23,7 +23,7 @@ import org.apache.jena.sparql.sse.Tags;
 
 /** Create a literal from lexical form and language tag */
 public class E_StrLangDir extends ExprFunction3 {
-    private static final String symbol = Tags.tagStrLang;
+    private static final String symbol = Tags.tagStrLangDir;
 
     public E_StrLangDir(Expr expr1, Expr expr2, Expr expr3) {
         super(expr1, expr2, expr3, symbol);

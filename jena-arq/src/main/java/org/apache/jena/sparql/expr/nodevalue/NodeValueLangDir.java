@@ -84,13 +84,13 @@ public class NodeValueLangDir extends NodeValue {
 
     @Override
     protected Node makeNode()
-    { return NodeFactory.createLiteralLang(string, lang); }
+    { return NodeFactory.createLiteralDirLang(string, lang, textDir); }
 
     @Override
     public String toString() {
         if ( getNode() != null )
             return FmtUtils.stringForNode(getNode());
-        return "'"+getString()+"'@"+lang ;
+        return "'"+getString()+"'@"+lang+"--"+textDir.direction() ;
     }
 
     @Override

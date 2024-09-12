@@ -22,7 +22,7 @@ import org.apache.jena.sparql.expr.nodevalue.NodeFunctions;
 import org.apache.jena.sparql.sse.Tags;
 
 public class E_IsLang extends ExprFunction1 {
-    private static final String symbol = Tags.tagIsNumeric;
+    private static final String symbol = Tags.tagIsLang;
 
     public E_IsLang(Expr expr) {
         super(expr, symbol);

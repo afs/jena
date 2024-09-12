@@ -22,7 +22,7 @@ import org.apache.jena.sparql.expr.nodevalue.NodeFunctions;
 import org.apache.jena.sparql.sse.Tags;
 
 public class E_LangDir extends ExprFunction1 {
-    private static final String symbol = Tags.tagLang;
+    private static final String symbol = Tags.tagIsLangDir;
 
     public E_LangDir(Expr expr) {
         super(expr, symbol);
