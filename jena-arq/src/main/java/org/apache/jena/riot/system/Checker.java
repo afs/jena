@@ -191,7 +191,10 @@ public class Checker {
 
     // ==== Literals
 
-    final static private Pattern langPattern = Pattern.compile("[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*");
+    //   Syntax of LANG_DIR in the Turtle (etc) parser grammars.
+    // final static private Pattern langPattern = Pattern.compile("[a-zA-Z]{1,8}(?:-[a-zA-Z0-9]{1,8})*(?:--[a-zA-Z]{3})?");
+    //   With ltr/rtl test
+    final static private Pattern langPattern = Pattern.compile("[a-zA-Z]{1,8}(?:-[a-zA-Z0-9]{1,8})*(?:--(?:ltr|rtl))?");
 
     public static boolean checkLiteral(Node node) {
         return checkLiteral(node, nullErrorHandler, -1L, -1L);
@@ -226,7 +229,7 @@ public class Checker {
             if ( textDir == null )
                 errorHandler(errorHandler).error("Language direction not valid: " + direction, line, col);
         }
-        return checkLiteral(lexicalForm, lang, direction, datatype, errorHandler, line, col);
+        return checkLiteral(lexicalForm, lang, textDir, datatype, errorHandler, line, col);
     }
 
     public static boolean checkLiteral(String lexicalForm, String lang, TextDirection direction, RDFDatatype datatype, ErrorHandler errorHandler, long line, long col) {
@@ -243,6 +246,7 @@ public class Checker {
         // If the Literal has a language...
         if ( hasLang ) {
             // Test language tag format -- not a perfect test...
+            // matches - whole string match.
             if ( !langPattern.matcher(lang).matches() ) {
                 errorHandler(errorHandler).warning("Language not valid: " + lang, line, col);
                 return false;

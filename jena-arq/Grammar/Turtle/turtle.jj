@@ -321,7 +321,6 @@ String IRIREF() : { Token t ; }
   { return resolveQuotedIRI(t.image, t.beginLine, t.beginColumn) ; }
 }
 
-
 Node Reifier() : { Node n = null; String iriStr; Token t; }
 {
   t = <TILDE>
@@ -336,13 +335,33 @@ Node Reifier() : { Node n = null; String iriStr; Token t; }
 Node ReifiedTriple() : { Node reifId = null ; Token tok ;  Node s; Node p ; Node o ; }
 {
    tok = <LT2>
-   (s = Subject() | s = ReifiedTriple())
+   s = ReifiedTripleSubject()
    p = Verb()
-   o = Object()
+   o = ReifiedTripleObject()
    ( reifId = Reifier())?
    { reifId = emitTripleReifier(tok.beginLine, tok.beginColumn, reifId, s, p, o); }
    <GT2>
    { return reifId ; }
+}
+
+// rtSubject
+Node ReifiedTripleSubject() : { Node s; String iri; } {
+  ( iri = iri() { s = createURI(iri, token.beginLine, token.beginColumn) ; }
+  | s = BlankNode()
+  | s = ReifiedTriple()
+  )
+  { return s; }
+}
+
+// rtObject
+Node ReifiedTripleObject() : { Node o; String iri; } {
+  ( iri = iri() { o = createURI(iri, token.beginLine, token.beginColumn) ; }
+  | o = BlankNode()
+  | o = Literal()
+  | o = TripleTerm()
+  | o = ReifiedTriple()
+  )
+  { return o; }
 }
 
 Node TripleTerm() : { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }

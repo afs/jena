@@ -277,8 +277,7 @@ public class QueryParserBase {
         }
 
         if ( langTag2 != null && textDirStr2 != null ) {
-            TextDirection textDir = TextDirection.createOrNull(textDirStr2);
-            if ( textDir == null )
+            if ( ! TextDirection.isValid(textDirStr2) )
                 throw new QueryParseException("Illegal text direction: '"+textDirStr2+"'", line, column);
             return NodeFactory.createLiteralDirLang(lexicalForm, langTag2, textDirStr2);
         }

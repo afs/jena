@@ -563,7 +563,6 @@ public class NodeFunctions {
         return NodeValue.makeDirLangString(lex, lang, textDir);
     }
 
-
     /** A duration, tided */
     public static Duration duration(int seconds) {
         if ( seconds == 0 )
