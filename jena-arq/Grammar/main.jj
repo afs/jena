@@ -1748,21 +1748,43 @@ Node VarOrTerm() : { Node n = null ; String iri ; }
 Node ReifiedTriple(TripleCollector acc) :  { Node reifId = null ; Token tok ; Node s; Node p ; Node o ; }
 {
   tok = <LT2>
-  (
-     s = VarOrTerm()
-  |
-     s = ReifiedTriple(acc)
-  )
+  s = ReifiedTripleSubject(acc)
   p = Verb()
-  (
-    o = VarOrTerm()
-  |
-    o =  ReifiedTriple(acc)
-  )
+  o = ReifiedTripleObject(acc)
   (reifId = Reifier())?
   { reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ; }    
   <GT2>
   { return reifId; }
+}
+
+Node ReifiedTripleSubject(TripleCollector acc) : { Node s; String iri; }
+{
+  ( s = Var()
+  | iri = iri()           { s = createNode(iri) ; }
+  | s = RDFLiteral()
+  | s = NumericLiteral()
+  | s = BooleanLiteral()
+  | s = BlankNode()
+  | s = ReifiedTriple(acc)
+  //  <LPAREN> <RPAREN>     { s = RDFnil ; }
+  | <NIL>  { s = nRDFnil ; }
+  )
+  { return s; }
+}
+
+Node ReifiedTripleObject(TripleCollector acc) : { Node o; String iri; }
+{
+  ( o = Var()
+  | iri = iri()           { o = createNode(iri) ; }
+  | o = RDFLiteral()
+  | o = NumericLiteral()
+  | o = BooleanLiteral()
+  | o = BlankNode()
+  | o = ReifiedTriple(acc)
+  //  <LPAREN> <RPAREN>     { o = nRDFnil ; }
+  | <NIL>  { o = nRDFnil ; }
+  )
+  { return o; }
 }
 
 Node TripleTerm() : { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }
