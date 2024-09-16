@@ -270,9 +270,10 @@ public abstract class LangTurtleBase extends LangBase {
 
     // RDF 1.2
     // [26]  reifiedTriple ::= '<<' (subject | reifiedTriple) verb object reifier? '>>'
+    // [26]  reifiedTriple ::= '<<' rtSubject verb rtObject reifier? '>>'
     // Assumes looking at << (LT2) on entry
     private Node parseReifiedTriple() {
-        Token startToken = nextToken();
+        Token startToken = nextToken(); // LT2
         long startLine = startToken.getLine();
         long startColumn = startToken.getColumn();
 
@@ -303,10 +304,12 @@ public abstract class LangTurtleBase extends LangBase {
     //profile.createTriple(s, p, o, token.getLine(), token.getColumn());
 
     private Node rtSubject(Token startToken) {
-        if (lookingAt(LT2) )
+        if ( lookingAt(LT2) )
             return parseReifiedTriple();
-        // Not compound triples (blankPredicateObjectList, collections).
-        Node s = subject();
+        Node s = possibleAnon() ;
+        if ( s != null )
+            return s;
+        s = node();
         if ( ! (s.isURI() || s.isBlank() ) )
             // ReifiedTriple covered by branch.
             exception(peekToken(), "Subject in a reified triple is not a URI, blank node or a nested reified triple: %s", s);
@@ -317,14 +320,29 @@ public abstract class LangTurtleBase extends LangBase {
     private Node rtObject(Token startToken) {
         if (lookingAt(LT2) )
             return parseReifiedTriple();
+        Node o = possibleAnon() ;
+        if ( o != null )
+            return o;
         // Not compound triples (blankPredicateObjectList, collections).
-        Node o = object();
+        o = object();
         if ( ! (o.isURI() || o.isBlank() || o.isLiteral() || o.isNodeTriple() ) )
-            // ReifiedTriple already expanded to a reifier by object()->nodeTerm.
             exception(startToken, "Illgeal object in a reified triple: %s", o);
         return o;
     }
 
+    // Possible [], not [ :p 123 ]
+    private Node possibleAnon() {
+        if ( ! lookingAt(LBRACKET) )
+            return null;
+        // Consume LBRACKET
+        nextToken();
+        if ( ! lookingAt(RBRACKET) )
+            exception(peekToken(), "Found '[' in reified triple. It must be followed by ']' but got: "+peekToken());
+        // Consume RBRACKET
+        Token token = nextToken();
+        Node x = profile.createBlankNode(currentGraph, token.getLine(), token.getColumn());
+        return x;
+    }
 
 //    // XXX Checker.validateTriple
 //    // XXX TripleTerm
