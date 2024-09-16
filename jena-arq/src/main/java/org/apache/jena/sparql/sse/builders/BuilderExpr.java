@@ -163,7 +163,7 @@ public class BuilderExpr
     private final static Map<String, Build> dispatch;
 
     public static Expr buildExpr(Item item) {
-        // Before testing for a list because of RDF terms that are lists: (qtriple).
+        // Before testing for a list because of there are RDF terms that are lists: (qtriple).
         if ( item.isNode() )
             return ExprLib.nodeToExpr(item.getNode());
 

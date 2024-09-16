@@ -45,7 +45,7 @@ public class Tags
     public static final String tagQuad            = "quad";
     public static final String tagTriplePath      = "path";
     // RDF Star quoted triple : Node_Triple
-    public static final String tagQTriple         = "qtriple";
+    public static final String tagTripleTerm      = "tripleterm";
 
     public static final String tagBase            = "base";
     public static final String tagPrefix          = "prefix";
