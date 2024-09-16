@@ -155,6 +155,10 @@ public class ParserProfileStd implements ParserProfile {
                 errorHandler.error("Subject is a literal: "+subject, line, col);
                 throw new RiotException("Bad subject: " + subject);
             }
+            if ( subject.isNodeTriple() ) {
+                errorHandler.error("Subject is a triple term: "+subject, line, col);
+                throw new RiotException("Bad subject: " + subject);
+            }
             if ( !allowSpecialNode(subject) ) {
                 errorHandler.error("Subject is not a URI or blank node", line, col);
                 throw new RiotException("Bad subject: " + subject);

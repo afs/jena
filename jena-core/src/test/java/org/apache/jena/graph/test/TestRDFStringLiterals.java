@@ -144,13 +144,11 @@ public class TestRDFStringLiterals {
     @Test(expected = JenaException.class)
     public void dirLangString11() {
         Node n = NodeFactory.createLiteralLang("abc", "en--LTR");
-        test(n, "abc", "en", RTL, RDF.dtDirLangString, "abc@en");
     }
 
     @Test(expected = JenaException.class)
     public void dirLangString12() {
         Node n = NodeFactory.createLiteralLang("abc", "en--");
-        test(n, "abc", "en", null, RDF.dtLangString, "abc@en");
     }
 
     // Errors

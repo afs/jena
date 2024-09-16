@@ -288,9 +288,6 @@ public abstract class LangTurtleBase extends LangBase {
             exception(peekToken(), "Expected >>, found %s", peekToken().text());
         nextToken();
 
-        //validateTriple(s, p, o, "reified triple", startToken);
-
-        // XXX Check if this does validation.
         Node tripleTerm = profile.createTripleTerm(s, p, o, startLine, startColumn);
         // XXX profile.createTripleReifier
         // emitTripleReifier(s, p, o, startReifiedTripleToken.getLine(), startReifiedTripleToken.getColumn());
@@ -361,7 +358,6 @@ public abstract class LangTurtleBase extends LangBase {
         Node s = ttSubject();
         if ( s.isNodeTriple() )
             exception(entryToken, "Subject of a triple term is a triple term");
-
         Node p = predicate();
         Node o = ttObject();
         if ( ! lookingAt(R_TRIPLE) )
