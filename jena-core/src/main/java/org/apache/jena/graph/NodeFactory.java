@@ -126,6 +126,8 @@ public class NodeFactory {
         int idx = lang.indexOf("--");
         if ( idx >= 0 ) {
             String textDir = lang.substring(idx+2);
+            if ( textDir.isEmpty() )
+                throw new JenaException("Empty text direction after '--'");
             lang = lang.substring(0, idx);
             return createLiteralDirLang(string, lang, textDir);
         }
@@ -136,13 +138,23 @@ public class NodeFactory {
     /**
      * Make a literal with specified language and language direction.
      * The lexical form must not be null.
-     * The language must not be null if a non-direction is provided.
+     * The language must not be null or "" if a non-direction is provided.
      *
      * @param string  the lexical form of the literal
      * @param lang    the optional language tag
      * @param textDir the optional language direction
      */
     public static Node createLiteralDirLang(String string, String lang, String textDir) {
+        boolean emptyDirection = textDir == null || textDir.isEmpty();
+        if ( lang == null || lang.isEmpty() ) {
+            if ( ! emptyDirection )
+                throw new JenaException("No langtag but text direction is given");
+            return createLiteralString(string);
+        }
+        if ( lang.contains("--") && ! emptyDirection )
+            throw new JenaException("Langtag contains '--' and  a text direction is given");
+        if ( emptyDirection )
+            return createLiteralLang(string, lang);
         TextDirection textDirEnum = initialTextDirection(textDir);
         String langFmt = formatLanguageTag(lang);
         return createLiteralDirLang(string, langFmt, textDirEnum);
