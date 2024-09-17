@@ -350,7 +350,7 @@ public class FmtUtils {
             result.append("?").append(n.getName());
         } else if ( n.equals(Node.ANY) ) {
             result.append("ANY");
-        } else if ( n.isNodeTriple() ) {
+        } else if ( n.isTripleTerm() ) {
             Triple t = n.getTriple();
             result.append("<<( ");
             stringForNode(result, t.getSubject(), context);

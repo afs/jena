@@ -43,12 +43,12 @@ public class TripleTermOps {
 
     /** Test whether a {@link NodeValue} is an triple term. */
     public static NodeValue isTriple(NodeValue nv) {
-        return NodeValue.booleanReturn(nv.asNode().isNodeTriple());
+        return NodeValue.booleanReturn(nv.asNode().isTripleTerm());
     }
 
     private static NodeValue tripleGetter(String name, NodeValue nv, Function<Triple, Node> accessor) {
         Node n = nv.asNode();
-        if ( ! n.isNodeTriple() )
+        if ( ! n.isTripleTerm() )
             throw new ExprEvalException(name+": Not a triple term: "+nv);
         Triple t = n.getTriple();
         Node x = accessor.apply(t);

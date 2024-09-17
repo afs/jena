@@ -46,7 +46,7 @@ public class Node_Triple extends Node {
     }
 
     @Override
-    public boolean isNodeTriple() {
+    public boolean isTripleTerm() {
         return true;
     }
 

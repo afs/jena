@@ -201,7 +201,7 @@ public class ThriftConvert
             return;
         }
 
-        if ( node.isNodeTriple() ) {
+        if ( node.isTripleTerm() ) {
             Triple triple = node.getTriple();
 
             RDF_Term sTerm = new RDF_Term();

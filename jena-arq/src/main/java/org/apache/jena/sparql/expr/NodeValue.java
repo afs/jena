@@ -402,7 +402,7 @@ public abstract class NodeValue extends ExprNode
 
     public boolean isTripleTerm() {
         forceToNode();
-        return node.isNodeTriple();
+        return node.isTripleTerm();
     }
 
     public ValueSpace getValueSpace() {

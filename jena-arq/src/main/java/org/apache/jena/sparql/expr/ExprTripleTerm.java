@@ -40,7 +40,7 @@ public class ExprTripleTerm extends ExprNode {
     private final NodeValue nvTripleTerm;
 
     public ExprTripleTerm(Node node) {
-        if ( ! node.isNodeTriple() )
+        if ( ! node.isTripleTerm() )
             throw new ARQInternalErrorException("Not a triple term "+node) ;
         Node_Triple tripleTerm = (Node_Triple)node;
         this.tripleTerm = tripleTerm;

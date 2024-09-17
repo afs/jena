@@ -322,7 +322,7 @@ public abstract class LangTurtleBase extends LangBase {
             return o;
         // Not compound triples (blankPredicateObjectList, collections).
         o = object();
-        if ( ! (o.isURI() || o.isBlank() || o.isLiteral() || o.isNodeTriple() ) )
+        if ( ! (o.isURI() || o.isBlank() || o.isLiteral() || o.isTripleTerm() ) )
             exception(startToken, "Illgeal object in a reified triple: %s", o);
         return o;
     }
@@ -356,7 +356,7 @@ public abstract class LangTurtleBase extends LangBase {
     private Node parseTripleTerm() {
         Token entryToken = nextToken();
         Node s = ttSubject();
-        if ( s.isNodeTriple() )
+        if ( s.isTripleTerm() )
             exception(entryToken, "Subject of a triple term is a triple term");
         Node p = predicate();
         Node o = ttObject();
@@ -413,7 +413,7 @@ public abstract class LangTurtleBase extends LangBase {
         // XXX Maybe allow but restrict later.
         if ( node.isLiteral() )
             exception(peekToken(), "Literals are not legal in the subject position.");
-        if ( node.isNodeTriple() ) {
+        if ( node.isTripleTerm() ) {
             exception(peekToken(), "Triple terms are not legal in the subject position.");
         }
         return node;

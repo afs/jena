@@ -71,7 +71,7 @@ public class G {
     public static boolean isBlank(Node n)       { return n != null && n.isBlank(); }
     public static boolean isLiteral(Node n)     { return n != null && n.isLiteral(); }
     public static boolean isResource(Node n)    { return n != null && (n.isURI()||n.isBlank()); }
-    public static boolean isNodeTriple(Node n)  { return n != null && n.isNodeTriple(); }
+    public static boolean isNodeTriple(Node n)  { return n != null && n.isTripleTerm(); }
     public static boolean isNodeGraph(Node n)   { return n != null && n.isNodeGraph(); }
     public static boolean isNullOrAny(Node n)   { return n == null || Node.ANY.equals(n); }
 

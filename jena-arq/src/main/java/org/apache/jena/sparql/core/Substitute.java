@@ -162,7 +162,7 @@ public class Substitute {
             return null;
         if ( isNotNeeded(binding) )
             return n;
-        if ( ! n.isNodeTriple() )
+        if ( ! n.isTripleTerm() )
             return Var.lookup(binding::get, n);
         if ( n.isConcrete() )
             return n;
@@ -187,7 +187,7 @@ public class Substitute {
 
     /** Substitute for a node that makes up a triple in a Node_Triple. Recursively. */
     private static Node subTripleTermNode(Node n, Binding binding) {
-        if ( n.isNodeTriple() ) {
+        if ( n.isTripleTerm() ) {
             if ( ! n.isConcrete() )
                 n = substitute(n, binding);
         } else if ( Var.isVar(n) ) {

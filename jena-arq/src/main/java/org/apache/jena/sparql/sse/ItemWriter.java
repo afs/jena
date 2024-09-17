@@ -80,7 +80,7 @@ public class ItemWriter
     }
 
     private static void writeNode(IndentedWriter out, Node node, SerializationContext sCxt) {
-        if ( node.isNodeTriple() ) {
+        if ( node.isTripleTerm() ) {
             Triple t = node.getTriple();
             if ( writeQuotedTriplesAsNodes ) {
                 // As <<(....)>>

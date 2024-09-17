@@ -155,7 +155,7 @@ public class ParserProfileStd implements ParserProfile {
                 errorHandler.error("Subject is a literal: "+subject, line, col);
                 throw new RiotException("Bad subject: " + subject);
             }
-            if ( subject.isNodeTriple() ) {
+            if ( subject.isTripleTerm() ) {
                 errorHandler.error("Subject is a triple term: "+subject, line, col);
                 throw new RiotException("Bad subject: " + subject);
             }
@@ -168,7 +168,7 @@ public class ParserProfileStd implements ParserProfile {
             errorHandler.error("Predicate not a URI", line, col);
             throw new RiotException("Bad predicate: " + predicate);
         }
-        if ( object == null || (!object.isURI() && !object.isBlank() && !object.isLiteral() && !object.isNodeTriple() ) ) {
+        if ( object == null || (!object.isURI() && !object.isBlank() && !object.isLiteral() && !object.isTripleTerm() ) ) {
             if ( !allowSpecialNode(object) ) {
                 errorHandler.error("Object is not a URI, blank node or literal", line, col);
                 throw new RiotException("Bad object: " + object);

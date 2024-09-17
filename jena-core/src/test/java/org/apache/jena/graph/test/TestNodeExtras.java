@@ -45,7 +45,7 @@ public class TestNodeExtras {
 
      @Test public void term_triple_1() {
         Node nt = newTripleTerm(s,p,o);
-        assertTrue(nt.isNodeTriple());
+        assertTrue(nt.isTripleTerm());
         assertNotNull(nt.getTriple());
         assertNotNull(nt.getTriple());
         assertEquals(triple1, nt.getTriple());

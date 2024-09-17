@@ -355,7 +355,7 @@ public class ProtobufConvert
             return termBuilder.setVariable(var).build();
         }
 
-        if ( node.isNodeTriple() ) {
+        if ( node.isTripleTerm() ) {
             Triple triple = node.getTriple();
 
             RDF_Term sTerm = toProtobuf(triple.getSubject(), pmap, termBuilder, allowValues);

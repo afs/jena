@@ -80,20 +80,20 @@ public class TestSPARQLStarParse {
     @Test public void build_1()    {
         Triple t = build("{ << :s :p :o >> :q 456 }");
         assertTrue(t.isConcrete());
-        assertTrue(t.getSubject().isNodeTriple());
+        assertTrue(t.getSubject().isTripleTerm());
     }
 
     @Test public void build_2()    {
         Triple t = build("{ :x  :q << <<:s ?p :o>> :p 678 >> }");
         assertFalse(t.isConcrete());
-        assertTrue(t.getObject().isNodeTriple());
-        assertTrue(t.getObject().getTriple().getSubject().isNodeTriple());
+        assertTrue(t.getObject().isTripleTerm());
+        assertTrue(t.getObject().getTriple().getSubject().isTripleTerm());
     }
 
     @Test public void build_3()    {
         Triple t = build("{ << :s ?p :o >> :q 456 }");
         assertFalse(t.isConcrete());
-        assertTrue(t.getSubject().isNodeTriple());
+        assertTrue(t.getSubject().isTripleTerm());
     }
 
     // OpAsQuery

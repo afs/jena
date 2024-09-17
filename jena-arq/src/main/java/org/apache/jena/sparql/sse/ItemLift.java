@@ -64,7 +64,7 @@ public class ItemLift {
 
     /** Reverse lift. */
     public static Item lowerCompound(Node node) {
-        if ( node.isNodeTriple() ) {
+        if ( node.isTripleTerm() ) {
             Item newItem = ItemLift.lowerCompound(node, -1, -1);
             return newItem;
         }
@@ -79,7 +79,7 @@ public class ItemLift {
     }
 
     private static Item lowerCompound(Node node, int line, int column) {
-        if ( node.isNodeTriple()) {
+        if ( node.isTripleTerm()) {
             Triple t = node.getTriple();
             Node s = t.getSubject();
             Node p = t.getPredicate();
@@ -215,7 +215,7 @@ public class ItemLift {
             Item item2 = nodeToItem(node, item.getLine(), item.getColumn());
             if (item2 != null )
                 return item2;
-            if ( node.isNodeTriple() )
+            if ( node.isTripleTerm() )
                 return ItemLift.lowerCompound(node, item.getLine(), item.getColumn());
             return super.transform(item, node);
         }
@@ -233,7 +233,7 @@ public class ItemLift {
     private static class LowerCompound extends ItemTransformBase {
         @Override
         public Item transform(Item item, Node node) {
-            if ( node.isNodeTriple() ) {
+            if ( node.isTripleTerm() ) {
                 Item newItem = ItemLift.nodeToItem(node, item.getLine(),item.getColumn());
                 return newItem;
             }

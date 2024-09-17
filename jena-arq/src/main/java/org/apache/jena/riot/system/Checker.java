@@ -75,7 +75,7 @@ public class Checker {
             return checkLiteral(node, errorHandler, line, col);
         else if ( node.isVariable() )
             return checkVar(node, errorHandler, line, col);
-        else if ( node.isNodeTriple() ) {
+        else if ( node.isTripleTerm() ) {
             Triple t = node.getTriple();
             return check(t.getSubject()) && check(t.getPredicate()) && check(t.getObject())
                     && checkTriple(t);
@@ -412,7 +412,7 @@ public class Checker {
             rc = false;
         }
 
-        if ( subject == null || (!subject.isURI() && !subject.isBlank() && !subject.isNodeTriple()) ) {
+        if ( subject == null || (!subject.isURI() && !subject.isBlank() && !subject.isTripleTerm()) ) {
             errorHandler(errorHandler).error("Subject is not a URI, blank node or RDF-star triple term", line, col);
             rc = false;
         }
@@ -420,7 +420,7 @@ public class Checker {
             errorHandler(errorHandler).error("Predicate not a URI", line, col);
             rc = false;
         }
-        if ( object == null || (!object.isURI() && !object.isBlank() && !object.isLiteral() && !subject.isNodeTriple()) ) {
+        if ( object == null || (!object.isURI() && !object.isBlank() && !object.isLiteral() && !subject.isTripleTerm()) ) {
             errorHandler(errorHandler).error("Object is not a URI, blank node, literal or RDF-star triple term", line, col);
             rc = false;
         }

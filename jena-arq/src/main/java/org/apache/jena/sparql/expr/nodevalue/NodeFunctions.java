@@ -138,7 +138,7 @@ public class NodeFunctions {
                 return false;
             return node1.getLiteralLanguage().equalsIgnoreCase(node2.getLiteralLanguage());
         }
-        if ( node1.isNodeTriple() && node2.isNodeTriple() ) {
+        if ( node1.isTripleTerm() && node2.isTripleTerm() ) {
             return sameTriples(node1.getTriple(), node2.getTriple());
         }
         return false ;
@@ -180,7 +180,7 @@ public class NodeFunctions {
             NodeValue.raise(new ExprEvalException("Mismatch in RDFterm-equals: " + n1 + ", " + n2)) ;
         }
 
-        if ( n1.isNodeTriple() && n2.isNodeTriple() ) {
+        if ( n1.isTripleTerm() && n2.isTripleTerm() ) {
             Triple t1 = n1.getTriple();
             Triple t2 = n2.getTriple();
             return rdfTermEquals(t1.getSubject(), t2.getSubject())
@@ -204,7 +204,7 @@ public class NodeFunctions {
             return node.getURI() ;
         if ( node.isBlank() && ! ARQ.isTrue(ARQ.strictSPARQL) )
              return RiotLib.blankNodeToIriString(node);
-        if ( node.isNodeTriple() && ! ARQ.isTrue(ARQ.strictSPARQL) ) {
+        if ( node.isTripleTerm() && ! ARQ.isTrue(ARQ.strictSPARQL) ) {
             Triple t = node.getTriple();
             // Recursion. Assumes no cycles!
             Function<Node, String> f = NodeFmtLib::strTTL;
@@ -212,7 +212,7 @@ public class NodeFunctions {
         }
         if ( node.isBlank() )
             NodeValue.raise(new ExprEvalException("Blank node: " + node)) ;
-        if ( node.isNodeTriple())
+        if ( node.isTripleTerm())
             NodeValue.raise(new ExprEvalException("Quoted triple: " + node)) ;
         NodeValue.raise(new ExprEvalException("Not valid for STR(): " + node)) ;
         return "[undef]" ;
