@@ -12,7 +12,7 @@ PREFIX foaf:   <http://xmlns.com/foaf/0.1/>
 PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
 
 trs:manifest  rdf:type mf:Manifest ;
-  rdfs:label "RDF-star test suite"@en ;
+  rdfs:label "RDF-star CG test suite"@en ;
   skos:prefLabel "La suite des tests pour RDF-star"@fr;
   skos:prefLabel "Conjunto de pruebas para RDF-star"@es;
   dct:issued "2021-06-21"^^xsd:date ;

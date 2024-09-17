@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.jena.rdf_star;
+package org.apache.jena.rdf12.basic;
 
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;

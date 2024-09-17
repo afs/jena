@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,18 +16,6 @@
  * limitations under the License.
  */
 
-package org.apache.jena.external;
+package org.apache.jena.rdf12;
 
-import org.apache.jena.arq.junit.manifest.Manifests;
-import org.apache.jena.arq.junit.runners.Label;
-import org.apache.jena.arq.junit.runners.RunnerRIOT;
-import org.junit.runner.RunWith ;
-
-/** rdf-star CG tests. */
-@RunWith(RunnerRIOT.class)
-@Label("RDF star CG")
-@Manifests({
-    "testing/rdf-star-cg/manifest.ttl"
-})
-
-public class Scripts_RDFStar {}
+enum TEST { GOOD, BAD }

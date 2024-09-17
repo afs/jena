@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.jena.rdf_star;
+package org.apache.jena.rdf12.basic;
 
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
@@ -28,27 +28,28 @@ import org.apache.jena.riot.system.StreamRDFLib;
 import org.junit.Test;
 
 /**
- * Test parsing of RDF-star constructs for N-Triples.
+ * Basic parsing tests of RDF-star constructs for N-Triples
  */
 public class TestNTriplesStarParse {
 
     private ErrorHandler silent = ErrorHandlerFactory.errorHandlerStrictNoLogging;
     private static StreamRDF sink = StreamRDFLib.sinkNull();
 
-    @Test public void parse_nt_good_1()    { parse("<<<x:s> <x:p> <x:o>>> <x:q> '1' . "); }
+    @Test public void parse_nt_good_1()    { parse("<x:s> <x:q> <<( <x:s> <x:p> <x:o>)>> . "); }
 
-    @Test public void parse_nt_good_2()    { parse("<http://ex/x> <http://ex/p> <<<x:s> <x:p> <x:o>>> ."); }
+    @Test public void parse_nt_good_2()    { parse("_:b <x:p> <<(_:b <x:p> _:o)>>. "); }
 
-    @Test public void parse_nt_good_3()    { parse("_:b <x:p> <<_:b <x:p> _:o>>. "); }
-
-    @Test public void parse_nt_good_4()    { parse("<< << <x:s> <x:p> <x:o> >> <x:q> '1' >> <x:q> '2' ."); }
-
+    @Test public void parse_nt_good_3()    { parse("<x:x> <x:y> <<(<x:s1> <x:p1> <<( <x:s> <x:p> '1' )>> )>> ."); }
 
     @Test(expected=RiotException.class)
-    public void parse_nt_bad_1()           { parse("<<<x:s> <x:p> <x:o>>> . "); }
+    // No reified triples.
+    public void parse_nt_bad_1()           { parse("<< <x:s> <x:p> <x:o>>> . "); }
 
     @Test(expected=RiotException.class)
-    public void parse_nt_bad_2()           { parse("<<<x:s> 'str' <x:o>>> <x:p> <x:o>. "); }
+    public void parse_nt_bad_2()           { parse("<<( <x:s> <x:p> <x:o>)>> <x:y> <x:z> . "); }
+
+    @Test(expected=RiotException.class)
+    public void parse_nt_bad_3()           { parse("<x:s> <<( <x:s> <x:p> <x:o>)>> <x:x>  . "); }
 
     private void parse(String string) {
         RDFParser.fromString(string, Lang.NTRIPLES).errorHandler(silent).parse(sink);

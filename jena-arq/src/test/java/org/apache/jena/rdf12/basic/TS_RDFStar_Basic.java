@@ -16,20 +16,21 @@
  * limitations under the License.
  */
 
-package org.apache.jena.rdf_star;
+package org.apache.jena.rdf12.basic;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses( {
+    // Old basic tests,
+    // ** To be removed.
     TestNQuadsStarParse.class,
     TestNTriplesStarParse.class,
     TestTrigStarParse.class,
     TestTurtleStarParse.class,
-    TestSPARQLStarParse.class,
-    TestSPARQLStarExtra.class
-    // And scripted tests.
+
+//    TestSPARQLStarParse.class,
 })
-public class TS_RDF_Star {
+public class TS_RDFStar_Basic {
 }

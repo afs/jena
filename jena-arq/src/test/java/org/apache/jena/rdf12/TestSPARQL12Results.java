@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.jena.rdf_star;
+package org.apache.jena.rdf12;
 
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFormatter;
@@ -25,8 +25,9 @@ import org.junit.Test;
 
 /**
  * Odds and ends for SPARQL*.
+ * CG era.
  */
-public class TestSPARQLStarExtra {
+public class TestSPARQL12Results {
 
     private static String FILES = "testing/ARQ/RDF-star/Other/";
 

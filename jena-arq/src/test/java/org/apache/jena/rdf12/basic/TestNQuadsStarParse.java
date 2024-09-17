@@ -16,12 +16,11 @@
  * limitations under the License.
  */
 
-package org.apache.jena.rdf_star;
+package org.apache.jena.rdf12.basic;
 
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.RiotException;
-import org.apache.jena.riot.lang.extra.TurtleJCC;
 import org.apache.jena.riot.system.ErrorHandler;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
 import org.apache.jena.riot.system.StreamRDF;
@@ -29,50 +28,36 @@ import org.apache.jena.riot.system.StreamRDFLib;
 import org.junit.Test;
 
 /**
- * Test parsing of RDF-star constructs for Turtle.
+ * Basic parsing tests of RDF-star constructs for N-Quads
  */
-public class TestTurtleStarParse {
+public class TestNQuadsStarParse {
 
     private ErrorHandler silent = ErrorHandlerFactory.errorHandlerStrictNoLogging;
     private static StreamRDF sink = StreamRDFLib.sinkNull();
 
-    @Test public void parse_turtle_good_1()    { parse("<<:s :p :o>> :q 1 . "); }
+    @Test public void parse_nq_good_1()    { parse("<x:s> <x:q> <<( <x:s> <x:p> <x:o> )>> . "); }
 
-    @Test public void parse_turtle_good_2()    { parse(":x :p <<:s :p :o>> . "); }
+    @Test public void parse_nq_good_2()    { parse("<x:s> <x:p> <<( <x:s> <x:p> <x:o> )>> <http://example/g> . "); }
 
-    @Test public void parse_turtle_good_3()    { parse(":x :p [ :q <<:s :p :o>> ]. "); }
+    @Test public void parse_nq_good_3()    { parse("<x:s> <x:q> <<( <x:s> <x:p> <<(<x:s1> <x:p1> <x:o1>)>> )>> . "); }
 
-    @Test public void parse_turtle_good_4()    { parse("( <<:s :p :o>> ) :p :z . "); }
+    @Test public void parse_nq_good_4()    { parse("<x:s> <x:p> <<( <x:s> <x:p> <<(<x:s1> <x:p1> <x:o1>)>> )>> <http://example/g> . "); }
 
-    @Test public void parse_turtle_good_5()    { parse("( <<[] :p []>> ) :p :z . "); }
-
-    @Test public void parse_turtle_good_10()   { parse("<<:s :p <<:x :r :z >>>> :q 1 . "); }
-
-    @Test public void parse_turtle_good_20()   { parse(":a :p <<:s :p <<:x :r :z >>>> . "); }
-
+    @Test public void parse_nq_good_5()    { parse("_:b <x:p> <<(_:b <x:p> _:o)>> _:g . "); }
 
     @Test(expected=RiotException.class)
-    public void parse_turtle_bad_1()           { parse("<<:s :p :o>> . "); }
+    public void parse_nq_bad_1()           { parse("<<<x:s> <x:p> <x:o>>> <x:q> <x:z> . "); }
 
     @Test(expected=RiotException.class)
-    public void parse_turtle_bad_2()           { parse("<<:s <<:x :y :z>> :o >> :q 1 . "); }
+    public void parse_nq_bad_2()           { parse("<<(<x:s> <x:p> <x:o>)>> <x:q> 'ABC' . "); }
 
     @Test(expected=RiotException.class)
-    public void parse_turtle_bad_3()           { parse("<<:s :p (3) >> :q 1 . "); }
+    public void parse_nq_bad_3()           { parse("<x:s> <<(<x:s> <x:p> <x:o>)>> <x:o> <http://example/g> . "); }
 
     @Test(expected=RiotException.class)
-    public void parse_turtle_bad_4()           { parse("<< 3 :p :o >> :q 1 . "); }
-
-    @Test(expected=RiotException.class)
-    public void parse_turtle_bad_5()           { parse(":s << :x :y :z >> :o . "); }
+    public void parse_nq_bad_4()           { parse("<x:s> <x:p> <x:o> <<(<x:gs> <x:gp> <x:go> )>> . "); }
 
     private void parse(String string) {
-        string = "PREFIX : <http://example/>\n"+string;
-
-        Lang lang1 = Lang.TURTLE;
-        Lang lang2 = TurtleJCC.TTLJCC;
-        Lang lang = lang1;
-
-        RDFParser.fromString(string, lang).errorHandler(silent).parse(sink);
+        RDFParser.fromString(string, Lang.NQUADS).errorHandler(silent).parse(sink);
     }
 }
