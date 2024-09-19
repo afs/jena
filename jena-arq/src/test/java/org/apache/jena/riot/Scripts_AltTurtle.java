@@ -36,7 +36,10 @@ import org.junit.runner.RunWith ;
     "testing/RIOT/Lang/TurtleStd/manifest.ttl",
     "testing/RIOT/Lang/Turtle2/manifest.ttl",
 
+    // rdf-tests CG
     "testing/rdf-tests-cg/turtle/manifest.ttl"
+    
+    // [rdf-star CG] RDF star CG tests. No longer valid
 //    "testing/rdf-star-cg/turtle/syntax/manifest.ttl",
 //    "testing/rdf-star-cg/turtle/eval/manifest.ttl"
 })

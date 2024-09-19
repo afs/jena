@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.jena.tdb1;
+package org.apache.jena.sparql;
 
 import org.apache.jena.arq.junit.manifest.Manifests;
 import org.apache.jena.arq.junit.manifest.Prefix;
@@ -24,22 +24,22 @@ import org.apache.jena.arq.junit.runners.Label;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.sparql.expr.E_Function;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.tdb1.junit.RunnerSPARQL_TDB1;
+import org.apache.jena.sparql.junit.RunnerSPARQL_DatasetMap;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 
-@RunWith(RunnerSPARQL_TDB1.class)
-@Label("SPARQL [TDB1]")
-@Prefix("TDB1-")
+@RunWith(RunnerSPARQL_DatasetMap.class)
+@Label("SPARQL [dataset Map]")
+@Prefix("DS_Map-")
 @Manifests
 ({
-    "testing/manifest.ttl"
-    // RDF-star CG tests - no longer valid
-    // ,"../jena-arq/testing/rdf-star-cg/sparql/eval/manifest.ttl"
+    "testing/ARQ/manifest-arq.ttl"
+    // [rdf-star CG]
+    //, "testing/rdf-star-cg/sparql/eval/manifest.ttl"
 })
 
-public class Scripts_TDB1
+public class Scripts_DatasetMap
 {
     @BeforeClass static public void beforeClass() {
         ARQ.setNormalMode();
