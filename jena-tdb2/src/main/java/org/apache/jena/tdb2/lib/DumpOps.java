@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.jena.tdb1.lib;
+package org.apache.jena.tdb2.lib;
 
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -29,20 +29,20 @@ import org.apache.jena.atlas.lib.ByteBufferLib;
 import org.apache.jena.atlas.lib.Pair;
 import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.apache.jena.atlas.lib.tuple.TupleFactory;
+import org.apache.jena.dboe.base.block.Block;
+import org.apache.jena.dboe.base.block.BlockMgr;
+import org.apache.jena.dboe.trans.bplustree.BPlusTree;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.riot.out.NodeFmtLib;
-import org.apache.jena.tdb1.TDB1Exception;
-import org.apache.jena.tdb1.base.block.Block;
-import org.apache.jena.tdb1.base.block.BlockMgr;
-import org.apache.jena.tdb1.index.bplustree.BPlusTree;
-import org.apache.jena.tdb1.store.DatasetGraphTDB;
-import org.apache.jena.tdb1.store.DatasetPrefixesTDB;
-import org.apache.jena.tdb1.store.NodeId;
-import org.apache.jena.tdb1.store.nodetable.NodeTable;
-import org.apache.jena.tdb1.store.nodetupletable.NodeTupleTable;
-import org.apache.jena.tdb1.store.tupletable.TupleIndex;
-import org.apache.jena.tdb1.store.tupletable.TupleTable;
+import org.apache.jena.tdb2.TDBException;
+import org.apache.jena.tdb2.store.DatasetGraphTDB;
+import org.apache.jena.tdb2.store.NodeId;
+import org.apache.jena.tdb2.store.StoragePrefixesTDB;
+import org.apache.jena.tdb2.store.nodetable.NodeTable;
+import org.apache.jena.tdb2.store.nodetupletable.NodeTupleTable;
+import org.apache.jena.tdb2.store.tupletable.TupleIndex;
+import org.apache.jena.tdb2.store.tupletable.TupleTable;
 
 public class DumpOps {
     public static void dump(Dataset ds) {
@@ -52,7 +52,7 @@ public class DumpOps {
         NodeTupleTable nodeTupleTableQuads = dsg.getQuadTable().getNodeTupleTable();
 
         if ( nodeTupleTableTriples.getNodeTable() != nodeTupleTableQuads.getNodeTable() )
-            throw new TDB1Exception("Different node tables for triples and quads");
+            throw new TDBException("Different node tables for triples and quads");
 
         NodeTable nodeTable = nodeTupleTableTriples.getNodeTable();
         // V special.
@@ -80,7 +80,7 @@ public class DumpOps {
         // Prefixes
         if ( true ) {
             System.out.print("## Prefix Table\n");
-            DatasetPrefixesTDB prefixes = dsg.getStoragePrefixes();
+            StoragePrefixesTDB prefixes = (StoragePrefixesTDB)dsg.getStoragePrefixes();
 
             NodeTupleTable pntt = prefixes.getNodeTupleTable();
             if ( !dumpedNodeTables.contains(pntt.getNodeTable()) ) {
@@ -105,7 +105,7 @@ public class DumpOps {
             NodeId nid = pair.car();
             Node n = pair.cdr();
             String x = NodeFmtLib.displayStr(n);
-            System.out.printf("%016X %s\n", nid.getId(), x);
+            System.out.printf("%016X %s\n", nid.getPtrLocation(), x);
         }
         if ( dumpedNodeTables != null )
             dumpedNodeTables.add(nodeTable);

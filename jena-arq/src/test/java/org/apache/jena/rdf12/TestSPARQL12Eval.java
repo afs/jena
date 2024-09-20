@@ -18,22 +18,19 @@
 
 package org.apache.jena.rdf12;
 
-import org.junit.platform.suite.api.SelectClasses;
-import org.junit.platform.suite.api.Suite;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
 
-import org.apache.jena.rdf12.basic.TS_RDFStar_Basic;
+/**
+ * Basic evaluation tests.
+ * <p>
+ * Evaluation is properly test by the rdf-tests CG scripted test suite.
+ */
 
-// Currently, RDF1.2 and SPARQL 1.2 specific tests.
-// Split sometime / replace with scripted tests.
-@Suite
-@SelectClasses({
-    // Old - to be removed.
-    TS_RDFStar_Basic.class,
+public class TestSPARQL12Eval extends AbstratTestSPARQL12Eval {
 
-    TestRDF12LangSyntax.class,
-    TestSPARQL12Syntax.class,
-    TestSPARQL12Eval.class,
-    TestSPARQL12Results.class
-})
-public class TS_RDF12 {
+    static DatasetGraph dsg = data(DatasetGraphFactory.createTxnMem());
+
+    @Override
+    protected DatasetGraph dsg() { return dsg; }
 }
