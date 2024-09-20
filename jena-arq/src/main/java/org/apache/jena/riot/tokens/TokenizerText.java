@@ -1046,6 +1046,7 @@ public final class TokenizerText implements Tokenizer
         // DOT or integer.
         ch = reader.peekChar();
         if ( ch == CH_DOT ) {
+            int y = 0;
             reader.readChar();
             stringBuilder.append(CH_DOT);
             hasDecimalPoint = true;
