@@ -21,9 +21,12 @@ package org.apache.jena.graph.test;
 import static org.junit.Assert.*;
 
 import org.apache.jena.graph.*;
+import org.apache.jena.rdf.model.impl.Util;
+import org.apache.jena.vocabulary.RDF;
+
 import org.junit.Test;
 
-/** Tests for {@link Node_Triple} and other unusual nodes */
+/** More tests for {@link Node Nodes}. */
 public class TestNodeExtras {
 
     private static Node s = NodeFactory.createBlankNode();
@@ -103,5 +106,29 @@ public class TestNodeExtras {
         assertEquals(nGraph, nGraph);
         assertNotEquals(nGraph.getGraph().hashCode(), nGraph.hashCode());
         assertTrue(nGraph.sameValueAs(nGraph));
+    }
+
+    @Test
+    public void term_dirLangString_1() {
+        Node nDirLangString = NodeFactory.createLiteralDirLang("abc", "EN", TextDirection.LTR);
+        assertTrue(nDirLangString.isLiteral());
+        assertTrue(Util.hasLang(nDirLangString));
+        assertTrue(Util.hasDirection(nDirLangString));
+        assertEquals(RDF.dtDirLangString, nDirLangString.getLiteralDatatype());
+        // Normalized.
+        assertEquals("en", nDirLangString.getLiteralLanguage());
+        assertEquals(TextDirection.LTR, nDirLangString.getLiteralTextDirection());
+    }
+
+    @Test
+    public void term_dirLangString_2() {
+        // Make via langtag
+        Node nDirLangString = NodeFactory.createLiteralLang("abc", "en--ltr");
+        assertTrue(nDirLangString.isLiteral());
+        assertTrue(Util.hasLang(nDirLangString));
+        assertTrue(Util.hasDirection(nDirLangString));
+        assertEquals(RDF.dtDirLangString, nDirLangString.getLiteralDatatype());
+        assertEquals("en", nDirLangString.getLiteralLanguage());
+        assertEquals(TextDirection.LTR, nDirLangString.getLiteralTextDirection());
     }
 }

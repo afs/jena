@@ -23,6 +23,7 @@ import static org.junit.Assert.*;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.TextDirection;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.sparql.expr.nodevalue.NodeFunctions;
 import org.apache.jena.sparql.graph.NodeConst;
@@ -257,6 +258,22 @@ public class TestNodeFunctions {
     public void testLang5() {
         NodeValue nv = NodeValue.makeNode(NodeFactory.createURI("http://example/"));
         NodeValue r = NodeFunctions.lang(nv);
+    }
+
+
+    @Test public void testDirLang1() {
+        Node n = NodeFactory.createLiteralDirLang("abc",  "en", TextDirection.LTR);
+        NodeValue nv = NodeValue.makeNode(n);
+        NodeValue lang = NodeFunctions.lang(nv);
+        NodeValue dir = NodeFunctions.langdir(nv);
+        assertEquals("en", lang.getString());
+        assertEquals("ltr", dir.getString());
+    }
+
+    @Test public void testDirLang2() {
+        Node n = NodeFactory.createLiteralDirLang("abc",  "en", "ltr");
+        NodeValue nv = NodeValue.makeDirLangString("abc", "en", "ltr");
+        assertEquals(nv.asNode(), n);
     }
 
     @Test public void testLangMatches1() {

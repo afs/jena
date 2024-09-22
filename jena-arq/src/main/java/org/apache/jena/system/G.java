@@ -1044,17 +1044,25 @@ public class G {
             // Any mix of node types except both strings with lang tags.
             return match.equals(data);
 
-        // Both nodes with language tags : compare languages case insensitively.
         String lex1 = match.getLiteralLexicalForm();
         String lex2 = data.getLiteralLexicalForm();
         if ( ! lex1.equals(lex2) )
             return false;
+        // Both nodes with language tags and same lexical forms.
+        // Compare languages case insensitively.
         String lang1 = match.getLiteralLanguage();
         String lang2 = data.getLiteralLanguage();
         return lang1.equalsIgnoreCase(lang2);
     }
 
-    /** Contains, and language tags compare case-insentively */
+
+    /**
+     * Contains: language tags compare case-insentively
+     *
+     * @deprecated Jena5: This should not be necessary any more.
+     *             Language tags are normalized during Node creation.
+     */
+    @Deprecated
     public static boolean containsByLang(Graph g, Node s, Node p, Node o) {
         // Try exact.
         if ( g.contains(s, p, o) )
@@ -1074,7 +1082,13 @@ public class G {
         }
     }
 
-    /** Contains, and language tags match case-insentively */
+    /**
+     * Find: language tags compare case-insentively
+     *
+     * @deprecated Jena5: This should not be necessary any more.
+     *             Language tags are normalized during Node creation.
+     */
+    @Deprecated
     public static ExtendedIterator<Triple> findByLang(Graph g, Node s, Node p, Node o) {
         // No specific value given.
         if ( G.isNullOrAny(o) )

@@ -105,7 +105,7 @@ public class NodeFactory {
      *
      * @deprecated Use {@link #createLiteralLang(String, String)}.
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public static Node createLiteral(String string, String lang) {
         return createLiteralLang(string, lang);
     }
@@ -243,7 +243,7 @@ public class NodeFactory {
      * Make a literal from any legal combination language tag, text direction and datatype.
      * Any of these can be null when not needed.
      */
-   private static Node createLiteralInternal(String lex, String lang, TextDirection textDir, RDFDatatype dtype) {
+    private static Node createLiteralInternal(String lex, String lang, TextDirection textDir, RDFDatatype dtype) {
         Objects.requireNonNull(lex, "null lexical form for literal");
         boolean hasLang = ! isEmpty(lang);
         if ( hasLang ) {
@@ -293,6 +293,10 @@ public class NodeFactory {
         return n;
     }
 
+    /*
+     * Controls whether langtags are normalized or not.
+     * RDF treats language tags in a case-insensitive manner. One way to do that is to normalize the strings.
+     */
     /*package*/ static final boolean legacyLangTag = false;
     /** Prepare the language tag - apply formatting normalization */
     private static String formatLanguageTag(String langTagStr) {
@@ -306,11 +310,13 @@ public class NodeFactory {
         return LangTags.basicFormat(langTagStr);
     }
 
-    /** Prepare the initial text direction - apply formatting normalization */
+    /** Prepare the initial text direction. */
     private static TextDirection initialTextDirection(String input) {
         if ( isEmpty(input) )
             return Node.noTextDirection;
         // Throws JenaException on bad input.
+        // If there is formatting normalization, it happens here.
+        // RDF 1.2 strictly is 'ltr', 'rtl' only.
         TextDirection textDir = TextDirection.create(input);
         return textDir;
     }
