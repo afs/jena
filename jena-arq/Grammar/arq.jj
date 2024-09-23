@@ -649,6 +649,10 @@ Element GraphPatternNotTriples() : { Element el = null ; }
  |
    el = LateralGraphPattern()
  |
+   el = SemiJoinGraphPattern()
+ |
+   el = AntiJoinGraphPattern()
+ |
    el = MinusGraphPattern()
  |
    el = GraphGraphPattern()
@@ -678,6 +682,14 @@ Element OptionalGraphPattern() : { Element el ; }
 Element LateralGraphPattern() : { Element el ; }
 { <LATERAL> el = GroupGraphPattern()
     { return new ElementLateral(el) ; }
+}
+Element SemiJoinGraphPattern() : { Element el ; }
+{ <SEMIJOIN> el = GroupGraphPattern()
+    { return new ElementSemiJoin(el) ; }
+}
+Element AntiJoinGraphPattern() : { Element el ; }
+{ <ANTIJOIN> el = GroupGraphPattern()
+    { return new ElementAntiJoin(el) ; }
 }
 Element GraphGraphPattern() : { Element el ; Node n ;}
 {
@@ -1955,7 +1967,9 @@ TOKEN [IGNORE_CASE] :
 | < BIND: "bind" >
 | < SERVICE: "service" >
 | < LET: "LET" >
-| < LATERAL: "LATERAL" >
+| < LATERAL: "lateral" >
+| < SEMIJOIN: "semijoin" >
+| < ANTIJOIN: "antijoin" >
 | < UNFOLD: "unfold" >
 | < TRIPLE: "TRIPLE" >
 | < IS_TRIPLE: "isTRIPLE" >

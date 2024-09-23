@@ -95,20 +95,26 @@
 
 [<SERVICE>]    ::=    'SERVICE'
 [<MINUS_P>]    ::=    'MINUS'
-[<DIFF>]       ::=    'DIFF'
 [<EXISTS>]     ::=    'EXISTS'
 [<NOT>]        ::=    'NOT'
-[<UNSAID>]     ::=    'UNSAID'
+// [<DIFF>]       ::=    'DIFF'
+// [<UNSAID>]     ::=    'UNSAID'
 [<LET>]        ::=    'LET'
 [<BIND>]       ::=    'BIND'
-[<FIND>]       ::=    'FIND'
+// [<FIND>]       ::=    'FIND'
 
 [<FILTER>]     ::= 'FILTER'
 [<REGEXP>]     ::= 'REGEXP'
 [<GRAPH>]      ::= 'GRAPH'
 [<UNION>]      ::= 'UNION'
 [<OPTIONAL>]   ::= 'OPTIONAL'
+
 [<LATERAL>]    ::= 'LATERAL'
+[<SEMIJOIN>]   ::= 'SEMIJOIN'
+[<ANTIJOIN>]   ::= 'ANTIJOIN'
+
+[<UNFOLD>]     ::= 'UNFOLD'
+
 [<BOUND>]      ::= 'BOUND'
 [<COALESCE>]   ::= 'COALESCE'
 [<IF>]         ::= 'IF'

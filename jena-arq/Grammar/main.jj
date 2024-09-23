@@ -915,6 +915,10 @@ Element GraphPatternNotTriples() : { Element el = null ; }
 #ifdef ARQ
  |
    el = LateralGraphPattern()
+ |
+   el = SemiJoinGraphPattern()
+ |
+   el = AntiJoinGraphPattern()
 #endif
  |
    el = MinusGraphPattern()
@@ -953,6 +957,16 @@ Element OptionalGraphPattern() : { Element el ; }
 Element LateralGraphPattern() : { Element el ; }
 { <LATERAL> el = GroupGraphPattern()
     { return new ElementLateral(el) ; }
+}
+
+Element SemiJoinGraphPattern() : { Element el ; }
+{ <SEMIJOIN> el = GroupGraphPattern()
+    { return new ElementSemiJoin(el) ; }
+}
+
+Element AntiJoinGraphPattern() : { Element el ; }
+{ <ANTIJOIN> el = GroupGraphPattern()
+    { return new ElementAntiJoin(el) ; }
 }
 #endif
 
@@ -2660,7 +2674,9 @@ TOKEN [IGNORE_CASE] :
 
 #ifdef ARQ
 |  < LET:         "LET" >
-|  < LATERAL:     "LATERAL" >
+|  < LATERAL:     "lateral" >
+|  < SEMIJOIN:    "semijoin" >
+|  < ANTIJOIN:    "antijoin" >
 |  < UNFOLD:      "unfold" >
 #endif
 

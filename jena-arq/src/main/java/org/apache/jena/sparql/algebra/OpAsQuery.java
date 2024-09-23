@@ -20,6 +20,7 @@ package org.apache.jena.sparql.algebra ;
 
 import java.util.* ;
 import java.util.function.BiConsumer ;
+import java.util.function.Function;
 import java.util.stream.Collectors ;
 
 import org.apache.jena.atlas.lib.NotImplemented ;
@@ -664,11 +665,6 @@ public class OpAsQuery {
         }
 
         @Override
-        public void visit(OpDiff opDiff) {
-            throw new ARQNotImplemented("OpDiff") ;
-        }
-
-        @Override
         public void visit(OpMinus opMinus) {
             Element eLeft = asElement(opMinus.getLeft()) ;
             Element eRight = asElementGroup(opMinus.getRight()) ;
@@ -703,9 +699,23 @@ public class OpAsQuery {
         }
 
         @Override
+        public void visit(OpSemiJoin opSemiJoin) {
+            visitGroupPatternRight(opSemiJoin, ElementSemiJoin::new);
+        }
+
+        @Override
+        public void visit(OpAntiJoin opAntiJoin) {
+            visitGroupPatternRight(opAntiJoin, ElementAntiJoin::new);
+        }
+        @Override
         public void visit(OpLateral opLateral) {
-            Element eLeft = asElement(opLateral.getLeft()) ;
-            ElementGroup eRight = asElementGroup(opLateral.getRight()) ;
+            visitGroupPatternRight(opLateral, ElementLateral::new);
+        }
+
+        // Op2 where the syntax form is "left WORD { right }"
+        private void visitGroupPatternRight(Op2 op2, Function<ElementGroup, Element> functionRightToElement) {
+            Element eLeft = asElement(op2.getLeft()) ;
+            ElementGroup eRight = asElementGroup(op2.getRight()) ;
             ElementGroup g = currentGroup() ;
             if ( !emptyGroup(eLeft) ) {
                 if ( eLeft instanceof ElementGroup )
@@ -713,8 +723,8 @@ public class OpAsQuery {
                 else
                     g.addElement(eLeft) ;
             }
-            ElementLateral eltLateral = new ElementLateral(eRight) ;
-            g.addElement(eltLateral) ;
+            Element elt = functionRightToElement.apply(eRight) ;
+            g.addElement(elt) ;
         }
 
         @Override

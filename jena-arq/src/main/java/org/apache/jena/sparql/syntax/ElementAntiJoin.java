@@ -23,37 +23,37 @@ import java.util.List;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.util.NodeIsomorphismMap;
 
-/** LATERAL */
-public class ElementLateral extends Element
+/** ANTIJOIN */
+public class ElementAntiJoin extends Element
 {
-    private final Element right ;
+    private final Element right;
 
-    public ElementLateral(Element right) {
+    public ElementAntiJoin(Element right) {
         this(right, null, false);
     }
 
-    private ElementLateral(Element right, List<Var> vars, boolean seenStar) {
-        this.right = right ;
+    private ElementAntiJoin(Element right, List<Var> vars, boolean seenStar) {
+        this.right = right;
     }
 
-    public Element getLateralElement()  { return right ; }
+    public Element getSubElement()  { return right; }
 
     @Override
     public int hashCode() {
-        int hash = Element.HashLateral ;
-        hash = hash ^ getLateralElement().hashCode() ;
-        return hash ;
+        int hash = Element.HashAntiJoin;
+        hash = hash ^ getSubElement().hashCode();
+        return hash;
     }
 
     @Override
     public boolean equalTo(Element el2, NodeIsomorphismMap isoMap) {
-        if ( el2 == null ) return false ;
-        if ( ! ( el2 instanceof ElementLateral ) )
-            return false ;
-        ElementLateral other = (ElementLateral)el2 ;
-        return getLateralElement().equalTo(other.getLateralElement(), isoMap);
+        if ( el2 == null ) return false;
+        if ( ! ( el2 instanceof ElementAntiJoin ) )
+            return false;
+        ElementAntiJoin other = (ElementAntiJoin)el2;
+        return getSubElement().equalTo(other.getSubElement(), isoMap);
     }
 
     @Override
-    public void visit(ElementVisitor v) { v.visit(this) ; }
+    public void visit(ElementVisitor v) { v.visit(this); }
 }

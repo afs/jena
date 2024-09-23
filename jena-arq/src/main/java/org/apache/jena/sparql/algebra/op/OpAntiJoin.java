@@ -24,17 +24,17 @@ import org.apache.jena.sparql.algebra.Transform;
 import org.apache.jena.sparql.sse.Tags;
 import org.apache.jena.sparql.util.NodeIsomorphismMap;
 
-public class OpDiff extends Op2
+public class OpAntiJoin extends Op2
 {
     public static Op create(Op left, Op right)
     {
-        return new OpDiff(left, right);
+        return new OpAntiJoin(left, right);
     }
 
-    private OpDiff(Op left, Op right) { super(left, right); }
+    private OpAntiJoin(Op left, Op right) { super(left, right); }
 
     @Override
-    public String getName() { return Tags.tagDiff; }
+    public String getName() { return Tags.tagSemiJoin; }
 
     @Override
     public Op apply(Transform transform, Op left, Op right)
@@ -45,11 +45,11 @@ public class OpDiff extends Op2
 
     @Override
     public Op2 copy(Op newLeft, Op newRight)
-    { return new OpDiff(newLeft, newRight); }
+    { return new OpAntiJoin(newLeft, newRight); }
 
     @Override
     public boolean equalTo(Op op2, NodeIsomorphismMap labelMap) {
-        if ( ! ( op2 instanceof OpDiff) ) return false;
+        if ( ! ( op2 instanceof OpAntiJoin) ) return false;
         return super.sameArgumentsAs((Op2)op2, labelMap);
     }
 }

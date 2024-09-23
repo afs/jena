@@ -67,12 +67,14 @@ public class Tags
     public static final String tagLabel           = "label";
     public static final String tagService         = "service";
     public static final String tagJoin            = "join";
-    public static final String tagLateral         = "lateral";
-    public static final String tagLeftJoin        = "leftjoin";
-    public static final String tagDiff            = "diff";
     public static final String tagMinus           = "minus";
     public static final String tagUnion           = "union";
     public static final String tagDatasetNames    = "datasetnames";
+
+    public static final String tagLateral         = "lateral";
+    public static final String tagSemiJoin        = "semijoin";
+    public static final String tagAntiJoin        = "antijoin";
+    public static final String tagLeftJoin        = "leftjoin";
 
     // Additional operators.
     public static final String tagProc            = "proc";
