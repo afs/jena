@@ -213,7 +213,6 @@ public class TestRDF12LangSyntax {
                 }
             } else {
                 printString(label, lang, turtleText);
-                System.out.println("--------");
                 StreamRDF dest = StreamRDFWriter.getWriterStream(System.out, RDFFormat.TURTLE_FLAT);
                 RDFParser.fromString(turtleText, TurtleJCC.TTLJCC).parse(dest);
             }

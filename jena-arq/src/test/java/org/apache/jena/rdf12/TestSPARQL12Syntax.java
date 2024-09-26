@@ -186,7 +186,6 @@ public class TestSPARQL12Syntax {
 
     private void execFragment(TEST testType, String label, String queryFragment, boolean verbose) {
         String qs = PREFIXES+"\nSELECT * "+queryFragment+"\n";
-        generateTestCode(qs, testType);
         testSPARQLSyntax(testType, label, qs, verbose);
     }
 
@@ -217,29 +216,4 @@ public class TestSPARQL12Syntax {
         }
         return "Unknown_"+(++unknownCount);
     }
-
-    private void generateTestCode(String queryString, TEST testType) {
-        String testMethodName = getTestMethodName();
-        //System.out.println(testMethodName);
-        switch (testType) {
-            case BAD -> {
-                System.out.printf("@Test public void %s() {\n", testMethodName);
-                System.out.printf("   assertThrows(QueryParseException.class,  ()->execTest(\"\"\"\n");
-                System.out.print(queryString);
-                System.out.printf("           \"\"\";");
-                System.out.printf(" }\n");
-                System.out.println();
-            }
-            case GOOD -> {
-                System.out.printf("@Test public void %s() {\n", testMethodName);
-                System.out.printf("   execTest(\"\"\"\n");
-                System.out.print(queryString);
-                System.out.printf("           \"\"\";");
-                System.out.printf(" }\n");
-                System.out.println();
-
-            }
-        }
-    }
-
 }

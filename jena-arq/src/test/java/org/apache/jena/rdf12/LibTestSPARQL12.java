@@ -40,8 +40,8 @@ class LibTestSPARQL12 {
                 throw ex;
             if ( verbose )
                 printString(label, queryString);
-            String exMsg = parserErrorMessage(ex);
-            System.out.println("**** "+exMsg);
+//            String exMsg = parserErrorMessage(ex);
+//            System.out.println("**** "+exMsg);
             throw ex;
         } catch( Throwable ex) {
             if ( verbose )
