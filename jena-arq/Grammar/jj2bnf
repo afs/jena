@@ -16,16 +16,7 @@
 ## limitations under the License.
 
 ## TODO (2024)
-## [x] Remove HTML 
 ## [ ] Why does ruleBodyStr have a newline?
-## [ ] Not inlining.
-## [ ] BuiltIn etc splitting
-## [ ] Multi inde tn rules.
-##     Short rule names %-15
-##     Long rule names  %-25
-## [ ] <NIL>
-## [ ] <NIL> also fixup HTML
-## [ ] PN_CHARS_BASE split?
 
 ## Consider rewriting, preserving the inlining.
 ## Parse lines (and continuation lines). Fixup.
@@ -180,7 +171,7 @@ for $r (@rules) {
 
     #exit if $ruleNum > 2 ;
 
-    $ruleId = sane("r".$rulename) ;
+    ##$ruleId = sane("r".$rulename) ;
 
     if($rulename eq 'IRIREF') {
 	print "\n";
@@ -188,7 +179,7 @@ for $r (@rules) {
 	print "\n" ;
     }
     ## First part of output.
-    $rlabel = '[' . $ruleNum .  ']' ;
+    ## $rlabel = '[' . $ruleNum .  ']' ;
 
     $rn = $rulename;
     $rn =~ s!^<!!; 
@@ -237,10 +228,6 @@ sub fixupRule {
     # Remove outer matching () where there are no inner ()
     $body =~ s/^\(\s+([^\(]*)\s+\)$/$1/ ;
 
-    # ( A )* => A* and for + and ? where A is a linked or spanned object
-    $body =~ s!\(\s+(\<a[^>]*\>[^<>]*\</a\>)\s+\)!$1!g ;
-    $body =~ s!\(\s+(\<span[^>]*\>[^<>]*\</span\>)\s+\)!$1!g ;
-
     # There aren't any of these
 ##    $body =~ s!\(\s+(\S*)\s+\)!$1!g ;
 
@@ -262,32 +249,26 @@ sub fixupRule {
 	## [140]  	StrReplaceExpression	  ::=  	'REPLACE' '(' Expression ',' Expression ',' Expression ( ',' Expression )? ')'
 	## [141]  	ExistsFunc	  ::=  	'EXISTS' GroupGraphPattern
 	## [142]  	NotExistsFunc	  ::=  	'NOT' 'EXISTS' GroupGraphPattern
+	##        | 'BNODE' ( '(' Expression ')' | <NIL> )
 
-	## | not inside () -- see Aggregate
+	print STDERR "A:",$body,"\n" if $p ;
+
+	## Fix up for BNODE that uses "|" - put in marker.
+	$body =~ s%'BNODE' \( '\(' Expression '\)' \| \<NIL\> \)%XXX-BNODE-XXX%;
+
+	## | followed by <NIL>
 	$body =~ s%\|\s*%\n                          |   %g ;
+	
+	## Replace marker
+	$body =~ s%XXX-BNODE-XXX%'BNODE' \( '(' Expression ')' \| \<NIL\> \)%;
     }
 
      if ( $head eq "Aggregate" )
      {
 	 # Strip outer ()
 	 $body =~ s/^\(\s*(.*)\s*\)$/$1/ ;	
-	 ## Be careful of nested | in COUNT
  	 $body =~ s/^\s+// ;
      }
-
-    if (  $head eq "BuiltInCall" )
-    {
-	# Undo <NIL> for BNODE, RAND etc
-	$body =~ s%\<NIL\>%'\(' '\)'%g;
-    }
-
-##     if ( $head eq "RelationalExpression" ||
-## 	 $head eq "AdditiveExpression" ||
-## 	 $head eq "MultiplicativeExpression" ||
-## 	 $head eq "ConditionalOrExpression")
-##     {
-## 	$body =~ s%\*\(%<br/>\(% ;
-##     }
 
     # These failed the outer () test because they have nested () in them
     if (  $head eq "QueryPattern" ||
@@ -316,5 +297,6 @@ sub fixupRule {
     {
 	$body =~ s/^\(\s*(.*)\s*\)$/$1/ ;	
     }
+
     return $body ;
 }

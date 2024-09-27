@@ -788,22 +788,11 @@ Node Reifier() : { Token tok = null ; Node reifId = null ; }
     (reifId = VarOrReifierId() )?
     { return reifId; }
 }
-Node ReifierData() : { Token tok = null ; Node reifId = null ; }
-{
-    tok = <TILDE>
-    (reifId = ReifierId() )?
-    { return reifId; }
-}
-Node ReifierId() : { Node n = null ; String iri ; }
-{
-  ( iri = iri() { return createNode(iri) ; }
-  | n = BlankNode() { return n ; }
-  )
-}
-Node VarOrReifierId() : { Node n = null; }
+Node VarOrReifierId() : { Node n = null; String iri = null; }
 {
    ( n = Var() { return n; }
-   | n = ReifierId() { return n; }
+   | iri = iri() { return createNode(iri) ; }
+   | n = BlankNode() { return n ; }
    )
 }
 Element Assignment() : { Var v ; Expr expr ; }
@@ -1111,6 +1100,11 @@ Path PathMod(Path p) : { long i1 ; long i2 ; }
        )
    )
 }
+long Integer() : {Token t ;}
+{
+    t = <INTEGER>
+    { return integerValue(t.image) ; }
+}
 Path PathPrimary() : { String str ; Path p ; Node n ; }
 {
   (
@@ -1160,11 +1154,6 @@ P_Path0 PathOneInPropertySet() : { String str ; Node n ; }
     | <KW_A> { return new P_ReverseLink(nRDFtype) ; }
     )
   )
-}
-long Integer() : {Token t ;}
-{
-    t = <INTEGER>
-    { return integerValue(t.image) ; }
 }
 Node TriplesNode(TripleCollectorMark acc) : { Node n ; }
 {
@@ -1336,7 +1325,6 @@ Node ReifiedTripleSubject(TripleCollector acc) : { Node s; String iri; }
   | s = BooleanLiteral()
   | s = BlankNode()
   | s = ReifiedTriple(acc)
-  | <NIL> { s = nRDFnil ; }
   )
   { return s; }
 }
@@ -1349,37 +1337,71 @@ Node ReifiedTripleObject(TripleCollector acc) : { Node o; String iri; }
   | o = BooleanLiteral()
   | o = BlankNode()
   | o = ReifiedTriple(acc)
-  | <NIL> { o = nRDFnil ; }
+  | o = TripleTerm()
   )
   { return o; }
 }
 Node TripleTerm() : { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }
 {
     openToken = <L_TRIPLE>
-    s = VarOrTerm()
+    s = TripleTermSubject()
     p = Verb()
-    o = VarOrTerm()
+    o = TripleTermObject()
     { n = createTripleTerm(s, p, o, openToken.beginLine, openToken.beginColumn); }
     <R_TRIPLE>
     { return n ; }
+}
+Node TripleTermSubject() : { Node n; String iri; }
+{
+  ( n = Var()
+  | iri = iri() { n = createNode(iri) ; }
+  | n = RDFLiteral()
+  | n = NumericLiteral()
+  | n = BooleanLiteral()
+  | n = BlankNode()
+  )
+  { return n; }
+}
+Node TripleTermObject() : { Node n; String iri; }
+{
+  ( n = Var()
+  | iri = iri() { n = createNode(iri) ; }
+  | n = RDFLiteral()
+  | n = NumericLiteral()
+  | n = BooleanLiteral()
+  | n = BlankNode()
+  | n = TripleTerm() { return n; }
+  )
+  { return n; }
 }
 Node TripleTermData() : { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }
 {
     openToken = <L_TRIPLE>
-    s = DataValueTerm()
+    s = TripleTermDataSubject()
     ( iri = iri() { p = createNode(iri) ; } | <KW_A> { p = nRDFtype ; } )
-    o = DataValueTerm()
+    o = TripleTermDataObject()
     { n = createTripleTerm(s, p, o, openToken.beginLine, openToken.beginColumn); }
     <R_TRIPLE>
     { return n ; }
 }
-Node DataValueTerm() : { Node n = null ; String iri ; Node s , p , o ; }
+Node TripleTermDataSubject() : { Node n = null; String iri; }
 {
-  iri = iri() { return createNode(iri) ; }
-| n = RDFLiteral() { return n ; }
-| n = NumericLiteral() { return n ; }
-| n = BooleanLiteral() { return n ; }
-| n = TripleTermData() { return n; }
+ ( iri = iri() { n = createNode(iri) ; }
+ | n = RDFLiteral()
+ | n = NumericLiteral()
+ | n = BooleanLiteral()
+ )
+ { return n; }
+}
+Node TripleTermDataObject() : { Node n = null; String iri; }
+{
+ ( iri = iri() { n = createNode(iri) ; }
+ | n = RDFLiteral()
+ | n = NumericLiteral()
+ | n = BooleanLiteral()
+ | n = TripleTermData()
+ )
+ { return n; }
 }
 Node VarOrIri() : {Node n = null ; String iri ; }
 {
@@ -1520,25 +1542,35 @@ Expr PrimaryExpression() : { Expr expr ; Node n ; }
   | n = ExprTripleTerm() { return asExpr(n) ; }
   )
 }
-Node ExprVarOrTerm() : { Node n; String s;}
+Node ExprTripleTerm() : { Token t ; Node s,p,o,n; }
 {
-  ( s = iri() { n = createNode(s); }
+  t = <L_TRIPLE>
+  s = ExprTripleTermSubject()
+  p = Verb()
+  o = ExprTripleTermObject()
+  { n = createTripleTerm(s, p, o, t.beginLine, t.beginColumn); }
+  <R_TRIPLE>
+  { return n; }
+}
+Node ExprTripleTermSubject() : { Node n; String iri; }
+{
+  ( iri = iri() { n = createNode(iri); }
+  | n = RDFLiteral()
+  | n = NumericLiteral()
+  | n = BooleanLiteral()
+  | n = Var()
+  )
+  { return n; }
+}
+Node ExprTripleTermObject() : { Node n; String iri; }
+{
+  ( iri = iri() { n = createNode(iri); }
   | n = RDFLiteral()
   | n = NumericLiteral()
   | n = BooleanLiteral()
   | n = Var()
   | n = ExprTripleTerm()
   )
-  { return n; }
-}
-Node ExprTripleTerm() : { Token t ; Node s,p,o,n; }
-{
-  t = <L_TRIPLE>
-  s = ExprVarOrTerm()
-  p = Verb()
-  o = ExprVarOrTerm()
-  { n = createTripleTerm(s, p, o, t.beginLine, t.beginColumn); }
-  <R_TRIPLE>
   { return n; }
 }
 Expr BrackettedExpression() : { Expr expr ; }

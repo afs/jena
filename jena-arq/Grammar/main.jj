@@ -1066,7 +1066,7 @@ Node DataBlockValue() : { Node n ; String iri ; }
 | n = NumericLiteral()  { return n ; }
 | n = BooleanLiteral()  { return n ; }
 | <UNDEF>               { return null ; }
-| n = TripleTermData()      { return n ; }
+| n = TripleTermData()  { return n ; }
 
 }
 
@@ -1080,26 +1080,34 @@ Node Reifier() : { Token tok = null ; Node reifId = null ; }
     { return reifId; }
 }
 
-// No variables.
-Node ReifierData() : { Token tok = null ; Node reifId = null ; }
-{
-    tok = <TILDE>
-    (reifId = ReifierId() )?
-    { return reifId; }
-}
+// // No variables.
+// Node ReifierData() : { Token tok = null ; Node reifId = null ; }
+// {
+//     tok = <TILDE>
+//     (reifId = ReifierId() )?
+//     { return reifId; }
+// }
+// 
+// Node ReifierId() : { Node n = null ; String iri ; } 
+// {
+//   // No variable
+//   ( iri = iri()           { return createNode(iri) ; }
+//   | n = BlankNode()       { return n ; }
+//   )
+// }
+// 
+// Node VarOrReifierId() : { Node n = null; }
+// {
+//    ( n = Var()        { return n; }
+//    | n = ReifierId()  { return n; }
+//    )
+// }
 
-Node ReifierId() : { Node n = null ; String iri ; } 
-{
-  // No variable
-  ( iri = iri()           { return createNode(iri) ; }
-  | n = BlankNode()       { return n ; }
-  )
-}
-
-Node VarOrReifierId() : { Node n = null; }
+Node VarOrReifierId() : { Node n = null; String iri = null; }
 {
    ( n = Var()        { return n; }
-   | n = ReifierId()  { return n; }
+   | iri = iri()      { return createNode(iri) ; }
+   | n = BlankNode()  { return n ; }
    )
 }
 
@@ -1512,6 +1520,16 @@ Path PathMod(Path p) : { long i1 ; long i2 ; }
    )
 }
 
+#ifdef ARQ
+long Integer() : {Token t ;}
+{
+    t = <INTEGER> 
+    { return integerValue(t.image) ; }
+}
+#endif
+
+
+
 Path PathPrimary() : { String str ; Path p ; Node n ; }
 {
   ( 
@@ -1567,12 +1585,6 @@ P_Path0 PathOneInPropertySet() : { String str ; Node n ; }
     | <KW_A> { return new P_ReverseLink(nRDFtype) ; } 
     )
   )
-}
-
-long Integer() : {Token t ;}
-{
-    t = <INTEGER> 
-    { return integerValue(t.image) ; }
 }
 
 // -------- Triple expansions
@@ -1723,7 +1735,7 @@ void AnnotationBlock(TripleCollector acc, Node reifId) : { }
 
 // -------- Nodes in a graph pattern or template
 
-// Object position RDF term, elemnt of a list
+// Object position RDF term, element of a list
 // No paths in TriplesNode
 Node GraphNode(TripleCollectorMark acc) : { Node n ; }
 {
@@ -1781,7 +1793,7 @@ Node ReifiedTripleSubject(TripleCollector acc) : { Node s; String iri; }
   | s = BlankNode()
   | s = ReifiedTriple(acc)
   //  <LPAREN> <RPAREN>     { s = RDFnil ; }
-  | <NIL>  { s = nRDFnil ; }
+  //| <NIL>  { s = nRDFnil ; }
   )
   { return s; }
 }
@@ -1796,7 +1808,8 @@ Node ReifiedTripleObject(TripleCollector acc) : { Node o; String iri; }
   | o = BlankNode()
   | o = ReifiedTriple(acc)
   //  <LPAREN> <RPAREN>     { o = nRDFnil ; }
-  | <NIL>  { o = nRDFnil ; }
+  //| <NIL>  { o = nRDFnil ; }
+  | o = TripleTerm()
   )
   { return o; }
 }
@@ -1804,37 +1817,89 @@ Node ReifiedTripleObject(TripleCollector acc) : { Node o; String iri; }
 Node TripleTerm() : { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }
 {
     openToken = <L_TRIPLE>
-    // @@ Need alt name. ttVarOrTerm
-    s = VarOrTerm()
+    // @@ Alt name. ttSubject()?
+    s = TripleTermSubject()
     p = Verb()
-    o = VarOrTerm()
+    o = TripleTermObject()
     { n = createTripleTerm(s, p, o, openToken.beginLine, openToken.beginColumn); }
     <R_TRIPLE>
     { return n ; }
+}
+
+Node TripleTermSubject() : { Node n; String iri; }
+{
+  ( n = Var()
+  | iri = iri()           { n = createNode(iri) ; }
+  | n = RDFLiteral()
+  | n = NumericLiteral()
+  | n = BooleanLiteral()
+  | n = BlankNode()
+  //  <LPAREN> <RPAREN>     { return nRDFnil ; }
+  //| <NIL>  { return nRDFnil ; }
+  //| n = TripleTerm()      { return n; }
+  )
+  { return n; }
+}
+
+Node TripleTermObject() : { Node n; String iri; }
+{
+  ( n = Var()
+  | iri = iri()           { n = createNode(iri) ; }
+  | n = RDFLiteral()
+  | n = NumericLiteral()
+  | n = BooleanLiteral()
+  | n = BlankNode()
+  //  <LPAREN> <RPAREN>     { return nRDFnil ; }
+  //| <NIL>  { return nRDFnil ; }
+  | n = TripleTerm()      { return n; }
+  )
+  { return n; }
 }
 
 Node TripleTermData() :  { Node n = null ; Token openToken ; String iri ; Node s , p , o ; }
 {
     openToken = <L_TRIPLE>
-    // @@ Need alt name. ttDataValueTerm
-    s = DataValueTerm()
+    // @@ Alt name? ttDataValueTerm
+    s = TripleTermDataSubject()
     ( iri = iri() { p = createNode(iri) ; } | <KW_A> { p = nRDFtype ; } )
-    o = DataValueTerm()
+    o = TripleTermDataObject()
     { n = createTripleTerm(s, p, o, openToken.beginLine, openToken.beginColumn); }
     <R_TRIPLE>
     { return n ; }
 }
 
-// VarOrTerm except no var, no bnodes
-// @@ Rename?
-Node DataValueTerm() : {  Node n = null ; String iri ; Node s , p , o ; }
+Node TripleTermDataSubject() : { Node n = null; String iri; }
 {
-  iri = iri()            { return createNode(iri) ; }
-| n = RDFLiteral()       { return n ; }
-| n = NumericLiteral()   { return n ; }
-| n = BooleanLiteral()   { return n ; }
-| n = TripleTermData()   { return n; }
+ ( iri = iri()            { n = createNode(iri) ; }
+ | n = RDFLiteral()
+ | n = NumericLiteral()
+ | n = BooleanLiteral()
+ //| n = TripleTermData()
+ )
+ { return n; }
 }
+
+Node TripleTermDataObject() : { Node n = null; String iri; }
+{
+ ( iri = iri()            { n = createNode(iri) ; }
+ | n = RDFLiteral()
+ | n = NumericLiteral()
+ | n = BooleanLiteral()
+ | n = TripleTermData()
+ )
+ { return n; }
+}
+
+// // VarOrTerm except no var, no bnodes
+// // @@ Rename?
+// Node DataValueTerm() : {  Node n = null ; String iri ; Node s , p , o ; }
+// {
+//   iri = iri()            { return createNode(iri) ; }
+// | n = RDFLiteral()       { return n ; }
+// | n = NumericLiteral()   { return n ; }
+// | n = BooleanLiteral()   { return n ; }
+// | n = TripleTermData()   { return n; }
+// }
 
 // e.g. Property (if no bNodes) + DESCRIBE
 Node VarOrIri() : {Node n = null ; String iri ; }
@@ -1999,7 +2064,6 @@ Expr PrimaryExpression() : { Expr expr ; Node n ; }
   | n = BooleanLiteral()  { return asExpr(n) ; }
   | n = Var()             { return asExpr(n) ; }
   | n = ExprTripleTerm()  { return asExpr(n) ; }
-
 // and not SPARQL 12
 // needs checking.
 // Use this for ?var(args)
@@ -2007,9 +2071,44 @@ Expr PrimaryExpression() : { Expr expr ; Node n ; }
   )
 }
 
-Node ExprVarOrTerm() : { Node n; String s;}
+// Node ExprVarOrTerm() : { Node n; String s;}
+// {
+//   ( s = iri() { n = createNode(s); }
+//   | n = RDFLiteral()
+//   | n = NumericLiteral()
+//   | n = BooleanLiteral()
+//   | n = Var()
+//   | n = ExprTripleTerm()
+//   )
+//   { return n; }
+// }
+
+Node ExprTripleTerm() : { Token t ; Node s,p,o,n; }
 {
-  ( s = iri() { n = createNode(s); }
+  t = <L_TRIPLE>
+  s = ExprTripleTermSubject()
+  p = Verb()
+  o = ExprTripleTermObject()
+  { n = createTripleTerm(s, p, o, t.beginLine, t.beginColumn); }
+  <R_TRIPLE>
+  { return n; }
+}
+
+Node ExprTripleTermSubject() : { Node n; String iri; }
+{
+  ( iri = iri() { n = createNode(iri); }
+  | n = RDFLiteral()
+  | n = NumericLiteral()
+  | n = BooleanLiteral()
+  | n = Var()
+  //| n = ExprTripleTerm()
+  )
+  { return n; }
+}
+
+Node ExprTripleTermObject() : { Node n; String iri; }
+{
+  ( iri = iri() { n = createNode(iri); }
   | n = RDFLiteral()
   | n = NumericLiteral()
   | n = BooleanLiteral()
@@ -2019,16 +2118,8 @@ Node ExprVarOrTerm() : { Node n; String s;}
   { return n; }
 }
 
-Node ExprTripleTerm() : { Token t ; Node s,p,o,n; }
-{
-  t = <L_TRIPLE>
-  s = ExprVarOrTerm()
-  p = Verb()
-  o = ExprVarOrTerm()
-  { n = createTripleTerm(s, p, o, t.beginLine, t.beginColumn); }
-  <R_TRIPLE>
-  { return n; }
-}
+
+
 
 Expr BrackettedExpression() : { Expr expr ; }
 {

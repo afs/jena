@@ -4,8 +4,8 @@ Run
 
     grammar
 
-This produces the curent SPARQL grammar and the ARQ (SPARQL with extensions) parsers.
-
+This produces the code for the current version SPARQL
+and the ARQ (SPARQL with extensions) parsers.
 
 ==
 
@@ -20,6 +20,12 @@ Then run
 
     sparql2html
 
-The output is in X12.html
+The output is in sparql-grammar.html.
 
 This replaces the table between "<!-- GRAMMAR -->" in the specific HTML.
+
+Running
+
+    sparql2bnf
+
+produces a text BNF form.
