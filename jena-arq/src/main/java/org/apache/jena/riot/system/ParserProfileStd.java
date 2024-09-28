@@ -112,7 +112,6 @@ public class ParserProfileStd implements ParserProfile {
             errorHandler.error("Relative IRI: " + uriStr, line, col);
             return IRIx.createAny(uriStr);
         } catch (IRIException ex) {
-            // Same code as Checker.iriViolations
             String msg = ex.getMessage();
             Checker.iriViolationMessage(uriStr, true, msg, line, col, errorHandler);
             return IRIx.createAny(uriStr);
@@ -120,18 +119,27 @@ public class ParserProfileStd implements ParserProfile {
     }
 
     private void doChecking(IRIx irix, String uriStr, long line, long col) {
+        //System.out.printf("doChecking: %s (%s) %s\n", irix, uriStr, irix.hasViolations());
+
+        if ( ! irix.hasViolations() )
+            return;
+
         // Should become ...
-//        irix.handleViolations((isError, message)->{
+        irix.handleViolations((isError, message)->{
+            Checker.iriViolationMessage(uriStr, isError, message, line, col, errorHandler);
 //            if ( isError )
 //                errorHandler.error(message, line, col);
-//        });
+//            else
+//                errorHandler.warning(message, line, col);
+        });
 
-        IRI iri;
-        if ( irix instanceof IRIProviderJenaIRI.IRIxJena )
-            iri = (IRI)irix.getImpl();
-        else
-            iri = iriCache.get(uriStr, x -> SetupJenaIRI.iriCheckerFactory().create(x));
-        Checker.iriViolations(iri, errorHandler, false, true, line, col);
+        // Always jena-iri messages
+//        IRI iri;
+//        if ( irix instanceof IRIProviderJenaIRI.IRIxJena )
+//            iri = (IRI)irix.getImpl();
+//        else
+//            iri = iriCache.get(uriStr, x -> SetupJenaIRI.iriCheckerFactory().create(x));
+//        Checker.iriViolations(iri, errorHandler, false, true, line, col);
     }
 
     /**
