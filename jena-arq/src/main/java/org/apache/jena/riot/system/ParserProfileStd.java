@@ -124,7 +124,6 @@ public class ParserProfileStd implements ParserProfile {
         if ( ! irix.hasViolations() )
             return;
 
-        // Should become ...
         irix.handleViolations((isError, message)->{
             Checker.iriViolationMessage(uriStr, isError, message, line, col, errorHandler);
 //            if ( isError )

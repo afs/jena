@@ -29,10 +29,8 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.iri.IRI;
 import org.apache.jena.iri.IRIComponents;
 import org.apache.jena.iri.Violation;
-import org.apache.jena.irix.IRIProviderJenaIRI;
 import org.apache.jena.irix.IRIs;
 import org.apache.jena.irix.SetupJenaIRI;
-import org.apache.jena.irix.SystemIRIx;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.util.SplitIRI;
 
@@ -103,6 +101,7 @@ public class Checker {
     /** See also {@link IRIs#reference} */
     public static boolean checkIRI(String iriStr, ErrorHandler errorHandler, long line, long col) {
         IRI iri = SetupJenaIRI.iriCheckerFactory().create(iriStr);
+        @SuppressWarnings("deprecated")
         boolean b = iriViolations(iri, errorHandler, line, col);
         return b;
     }
@@ -111,6 +110,7 @@ public class Checker {
      * Process violations on an IRI Calls the {@link ErrorHandler} on all errors and
      * warnings (as warnings).
      */
+    @Deprecated(forRemoval = true)
     public static void iriViolations(IRI iri) {
         iriViolations(iri, nullErrorHandler, false, true, -1L, -1L);
     }
@@ -119,6 +119,7 @@ public class Checker {
      * Process violations on an IRI Calls the {@link ErrorHandler} on all errors and
      * warnings (as warnings).
      */
+    @Deprecated(forRemoval = true)
     public static boolean iriViolations(IRI iri, ErrorHandler errorHandler, long line, long col) {
         return iriViolations(iri, errorHandler, false, true, line, col);
     }
@@ -127,7 +128,9 @@ public class Checker {
      * Process violations on an IRI Calls the errorHandler on all errors and warnings
      * (as warning). (If checking for relative IRIs, these are sent out as errors.)
      * Assumes error handler throws exceptions on errors if need be
+     * @deprecated This code depends on the older jena-iri
      */
+    @Deprecated(forRemoval = true)
     public static boolean iriViolations(IRI iri, ErrorHandler errorHandler,
                                         boolean allowRelativeIRIs, boolean includeIRIwarnings,
                                         long line, long col) {
@@ -176,14 +179,12 @@ public class Checker {
      */
     public static void iriViolationMessage(String iriStr, boolean isError, String msg, long line, long col, ErrorHandler errorHandler) {
         try {
-            if ( ! ( SystemIRIx.getProvider() instanceof IRIProviderJenaIRI ) )
-                msg = "<" + iriStr + "> : " + msg;
-
+            // The IRI is valid RFC3986 syntax, else it failed earlier.
+            // This code is for scheme violations which do not stop parsing.
             if ( isError ) {
-                // ?? Treat as error, catch exceptions?
                 errorHandler(errorHandler).warning("Bad IRI: " + msg, line, col);
             } else
-                errorHandler(errorHandler).warning("Not advised IRI: " + msg, line, col);
+                errorHandler(errorHandler).warning("Unwise IRI: " + msg, line, col);
         } catch (org.apache.jena.iri.IRIException | org.apache.jena.irix.IRIException ex) {}
     }
 
