@@ -18,7 +18,6 @@
 
 package org.apache.jena.riot.system;
 
-import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import org.apache.jena.datatypes.RDFDatatype;
@@ -27,10 +26,7 @@ import org.apache.jena.datatypes.xsd.impl.RDFLangString;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.iri.IRI;
-import org.apache.jena.iri.IRIComponents;
-import org.apache.jena.iri.Violation;
-import org.apache.jena.irix.IRIs;
-import org.apache.jena.irix.SetupJenaIRI;
+import org.apache.jena.irix.*;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.util.SplitIRI;
 
@@ -94,83 +90,29 @@ public class Checker {
         return checkIRI(node.getURI(), errorHandler, line, col);
     }
 
-    public static boolean checkIRI(String iriStr) {
-        return checkIRI(iriStr, nullErrorHandler, -1L, -1L);
-    }
+//    public static boolean checkIRI(String iriStr) {
+//        return checkIRI(iriStr, nullErrorHandler, -1L, -1L);
+//    }
 
     /** See also {@link IRIs#reference} */
     public static boolean checkIRI(String iriStr, ErrorHandler errorHandler, long line, long col) {
-        IRI iri = SetupJenaIRI.iriCheckerFactory().create(iriStr);
-        @SuppressWarnings("deprecated")
-        boolean b = iriViolations(iri, errorHandler, line, col);
-        return b;
-    }
-
-    /**
-     * Process violations on an IRI Calls the {@link ErrorHandler} on all errors and
-     * warnings (as warnings).
-     */
-    @Deprecated(forRemoval = true)
-    public static void iriViolations(IRI iri) {
-        iriViolations(iri, nullErrorHandler, false, true, -1L, -1L);
-    }
-
-    /**
-     * Process violations on an IRI Calls the {@link ErrorHandler} on all errors and
-     * warnings (as warnings).
-     */
-    @Deprecated(forRemoval = true)
-    public static boolean iriViolations(IRI iri, ErrorHandler errorHandler, long line, long col) {
-        return iriViolations(iri, errorHandler, false, true, line, col);
-    }
-
-    /**
-     * Process violations on an IRI Calls the errorHandler on all errors and warnings
-     * (as warning). (If checking for relative IRIs, these are sent out as errors.)
-     * Assumes error handler throws exceptions on errors if need be
-     * @deprecated This code depends on the older jena-iri
-     */
-    @Deprecated(forRemoval = true)
-    public static boolean iriViolations(IRI iri, ErrorHandler errorHandler,
-                                        boolean allowRelativeIRIs, boolean includeIRIwarnings,
-                                        long line, long col) {
-
-        if ( !allowRelativeIRIs && iri.isRelative() )
-            // Relative IRIs.
-            iriViolationMessage(iri.toString(), true, "Relative IRI: " + iri, line, col, errorHandler);
-
-        boolean isOK = true;
-
-        if ( iri.hasViolation(includeIRIwarnings) ) {
-            Iterator<Violation> iter = iri.violations(includeIRIwarnings);
-
-            for ( ; iter.hasNext() ; ) {
-                Violation v = iter.next();
-                int code = v.getViolationCode();
-                boolean isError = v.isError();
-
-                // --- Tune warnings.
-                // IRIProviderJena filters ERRORs and throws an exception on error.
-                // It can't add warnings or remove them at that point.
-                // Do WARN filtering here.
-                if ( code == Violation.LOWERCASE_PREFERRED && v.getComponent() != IRIComponents.SCHEME ) {
-                    // Issue warning about the scheme part only. Not e.g. DNS names.
-                    continue;
-                }
-
-                // Convert selected violations from ERROR to WARN for output.
-                // There are cases where jena-iri always makes a violation an ERROR regardless of SetupJenaIRI
-                // PROHIBITED_COMPONENT_PRESENT
-//                if ( code == Violation.PROHIBITED_COMPONENT_PRESENT )
-//                    isError = false;
-
-                isOK = false;
-                String msg = v.getShortMessage();
-                String iriStr = iri.toString();
-                iriViolationMessage(iriStr, isError, msg, line, col, errorHandler);
+        try {
+            IRIx iri = IRIs.reference(iriStr);
+            if ( iri instanceof IRIProviderJenaIRI.IRIxJena jiri ) {
+                IRI jenaIRI = jiri.getImpl();
+                return CheckerJenaIRI.iriViolations(jenaIRI, errorHandler, line, col);
             }
+            if ( ! iri.hasViolations() )
+                return true;
+            // IRI errors are errorHandler warnings when checking.
+            iri.handleViolations((isError, message)->{
+                    errorHandler.warning(message, line, col);
+            });
+            return false;
+        } catch (IRIException ex) {
+            errorHandler.warning(ex.getMessage(), line, col);
+            return false;
         }
-        return isOK;
     }
 
     /**
@@ -188,8 +130,15 @@ public class Checker {
         } catch (org.apache.jena.iri.IRIException | org.apache.jena.irix.IRIException ex) {}
     }
 
-    // ==== Literals
-
+//    /**
+//     * Process violations on an IRI Calls the {@link ErrorHandler} on all errors and
+//     * warnings (as warnings).
+//     */
+//    @Deprecated(forRemoval = true)
+//    public static void iriViolations(IRI iri) {
+//        iriViolations(iri, nullErrorHandler, false, true, -1L, -1L);
+//    }
+//
     final static private Pattern langPattern = Pattern.compile("[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*");
 
     public static boolean checkLiteral(Node node) {
