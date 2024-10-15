@@ -67,6 +67,10 @@ public class Chars3986 {
         return range(ch, 'a', 'z') || range(ch, 'A', 'Z');
     }
 
+    public static boolean isAlphaNum(char ch) {
+        return isAlpha(ch) || isDigit(ch);
+    }
+
     /** RFC3987: International alphabetic. */
     public static boolean isIAlpha(char ch) {
         return isAlpha(ch) || isUcsChar(ch);
@@ -174,12 +178,12 @@ public class Chars3986 {
 
     private static boolean percentCheck(int idx, char ch1, char ch2) {
         if ( ch1 == EOF || ch2 == EOF ) {
-            parseError(idx+1, "Incomplete %-encoded character");
+            parseError(null, idx+1, "Incomplete %-encoded character");
             return false;
         }
         if ( isHexDigit(ch1) && isHexDigit(ch2) )
             return true;
-        parseError(idx+1, "Bad %-encoded character ["+displayChar(ch1)+" "+displayChar(ch2)+"]");
+        parseError(null, idx+1, "Bad %-encoded character ["+displayChar(ch1)+" "+displayChar(ch2)+"]");
         return false;
     }
 
@@ -214,7 +218,18 @@ public class Chars3986 {
         return -1;
     }
 
-    private static void parseError(int posn, String s) {
-        // Choice of error handling.
+    /** Test for 'A' to 'F' */
+    public static boolean isHexDigitUC(char ch) {
+        return range(ch, 'A', 'F' )  ;
+    }
+
+    /** Test for 'a' to 'f' */
+    static boolean isHexDigitLC(char ch) {
+        return range(ch, 'a', 'f' )  ;
+    }
+
+    // How to handle pare errors (percent encoding).
+    private static void parseError(String string, int posn, String msg) {
+        // Choice of error handling exception.
     }
 }
