@@ -24,6 +24,7 @@ import org.apache.jena.external.Scripts_LangSuiteCG;
 import org.apache.jena.external.Scripts_RDFStar;
 import org.apache.jena.external.Scripts_SPARQL11;
 import org.apache.jena.http.auth.TS_HttpAuth;
+import org.apache.jena.iri3986.provider.InitIRI3986;
 import org.apache.jena.rdfs.TS_InfRdfs;
 import org.apache.jena.riot.Scripts_AltTurtle;
 import org.apache.jena.riot.Scripts_LangSuite;
@@ -83,6 +84,7 @@ import org.junit.runners.Suite;
 public class ARQTestSuite {
     static {
         JenaSystem.init();
+        InitIRI3986.init();
     }
 
     public static final String testDirARQ                  = "testing/ARQ";
