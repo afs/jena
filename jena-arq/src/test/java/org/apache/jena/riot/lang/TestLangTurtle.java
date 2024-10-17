@@ -164,7 +164,7 @@ public class TestLangTurtle
     @Test(expected=ExWarning.class)
     public void errorBadURI_2()         { parse("<http://example/a%XAb> <http://example/p> 123 .") ; }
 
-    @Test
+    @Test (expected=ExWarning.class)
     public void errorBadURI_3()         { parse("<http://example/a%Aab> <http://example/p> 123 .") ; }
 
     // Bad URIs

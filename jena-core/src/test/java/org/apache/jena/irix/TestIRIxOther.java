@@ -52,6 +52,12 @@ public class TestIRIxOther extends AbstractTestIRIx {
         notStrict("urn", ()->bad("urn:x:abc"));
     }
 
+    // Jena rules uses urn:x-hp in a way that is exposed to user code so can't be simply updated.
+    @Test public void irix_jena_1() {
+        good("urn:x-hp:abc");
+        //urn:x-hp-direct-predicate:
+    }
+
     // Full check
     private void good(String string) {
         IRIx iri = test_create(string);
@@ -76,4 +82,3 @@ public class TestIRIxOther extends AbstractTestIRIx {
         } catch (IRIException ex) {}
     }
 }
-
