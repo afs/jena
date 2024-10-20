@@ -18,8 +18,6 @@
 
 package org.apache.jena.iri3986.provider;
 
-import org.apache.jena.irix.IRIProvider;
-import org.apache.jena.irix.SystemIRIx;
 import org.seaborne.rfc3986.ErrorHandler;
 import org.seaborne.rfc3986.SystemIRI3986;
 import org.seaborne.rfc3986.Violations;
@@ -33,19 +31,22 @@ public class InitIRI3986 {
 
     private static Logger LOG = LoggerFactory.getLogger("IRI3986");
 
-    private static IRIProvider systemtDefaultProvider = null;
+    private static boolean initialized = false;
 
     // Call, or move code to, SystemIRIx.init
     public static void init() {
-        if ( systemtDefaultProvider == null )
-            systemtDefaultProvider = SystemIRIx.getProvider();
-
-        IRIProvider3986 provider = new IRIProvider3986();
-        // Errors and warnings should be handled via exceptions and violations.
-        // In case any aren't, set the IRI3986 system error handler
-        ErrorHandler iri3986errorHandler = ErrorHandler.create(msg->LOG.error(msg), msg->LOG.warn(msg));
-        SystemIRI3986.setErrorHandler(iri3986errorHandler);
-        Violations.setSystemSeverityMap(JenaSeveritySettings.jenaSystemSettings());
-        SystemIRIx.setProvider(provider);
+        if ( initialized )
+            return;
+        synchronized(InitIRI3986.class) {
+            if ( initialized )
+                return;
+            initialized = true;
+            // Errors and warnings should be handled via exceptions and violations.
+            // In case any aren't, set the IRI3986 system error handler, for safety.
+            ErrorHandler iri3986errorHandler = ErrorHandler.create(msg->LOG.error(msg), msg->LOG.warn(msg));
+            SystemIRI3986.setErrorHandler(iri3986errorHandler);
+            // Jena setup.
+            Violations.setSystemSeverityMap(JenaSeveritySettings.jenaSystemSettings());
+        }
     }
 }

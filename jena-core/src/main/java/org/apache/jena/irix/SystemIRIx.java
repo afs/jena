@@ -20,6 +20,8 @@ package org.apache.jena.irix;
 
 import org.apache.jena.atlas.lib.IRILib;
 import org.apache.jena.atlas.logging.Log;
+import org.apache.jena.iri3986.provider.IRIProvider3986;
+import org.apache.jena.iri3986.provider.InitIRI3986;
 
 /**
  * System setup and configuration.
@@ -35,29 +37,35 @@ public class SystemIRIx {
         newProviderJenaIRI.strictMode("file", false);
         return newProviderJenaIRI;
     }
-    private static IRIProvider providerJenaIRI = makeProviderJenaIRI();
+
+    private static IRIProvider makeProviderIRI3986() {
+        InitIRI3986.init();
+        IRIProvider3986 providerIRI3986 = new IRIProvider3986();
+//      newProviderIRI3986.strictMode("urn", true);
+//      newProviderIRI3986.strictMode("http", true);
+//      newProviderIRI3986.strictMode("file", true);
+        return providerIRI3986;
+    }
 
     // ** Do not use IRIProviderJDK in production. **
     private static IRIProvider makeProviderJDK() { return new IRIProviderJDK(); }
 
-//    private static IRIProvider makeProviderIRI3986() {
-//        IRIProvider newProviderIRI3986 = new IRIProvider3986();
-//        newProviderIRI3986.strictMode("urn", true);
-//        newProviderIRI3986.strictMode("http", true);
-//        newProviderIRI3986.strictMode("file", true);
-//    }
-//    private static IRIProvider providerIRI3986 = makeProviderIRI3986();
+    // -- System provider choice
+
+    public static IRIProvider makeFreshSystemProvider() {
+        // This is the choice point.
+        //return makeProviderJenaIRI();
+        return makeProviderIRI3986();
+    }
 
     // -- System-wide provider.
 
-    public static IRIProvider makeFreshSystemProvider() {
-        // Choice point.
-        return makeProviderJenaIRI();
-    }
-
     private static IRIProvider provider = makeFreshSystemProvider();
 
-    public static void init() {}
+    // -- Initialization (called from InitjenaCore)
+
+    public static void init() { }
+
     public static void reset() {
         provider = makeFreshSystemProvider();
     }
