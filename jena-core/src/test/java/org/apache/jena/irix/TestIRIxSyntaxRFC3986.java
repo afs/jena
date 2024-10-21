@@ -31,7 +31,7 @@ import org.junit.runners.Parameterized;
  * {@link TestIRIxJenaSystem} contains tests with more scheme errors and warnings. It also compares to jena-iri.
  */
 @RunWith(Parameterized.class)
-public class TestIRIxSyntaxRFC3986 extends AbstractTestIRIx {
+public class TestIRIxSyntaxRFC3986 extends AbstractTestIRIx_3986 {
 
     public TestIRIxSyntaxRFC3986(String name, IRIProvider provider) {
         super(name, provider);

@@ -25,7 +25,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
-public class TestIRIxRelativize extends AbstractTestIRIx {
+public class TestIRIxRelativize extends AbstractTestIRIx_3986 {
 
     public TestIRIxRelativize(String name, IRIProvider provider) {
         super(name, provider);

@@ -18,9 +18,9 @@
 
 package org.apache.jena.iri3986.provider;
 
-import org.seaborne.rfc3986.ErrorHandler;
-import org.seaborne.rfc3986.SystemIRI3986;
-import org.seaborne.rfc3986.Violations;
+import org.apache.jena.rfc3986.ErrorHandler;
+import org.apache.jena.rfc3986.SystemIRI3986;
+import org.apache.jena.rfc3986.Violations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,6 @@ public class InitIRI3986 {
 
     private static boolean initialized = false;
 
-    // Call, or move code to, SystemIRIx.init
     public static void init() {
         if ( initialized )
             return;

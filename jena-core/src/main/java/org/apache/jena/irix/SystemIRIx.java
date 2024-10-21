@@ -22,6 +22,7 @@ import org.apache.jena.atlas.lib.IRILib;
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.iri3986.provider.IRIProvider3986;
 import org.apache.jena.iri3986.provider.InitIRI3986;
+import org.apache.jena.shared.JenaException;
 
 /**
  * System setup and configuration.
@@ -41,9 +42,6 @@ public class SystemIRIx {
     private static IRIProvider makeProviderIRI3986() {
         InitIRI3986.init();
         IRIProvider3986 providerIRI3986 = new IRIProvider3986();
-//      newProviderIRI3986.strictMode("urn", true);
-//      newProviderIRI3986.strictMode("http", true);
-//      newProviderIRI3986.strictMode("file", true);
         return providerIRI3986;
     }
 
@@ -52,10 +50,19 @@ public class SystemIRIx {
 
     // -- System provider choice
 
+    private enum ProviderImpl { JENA_IRI, IRI3986 }
+
+    //private static final ProviderImpl providerImpl = ProviderImpl.JENA_IRI;
+    private static final ProviderImpl providerImpl = ProviderImpl.IRI3986;
+
     public static IRIProvider makeFreshSystemProvider() {
-        // This is the choice point.
-        //return makeProviderJenaIRI();
-        return makeProviderIRI3986();
+        // ** This is the implementation choice point. **
+        return switch(providerImpl) {
+            case IRI3986 -> makeProviderIRI3986();
+            case JENA_IRI -> makeProviderJenaIRI();
+            default ->
+                throw new JenaException("Unknown IRIx Provider");
+        };
     }
 
     // -- System-wide provider.
@@ -64,7 +71,7 @@ public class SystemIRIx {
 
     // -- Initialization (called from InitjenaCore)
 
-    public static void init() { }
+    public static void init() {}
 
     public static void reset() {
         provider = makeFreshSystemProvider();
@@ -108,6 +115,7 @@ public class SystemIRIx {
     }
 
     private static IRIx establishBaseURI() {
+        init();
         try {
             String baseStr = IRILib.filenameToIRI("./");
             if ( ! baseStr.endsWith("/") )

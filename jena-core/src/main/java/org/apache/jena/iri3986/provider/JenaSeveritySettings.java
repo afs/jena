@@ -21,9 +21,9 @@ package org.apache.jena.iri3986.provider;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.seaborne.rfc3986.Issue;
-import org.seaborne.rfc3986.Severity;
-import org.seaborne.rfc3986.SeverityMap;
+import org.apache.jena.rfc3986.Issue;
+import org.apache.jena.rfc3986.Severity;
+import org.apache.jena.rfc3986.SeverityMap;
 
 public class JenaSeveritySettings {
 
@@ -40,7 +40,7 @@ public class JenaSeveritySettings {
 
         // General
         SeverityMap.setSeverity(severityMap, Issue.iri_percent_not_uppercase,         Severity.WARNING);
-        SeverityMap.setSeverity(severityMap, Issue.iri_host_not_lowercase,            Severity.WARNING);
+        SeverityMap.setSeverity(severityMap, Issue.iri_host_not_lowercase,            Severity.IGNORE);
         SeverityMap.setSeverity(severityMap, Issue.iri_user_info_present,             Severity.WARNING);
         SeverityMap.setSeverity(severityMap, Issue.iri_password,                      Severity.ERROR);
         SeverityMap.setSeverity(severityMap, Issue.iri_bad_ipv4_address,              Severity.WARNING);

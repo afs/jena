@@ -28,16 +28,18 @@ import org.junit.BeforeClass;
 import org.junit.runners.Parameterized.Parameters;
 
 import org.apache.jena.iri3986.provider.IRIProvider3986;
+import org.apache.jena.iri3986.provider.JenaSeveritySettings;
+import org.apache.jena.rfc3986.Violations;
 
-/** Test suite driver for IRIx.
+/**
+ * Test suite driver for IRIx.
  * The test execution environment is set to be "strict".
  * Tests can change this; it is reset after each test.
  */
-public class AbstractTestIRIx {
+public class AbstractTestIRIx_3986 {
 
     @Parameters(name = "{index}: {0}")
     public static Iterable<Object[]> data() {
-        SystemIRIx.init();
         List<Object[]> data = new ArrayList<>();
         data.add(new Object[]{"IRI3986", new IRIProvider3986()});
         data.add(new Object[]{"JenaIRI", new IRIProviderJenaIRI()});
@@ -45,6 +47,7 @@ public class AbstractTestIRIx {
         // Does not pass the test suite.
         //data.add(new Object[]{"JDK.URI", new IRIProviderJDK()});
         // Wire up IRIProvider3986 error/warning controls.
+        Violations.setSystemSeverityMap(JenaSeveritySettings.jenaSystemSettings());
         return data;
     }
 
@@ -109,7 +112,7 @@ public class AbstractTestIRIx {
         systemProvider.strictMode("did",  StrictDID);
     }
 
-    protected AbstractTestIRIx(String name, IRIProvider provider) {
+    protected AbstractTestIRIx_3986(String name, IRIProvider provider) {
         this.provider = provider;
     }
 

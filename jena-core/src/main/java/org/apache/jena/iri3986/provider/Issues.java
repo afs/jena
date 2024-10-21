@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.jena.atlas.lib.Lib;
 import org.apache.jena.atlas.logging.FmtLog;
-import org.seaborne.rfc3986.Issue;
+import org.apache.jena.rfc3986.Issue;
 
 class Issues {
 

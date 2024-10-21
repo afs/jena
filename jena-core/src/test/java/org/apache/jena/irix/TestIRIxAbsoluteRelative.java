@@ -25,7 +25,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
-public class TestIRIxAbsoluteRelative extends AbstractTestIRIx {
+public class TestIRIxAbsoluteRelative extends AbstractTestIRIx_3986 {
 
     public TestIRIxAbsoluteRelative(String name, IRIProvider provider) {
         super(name, provider);

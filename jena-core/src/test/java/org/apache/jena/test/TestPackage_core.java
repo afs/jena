@@ -20,7 +20,6 @@ package org.apache.jena.test;
 
 import junit.framework.TestCase ;
 import junit.framework.TestSuite ;
-import org.apache.jena.iri3986.provider.InitIRI3986;
 import org.apache.jena.rdf.model.impl.RDFReaderFImpl;
 import org.apache.jena.sys.JenaSystem;
 
@@ -31,7 +30,6 @@ public class TestPackage_core extends TestCase {
 
     static public TestSuite suite() {
         JenaSystem.init();
-        InitIRI3986.init();
         // Reads Turtle (old parser, not up-to-date but we need something for testing.)
         RDFReaderFImpl.alternative(new X_RDFReaderF());
 

@@ -30,7 +30,7 @@ import org.junit.runners.Parameterized;
  * Tests that don't easily go in other TestIRIx suites.
  */
 @RunWith(Parameterized.class)
-public class TestIRIxOther extends AbstractTestIRIx {
+public class TestIRIxOther extends AbstractTestIRIx_3986 {
 
     public TestIRIxOther(String name, IRIProvider provider) {
         super(name, provider);
@@ -52,10 +52,9 @@ public class TestIRIxOther extends AbstractTestIRIx {
         notStrict("urn", ()->bad("urn:x:abc"));
     }
 
-    // Jena rules uses urn:x-hp in a way that is exposed to user code so can't be simply updated.
+    // Jena rules uses urn:x-hp in a way that is exposed to user code.
     @Test public void irix_jena_1() {
         good("urn:x-hp:abc");
-        //urn:x-hp-direct-predicate:
     }
 
     // Full check
@@ -82,3 +81,4 @@ public class TestIRIxOther extends AbstractTestIRIx {
         } catch (IRIException ex) {}
     }
 }
+

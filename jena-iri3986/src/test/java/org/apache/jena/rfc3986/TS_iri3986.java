@@ -16,28 +16,34 @@
  * limitations under the License.
  */
 
-package org.apache.jena.irix;
+package org.apache.jena.rfc3986;
 
-import org.junit.Test;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
-/**
- *
- */
-public class TestProvider extends AbstractTestIRIx {
+@Suite
+@SelectClasses( {
+    TestRFC3986Syntax.class,
+    TestIRI3986.class,
+    TestSystem3986.class,
 
-    protected TestProvider(String name, IRIProvider provider) {
-        super(name, provider);
-    }
+    TestBuild.class,
+    TestNormalize.class,
+    TestRelative.class,
+    TestRelativePaths.class,
+    TestRelativeVariants.class,
+    TestResolve.class,
 
-    @Test public void providr_01() {
-//        getProvider().strictMode(scheme, runStrict);
-//        getProvider().check(iriStr); // IRIExcpettion
-//        getProvider().create(iriStr); // IRIExcpettion
+    TestParseDID.class,
+    TestParseDNS.class,
 
-    }
+    TestParseIPv4Address.class,
+    TestParseIPv6Address.class,
+    TestParseOID.class,
+    TestParseURN.class,
+    TestParseURNComponents.class,
 
-    // strict
+    TestURISchemes.class,
+} )
 
-
-
-}
+public class TS_iri3986 { }

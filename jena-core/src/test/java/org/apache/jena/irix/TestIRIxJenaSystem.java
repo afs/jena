@@ -39,7 +39,7 @@ import org.apache.jena.iri.IRI;
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(Parameterized.class)
-public class TestIRIxJenaSystem extends AbstractTestIRIx {
+public class TestIRIxJenaSystem extends AbstractTestIRIx_3986 {
     public TestIRIxJenaSystem(String name, IRIProvider provider) {
         super(name, provider);
     }

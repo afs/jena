@@ -18,13 +18,16 @@
 
 package org.apache.jena.iri3986.provider;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
 import org.apache.jena.irix.IRIException;
 import org.apache.jena.irix.IRIProvider;
 import org.apache.jena.irix.IRIx;
-import org.seaborne.rfc3986.*;
+import org.apache.jena.rfc3986.*;
 
 public class IRIProvider3986 implements IRIProvider {
 
@@ -123,8 +126,8 @@ public class IRIProvider3986 implements IRIProvider {
                 String msg = v.message();
                 switch(severity) {
                     case INVALID -> throw new IRIException(msg);
-                    case ERROR  ->  handler.accept(true, msg);
-                    case WARNING -> handler.accept(false, msg);
+                    case ERROR  ->  handler.accept(TRUE, msg);
+                    case WARNING -> handler.accept(FALSE, msg);
                     case IGNORE ->  {}
                     default ->      {}
                 }
@@ -175,7 +178,7 @@ public class IRIProvider3986 implements IRIProvider {
      * {@link IRI3986#createAny} parses and records violations,
      * including syntax errors, but does not throws exceptions.
      * Specifically, it does not throw non-Jena exception
-     * {@link org.seaborne.rfc3986.IRIParseException}.
+     * {@link org.apache.jena.rfc3986.IRIParseException}.
      * This code then decides how to treat violations.
      */
     private static IRI3986 create3986(String iriStr) {
