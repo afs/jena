@@ -60,7 +60,8 @@ public class TestModelStore {
     }
 
     @AfterClass public static void afterClass() {
-        EnvTest.stop(env);
+        // EXPERIMENT
+        // EnvTest.stop(env);
     }
 
     private static Model model1 = ModelFactory.createModelForGraph(SSE.parseGraph("(graph (:s :p :x) (:s :p 1))"));
