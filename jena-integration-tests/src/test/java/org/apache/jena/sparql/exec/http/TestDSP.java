@@ -52,7 +52,8 @@ public class TestDSP {
     }
 
     @AfterClass public static void afterClass() {
-        EnvTest.stop(env);
+        // EXPERIMENT
+        //EnvTest.stop(env);
     }
 
     private String url(String path) { return env.datasetPath(path); }
@@ -135,7 +136,7 @@ public class TestDSP {
         assertEquals(ct, h);
     }
 
-    
+
 
     // 404
 

@@ -16,17 +16,10 @@
  * limitations under the License.
  */
 
-package org.apache.jena.fuseki.main.prefixes;
+package org.apache.jena.fuseki.main;
 
-import org.junit.platform.suite.api.SelectClasses;
-import org.junit.platform.suite.api.Suite;
+public class NewTestSupport {
+    /*package*/ static boolean OneServerPerTestSuite = false;
+    /*package*/ static boolean CloseTestServers = true;
 
-@Suite
-@SelectClasses({
-      TestPrefixesActions.class
-    , TestPrefixesServicePlain.class
-    , TestPrefixesServiceRDF.class
-    , TestPrefixesServicePrefixesMap.class
-    , TestPrefixesActionResponse.class
-})
-public class PrefixesServiceTests {}
+}
