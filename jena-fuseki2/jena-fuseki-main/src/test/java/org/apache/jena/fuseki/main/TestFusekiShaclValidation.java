@@ -30,137 +30,212 @@ import org.apache.jena.http.HttpRDF;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.shacl.ValidationReport;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
 
 public class TestFusekiShaclValidation {
     // Fuseki Main server
     private static FusekiServer server = null;
-    private static String serverURL = null;
     private static final String DIR = "testing/ShaclValidation/";
+
+    // ==== Common code: TestFusekiStdSetup, TestFusekiStdReadOnlySetup, TestFusekiShaclValidation
+
+    private static Object lock = new Object();
+    private static boolean OneServerAllTests = false;
+
+    private static void sync(Runnable action) {
+        synchronized(lock) {
+            action.run();
+        }
+    }
 
     @BeforeAll
     public static void beforeClass() {
-        server = FusekiServer.create()
-            .port(0)
-            .parseConfigFile(DIR+"config-validation.ttl")
-            .build();
-        server.start();
-        serverURL = "http://localhost:"+server.getPort();
+        if ( OneServerAllTests ) {
+            server = createServer().start();
+        }
     }
 
     @AfterAll
     public static void afterClass() {
-        if ( server != null ) {
-            server.stop();
-            server = null;
+        if ( OneServerAllTests ) {
+              sync(()->{
+                  if ( server != null ) {
+                      server.stop();
+                      server = null;
+                  }
+              });
+          }
+    }
+
+    @FunctionalInterface
+    interface Action { void run(String datasetURL); }
+
+    private void withServer(Action action) {
+        FusekiServer server = server();
+        try {
+            String datasetURL = server.datasetURL("/ds");
+            sync(()-> {
+                action.run(datasetURL);
+            });
+        } finally {
+            finishWithServer(server);
         }
     }
 
-    @Test
-    public void shacl_empty_shapes() {
-        try ( RDFConnection conn = RDFConnection.connect(serverURL+"/ds")) {
-            conn.put(DIR+"data1.ttl");
-            ValidationReport report = validateReport(serverURL+"/ds/shacl?graph=default", DIR+"shapes-empty.ttl");
-            assertNotNull(report);
-            assertEquals(0, report.getEntries().size());
-            conn.update("CLEAR ALL");
+    private static FusekiServer createServer() {
+        DatasetGraph dsg = DatasetGraphFactory.createTxnMem();
+        synchronized(lock) {
+            server = FusekiServer.create()
+                    // With SHACL service.
+                    .parseConfigFile(DIR+"config-validation.ttl")
+                    .port(0)
+                    .build();
         }
+        return server;
     }
 
-    @Test
-    public void shacl_default_graph() {
-        try ( RDFConnection conn = RDFConnection.connect(serverURL+"/ds")) {
-            conn.put(DIR+"data1.ttl");
-            ValidationReport report = validateReport(serverURL+"/ds/shacl?graph=default", DIR+"shapes1.ttl");
-            assertNotNull(report);
-            assertEquals(3, report.getEntries().size());
-            conn.update("CLEAR ALL");
-        }
+    private FusekiServer server() {
+        if ( OneServerAllTests )
+            return server;
+        else
+            return createServer().start();
     }
 
-    @Test
-    public void shacl_no_data_graph() {
-        try ( RDFConnection conn = RDFConnection.connect(serverURL+"/ds")) {
-            conn.put(DIR+"data1.ttl");
-            try {
-                FusekiTestLib.expect404(()->{
-                    ValidationReport report = validateReport(serverURL+"/ds/shacl?graph=urn:abc:noGraph", DIR+"shapes1.ttl");
-                });
-            } finally {
-                conn.update("CLEAR ALL");
+    private void finishWithServer(FusekiServer server) {
+        if ( ! OneServerAllTests ) {
+            synchronized(lock) {
+                server.stop();
             }
         }
     }
 
+    // ====
+
+    @Test
+    public void shacl_empty_shapes() {
+        withServer((datasetURL)->{
+            try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
+                conn.put(DIR+"data1.ttl");
+                ValidationReport report = validateReport(datasetURL+"/shacl?graph=default", DIR+"shapes-empty.ttl");
+                assertNotNull(report);
+                assertEquals(0, report.getEntries().size());
+                conn.update("CLEAR ALL");
+            }
+        });
+    }
+
+    @Test
+    public void shacl_default_graph() {
+        withServer((datasetURL)->{
+            try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
+                conn.put(DIR+"data1.ttl");
+                ValidationReport report = validateReport(datasetURL+"/shacl?graph=default", DIR+"shapes1.ttl");
+                assertNotNull(report);
+                assertEquals(3, report.getEntries().size());
+                conn.update("CLEAR ALL");
+            }
+        });
+    }
+
+    @Test
+    public void shacl_no_data_graph() {
+        withServer((datasetURL)->{
+            try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
+                conn.put(DIR+"data1.ttl");
+                try {
+                    FusekiTestLib.expect404(()->{
+                        ValidationReport report = validateReport(datasetURL+"/shacl?graph=urn:abc:noGraph", DIR+"shapes1.ttl");
+                    });
+                } finally {
+                    conn.update("CLEAR ALL");
+                }
+            }
+        });
+    }
+
     @Test
     public void shacl_union_1() {
-        try ( RDFConnection conn = RDFConnection.connect(serverURL+"/ds")) {
-            conn.put(DIR+"data1.ttl");
-            ValidationReport report = validateReport(serverURL+"/ds/shacl?graph=union", DIR+"shapes1.ttl");
-            assertNotNull(report);
-            // Union does not include the storage default graph
-            assertEquals(0, report.getEntries().size());
-            conn.update("CLEAR ALL");
-        }
+        withServer((datasetURL)->{
+            try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
+                conn.put(DIR+"data1.ttl");
+                ValidationReport report = validateReport(datasetURL+"/shacl?graph=union", DIR+"shapes1.ttl");
+                assertNotNull(report);
+                // Union does not include the storage default graph
+                assertEquals(0, report.getEntries().size());
+                conn.update("CLEAR ALL");
+            }
+        });
     }
 
     @Test
     public void shacl_union_2() {
-        try ( RDFConnection conn = RDFConnection.connect(serverURL+"/ds")) {
-            conn.put("urn:abc:graph", DIR+"data1.ttl");
-            ValidationReport report = validateReport(serverURL+"/ds/shacl?graph=union", DIR+"shapes1.ttl");
-            assertNotNull(report);
-            assertEquals(3, report.getEntries().size());
-            conn.update("CLEAR ALL");
-        }
+        withServer((datasetURL)->{
+            try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
+                conn.put("urn:abc:graph", DIR+"data1.ttl");
+                ValidationReport report = validateReport(datasetURL+"/shacl?graph=union", DIR+"shapes1.ttl");
+                assertNotNull(report);
+                assertEquals(3, report.getEntries().size());
+                conn.update("CLEAR ALL");
+            }
+        });
     }
 
-    @Test
-    public void shacl_named_graph() {
-        try ( RDFConnection conn = RDFConnection.connect(serverURL+"/ds")) {
-            conn.put("urn:abc:graph", DIR+"data1.ttl");
-            ValidationReport report = validateReport(serverURL+"/ds/shacl?graph=urn:abc:graph", DIR+"shapes1.ttl");
-            assertNotNull(report);
-            assertEquals(3, report.getEntries().size());
-            conn.update("CLEAR ALL");
+        @Test
+        public void shacl_named_graph() {
+            withServer((datasetURL)->{
+                try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
+                    conn.put("urn:abc:graph", DIR+"data1.ttl");
+                    ValidationReport report = validateReport(datasetURL+"/shacl?graph=urn:abc:graph", DIR+"shapes1.ttl");
+                    assertNotNull(report);
+                    assertEquals(3, report.getEntries().size());
+                    conn.update("CLEAR ALL");
+                }
+            });
+        }
+
+        @Test
+        public void shacl_targetNode_1() {
+            withServer((datasetURL)->{
+                try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
+                    conn.put("urn:abc:graph", DIR+"data1.ttl");
+                    ValidationReport report = validateReport(datasetURL+"/shacl?graph=urn:abc:graph&target=:s1", DIR+"shapes1.ttl");
+                    assertNotNull(report);
+                    assertEquals(2, report.getEntries().size());
+                    conn.update("CLEAR ALL");
+                }
+            });
+        }
+
+        @Test
+        public void shacl_targetNode_2() {
+            withServer((datasetURL)->{
+                try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
+                    conn.put("urn:abc:graph", DIR+"data1.ttl");
+                    ValidationReport report = validateReport(datasetURL+"/shacl?graph=urn:abc:graph&target=:s3", DIR+"shapes1.ttl");
+                    assertNotNull(report);
+                    assertEquals(0, report.getEntries().size());
+                    conn.update("CLEAR ALL");
+                }
+            });
+        }
+
+        @Test
+        public void shacl_targetNode_3() {
+            withServer((datasetURL)->{
+                try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
+                    conn.put("urn:abc:graph", DIR+"data1.ttl");
+                    ValidationReport report = validateReport(datasetURL+"/shacl?graph=urn:abc:graph&target=http://nosuch/node/", DIR+"shapes1.ttl");
+                    assertNotNull(report);
+                    assertEquals(0, report.getEntries().size());
+                    conn.update("CLEAR ALL");
+                }
+            });
+        }
+
+        private static ValidationReport validateReport(String url, String shapesFile) {
+            Graph shapesGraph = RDFDataMgr.loadGraph(shapesFile);
+            Graph responseGraph = HttpRDF.httpPostGraphRtn(url, shapesGraph);
+            return ValidationReport.fromGraph(responseGraph);
         }
     }
-
-    @Test
-    public void shacl_targetNode_1() {
-        try ( RDFConnection conn = RDFConnection.connect(serverURL+"/ds")) {
-            conn.put("urn:abc:graph", DIR+"data1.ttl");
-            ValidationReport report = validateReport(serverURL+"/ds/shacl?graph=urn:abc:graph&target=:s1", DIR+"shapes1.ttl");
-            assertNotNull(report);
-            assertEquals(2, report.getEntries().size());
-            conn.update("CLEAR ALL");
-        }
-    }
-
-    @Test
-    public void shacl_targetNode_2() {
-        try ( RDFConnection conn = RDFConnection.connect(serverURL+"/ds")) {
-            conn.put("urn:abc:graph", DIR+"data1.ttl");
-            ValidationReport report = validateReport(serverURL+"/ds/shacl?graph=urn:abc:graph&target=:s3", DIR+"shapes1.ttl");
-            assertNotNull(report);
-            assertEquals(0, report.getEntries().size());
-            conn.update("CLEAR ALL");
-        }
-    }
-
-    @Test
-    public void shacl_targetNode_3() {
-        try ( RDFConnection conn = RDFConnection.connect(serverURL+"/ds")) {
-            conn.put("urn:abc:graph", DIR+"data1.ttl");
-            ValidationReport report = validateReport(serverURL+"/ds/shacl?graph=urn:abc:graph&target=http://nosuch/node/", DIR+"shapes1.ttl");
-            assertNotNull(report);
-            assertEquals(0, report.getEntries().size());
-            conn.update("CLEAR ALL");
-        }
-    }
-
-    private static ValidationReport validateReport(String url, String shapesFile) {
-        Graph shapesGraph = RDFDataMgr.loadGraph(shapesFile);
-        Graph responseGraph = HttpRDF.httpPostGraphRtn(url, shapesGraph);
-        return ValidationReport.fromGraph(responseGraph);
-    }
-}

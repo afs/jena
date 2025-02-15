@@ -60,12 +60,13 @@ public class TestGSP {
     }
 
     @AfterClass public static void afterClass() {
-        EnvTest.stop(env);
+        // EXPERIMENT
+        //EnvTest.stop(env);
     }
 
     // TESTS:
     // Change RDFFormat.
-    // Chnage httpClient
+    // Chaage httpClient
     // And DSP.
 
     private static Graph graph1 = SSE.parseGraph("(graph (:s :p :x) (:s :p 1))");
