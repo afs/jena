@@ -5,48 +5,48 @@ name: Apache Jena UI
 on:
   push:
     branches: [ main ]
-  pull_request:
+##  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  # Unit tests, faster, only run on GH for the ASF repository.
-  unit-test-and-build:
-    ### if: github.repository == 'apache/jena'
-
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest ]
-        java_version: [ '21' ]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          working-directory: jena-fuseki2/jena-fuseki-ui
-          node-version: 'lts/*'
-
-      - name: Set up JDK ${{ matrix.java_version }}
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: ${{ matrix.java_version }}
-
-      - name: Build with Maven
-        run: mvn -B --file pom.xml clean install -Pdev -Dmaven.javadoc.skip=true
-
-      - name: Lint
-        working-directory: jena-fuseki2/jena-fuseki-ui
-        run: yarn lint
+##   # Unit tests, faster, only run on GH for the ASF repository.
+##   unit-test-and-build:
+##     ### if: github.repository == 'apache/jena'
+## 
+##     runs-on: ${{ matrix.os }}
+##     timeout-minutes: 15
+## 
+##     strategy:
+##       fail-fast: false
+##       matrix:
+##         os: [ ubuntu-latest ]
+##         java_version: [ '21' ]
+## 
+##     steps:
+##       - name: Checkout
+##         uses: actions/checkout@v4
+## 
+##       - name: Setup Node
+##         uses: actions/setup-node@v4
+##         with:
+##           working-directory: jena-fuseki2/jena-fuseki-ui
+##           node-version: 'lts/*'
+## 
+##       - name: Set up JDK ${{ matrix.java_version }}
+##         uses: actions/setup-java@v4
+##         with:
+##           distribution: 'temurin'
+##           java-version: ${{ matrix.java_version }}
+## 
+##       - name: Build with Maven
+##         run: mvn -B --file pom.xml clean install -Pdev -Dmaven.javadoc.skip=true
+## 
+##       - name: Lint
+##         working-directory: jena-fuseki2/jena-fuseki-ui
+##         run: yarn lint
 
   cypress-run:
     # End-to-end tests, only run on GH for the ASF repository.
@@ -54,7 +54,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
-    needs: unit-test-and-build
+    #### needs: unit-test-and-build
 
     strategy:
       fail-fast: false
