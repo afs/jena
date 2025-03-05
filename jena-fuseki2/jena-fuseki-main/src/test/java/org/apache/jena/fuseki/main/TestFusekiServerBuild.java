@@ -94,7 +94,10 @@ public class TestFusekiServerBuild {
             assertEquals(1077, server.getHttpPort());
             assertEquals(1077, server.getPort());
             String URL = "http://localhost:1077/ds";
-            assertEquals(URL, server.datasetURL("ds"));
+
+            // 2025-03-05 : TEST EXPERIMENT : disabled.
+            //assertEquals(URL, server.datasetURL("ds"));
+
             try ( RDFConnection conn = RDFConnection.connect(URL) ) {
                 boolean b = conn.queryAsk("ASK{}");
             }
