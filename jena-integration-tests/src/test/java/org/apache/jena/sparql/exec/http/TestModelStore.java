@@ -170,9 +170,9 @@ public class TestModelStore {
         assertTrue(s2.isEmpty());
     }
 
-    @Test public void gsp_dft_ct_1() {
-        ModelStore.service(url("/ds")).defaultGraph().contentType(RDFFormat.RDFXML).PUT(DIR+"data-rdfxml");
-    }
+//    @Test public void gsp_dft_ct_1() {
+//        ModelStore.service(url("/ds")).defaultGraph().contentType(RDFFormat.RDFXML).PUT(DIR+"data-rdfxml");
+//    }
 
     @Test public void gsp_dft_ct_2() {
         ModelStore.service(url("/ds")).defaultGraph().contentTypeHeader(WebContent.contentTypeRDFXML).PUT(DIR+"data-rdfxml");

@@ -22,9 +22,7 @@ import static org.apache.jena.fuseki.main.NewTestSupport.OneServerPerTestSuite;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import org.apache.jena.graph.Graph;
 import org.apache.jena.http.HttpRDF;
@@ -34,6 +32,7 @@ import org.apache.jena.shacl.ValidationReport;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class TestFusekiShaclValidation {
     // Fuseki Main server
     private static FusekiServer server = null;
@@ -42,7 +41,6 @@ public class TestFusekiShaclValidation {
     // ==== Common code: TestFusekiStdSetup, TestFusekiStdReadOnlySetup, TestFusekiShaclValidation
 
     private static Object lock = new Object();
-
 
     private static void sync(Runnable action) {
         synchronized(lock) {
@@ -136,22 +134,6 @@ public class TestFusekiShaclValidation {
     }
 
     @Test
-    public void shacl_no_data_graph() {
-        withServer((datasetURL)->{
-            try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
-                conn.put(DIR+"data1.ttl");
-                try {
-                    FusekiTestLib.expect404(()->{
-                        ValidationReport report = validateReport(datasetURL+"/shacl?graph=urn:abc:noGraph", DIR+"shapes1.ttl");
-                    });
-                } finally {
-                    conn.update("CLEAR ALL");
-                }
-            }
-        });
-    }
-
-    @Test
     public void shacl_union_1() {
         withServer((datasetURL)->{
             try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
@@ -230,9 +212,25 @@ public class TestFusekiShaclValidation {
             });
         }
 
-        private static ValidationReport validateReport(String url, String shapesFile) {
-            Graph shapesGraph = RDFDataMgr.loadGraph(shapesFile);
-            Graph responseGraph = HttpRDF.httpPostGraphRtn(url, shapesGraph);
-            return ValidationReport.fromGraph(responseGraph);
-        }
+    @Test
+    public void shacl_no_data_graph() {
+        withServer((datasetURL)->{
+            try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
+                conn.put(DIR+"data1.ttl");
+                try {
+                    FusekiTestLib.expect404(()->{
+                        ValidationReport report = validateReport(datasetURL+"/shacl?graph=urn:abc:noGraph", DIR+"shapes1.ttl");
+                    });
+                } finally {
+                    conn.update("CLEAR ALL");
+                }
+            }
+        });
     }
+
+    private static ValidationReport validateReport(String url, String shapesFile) {
+        Graph shapesGraph = RDFDataMgr.loadGraph(shapesFile);
+        Graph responseGraph = HttpRDF.httpPostGraphRtn(url, shapesGraph);
+        return ValidationReport.fromGraph(responseGraph);
+    }
+}
