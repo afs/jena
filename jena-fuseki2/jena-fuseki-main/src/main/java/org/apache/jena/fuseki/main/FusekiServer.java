@@ -291,7 +291,8 @@ public class FusekiServer {
             scheme = "https";
             port =  getHttpsPort();
         }
-        return scheme+"://localhost:"+port;
+        //return scheme+"://localhost:"+port;
+        return scheme+"://127.0.0.1:"+port;
     }
 
     /** Get the underlying Jetty server which has also been set up. */
