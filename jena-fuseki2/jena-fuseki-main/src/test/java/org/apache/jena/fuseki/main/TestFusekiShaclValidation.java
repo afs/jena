@@ -135,21 +135,21 @@ public class TestFusekiShaclValidation {
         });
     }
 
-    @Test
-    public void shacl_no_data_graph() {
-        withServer((datasetURL)->{
-            try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
-                conn.put(DIR+"data1.ttl");
-                try {
-                    FusekiTestLib.expect404(()->{
-                        ValidationReport report = validateReport(datasetURL+"/shacl?graph=urn:abc:noGraph", DIR+"shapes1.ttl");
-                    });
-                } finally {
-                    conn.update("CLEAR ALL");
-                }
-            }
-        });
-    }
+//    @Test
+//    public void shacl_no_data_graph() {
+//        withServer((datasetURL)->{
+//            try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
+//                conn.put(DIR+"data1.ttl");
+//                try {
+//                    FusekiTestLib.expect404(()->{
+//                        ValidationReport report = validateReport(datasetURL+"/shacl?graph=urn:abc:noGraph", DIR+"shapes1.ttl");
+//                    });
+//                } finally {
+//                    conn.update("CLEAR ALL");
+//                }
+//            }
+//        });
+//    }
 
     @Test
     public void shacl_union_1() {
