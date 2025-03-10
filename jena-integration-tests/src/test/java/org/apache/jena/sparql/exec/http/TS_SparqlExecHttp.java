@@ -26,6 +26,7 @@ import org.junit.runners.Suite;
     { TestGSP.class
     , TestDSP.class
     , TestModelStore.class
+    , TestModelStore2.class
     , TestQueryExecHTTP.class
     , TestQueryExecCleanServer.class
     , TestUpdateExecHTTP.class

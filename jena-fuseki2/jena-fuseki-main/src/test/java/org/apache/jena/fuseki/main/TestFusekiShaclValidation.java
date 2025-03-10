@@ -96,6 +96,8 @@ public class TestFusekiShaclValidation {
     }
 
     private void finishWithServer(FusekiServer server) {
+        if ( NewTestSupport.OneServerPerTestSuite )
+            return;
         stopServer(server);
     }
 
@@ -104,6 +106,7 @@ public class TestFusekiShaclValidation {
             return;
         sync(()->server.stop());
     }
+
 
     // ====
 
@@ -212,21 +215,22 @@ public class TestFusekiShaclValidation {
             });
         }
 
-    @Test
-    public void shacl_no_data_graph() {
-        withServer((datasetURL)->{
-            try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
-                conn.put(DIR+"data1.ttl");
-                try {
-                    FusekiTestLib.expect404(()->{
-                        ValidationReport report = validateReport(datasetURL+"/shacl?graph=urn:abc:noGraph", DIR+"shapes1.ttl");
-                    });
-                } finally {
-                    conn.update("CLEAR ALL");
-                }
-            }
-        });
-    }
+        //Moved to TestFusekiShalcValidation2
+//    @Test
+//    public void shacl_no_data_graph() {
+//        withServer((datasetURL)->{
+//            try ( RDFConnection conn = RDFConnection.connect(datasetURL)) {
+//                conn.put(DIR+"data1.ttl");
+//                try {
+//                    FusekiTestLib.expect404(()->{
+//                        ValidationReport report = validateReport(datasetURL+"/shacl?graph=urn:abc:noGraph", DIR+"shapes1.ttl");
+//                    });
+//                } finally {
+//                    conn.update("CLEAR ALL");
+//                }
+//            }
+//        });
+//    }
 
     private static ValidationReport validateReport(String url, String shapesFile) {
         Graph shapesGraph = RDFDataMgr.loadGraph(shapesFile);

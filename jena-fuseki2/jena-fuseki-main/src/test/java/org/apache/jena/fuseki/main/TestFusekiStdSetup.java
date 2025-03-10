@@ -116,6 +116,8 @@ public class TestFusekiStdSetup {
     }
 
     private void finishWithServer(FusekiServer server) {
+        if ( NewTestSupport.OneServerPerTestSuite )
+            return;
         stopServer(server);
     }
 

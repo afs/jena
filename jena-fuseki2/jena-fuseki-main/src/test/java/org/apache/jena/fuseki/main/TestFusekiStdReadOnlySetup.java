@@ -77,7 +77,6 @@ public class TestFusekiStdReadOnlySetup {
             stopServer(server);
     }
 
-
     @FunctionalInterface
     interface Action { void run(String datasetURL); }
 
@@ -112,6 +111,8 @@ public class TestFusekiStdReadOnlySetup {
     }
 
     private void finishWithServer(FusekiServer server) {
+        if ( NewTestSupport.OneServerPerTestSuite )
+            return;
         stopServer(server);
     }
 

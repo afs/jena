@@ -57,6 +57,7 @@ import org.apache.jena.fuseki.main.sys.TestFusekiModules;
   , TS_PrefixesService.class
   , TestMetrics.class
   , TestFusekiShaclValidation.class
+  , TestFusekiShaclValidation2.class
 
 })
 public class TS_FusekiMain {}
