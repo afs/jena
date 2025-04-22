@@ -54,7 +54,18 @@ public class RDFParserRegistry
         if ( initialized )
             return;
         initialized = true;
-        initStandard();
+        try {
+            initStandard();
+        } catch (Throwable th) {
+            System.err.println(">> RDFParserRegistry");
+            System.err.println(th.getMessage());
+            if ( th.getCause() != null )
+                System.err.println(th.getCause().getMessage());
+            System.err.println("----");
+            th.printStackTrace();
+            System.err.println("<< RDFParserRegistry");
+            throw th;
+        }
     }
 
     private static void initStandard() {
