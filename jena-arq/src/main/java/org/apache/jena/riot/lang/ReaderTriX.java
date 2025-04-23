@@ -26,6 +26,7 @@ import javax.xml.stream.XMLStreamReader;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.datatypes.xsd.impl.XMLLiteralType;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Node_Marker;
@@ -116,7 +117,7 @@ public class ReaderTriX implements ReaderRIOT {
     private static String nsRDF = RDF.getURI();
     private static String nsXSD = XSDDatatype.XSD; // No "#"
     private static String nsXML0 = "http://www.w3.org/XML/1998/namespace";
-    private static String rdfXMLLiteral = RDF.xmlLiteral.getURI();
+    private static String rdfXMLLiteral = XMLLiteralType.XMLLiteralTypeURI;
 
     // State TRIPLE is "asserted triple" - a triple that will go into the output.
     // State TRIPLE_TERM is a triple term (<<()>>) that will be term in another triple/quad.
