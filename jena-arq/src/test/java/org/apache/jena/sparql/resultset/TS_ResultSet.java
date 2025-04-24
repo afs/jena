@@ -18,6 +18,8 @@
 
 package org.apache.jena.sparql.resultset;
 
+import org.apache.jena.sys.JenaSystem;
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith ;
 import org.junit.runners.Suite ;
 
@@ -29,4 +31,7 @@ import org.junit.runners.Suite ;
 })
 public class TS_ResultSet
 {
+    @BeforeClass public static void beforeClass() {
+        JenaSystem.init();
+    }
 }
