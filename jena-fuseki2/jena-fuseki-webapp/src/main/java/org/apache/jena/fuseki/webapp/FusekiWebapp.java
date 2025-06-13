@@ -39,6 +39,7 @@ import org.apache.jena.fuseki.Fuseki;
 import org.apache.jena.fuseki.FusekiConfigException;
 import org.apache.jena.fuseki.build.FusekiConfig;
 import org.apache.jena.fuseki.cmd.FusekiArgs;
+import org.apache.jena.fuseki.mgt.ActionDatasets;
 import org.apache.jena.fuseki.mgt.Template;
 import org.apache.jena.fuseki.mgt.TemplateFunctions;
 import org.apache.jena.fuseki.server.DataAccessPoint;
@@ -114,6 +115,27 @@ public class FusekiWebapp
     private static boolean    initialized        = false;
     // Marks the end of successful initialization.
     /*package*/static boolean serverInitialized  = false;
+
+    // Run-time lock for operations that change the server configuration (e..g adding and deleting data services)
+    public static final Object systemLock        = new Object();
+
+    /**
+     * Control whether to allow creating new dataservices by uploading a config file.
+     * See {@link ActionDatasets}.
+     *
+     */
+    public static final String allowConfigFileProperty = "fuseki:allowAddByConfigFile";
+
+    /**
+     * Return whether to allow service configuration files to be uploaded as a file.
+     * See {@link ActionDatasets}.
+     */
+    public static boolean allowConfigFiles() {
+        String value = System.getProperty(allowConfigFileProperty);
+        if ( value != null )
+            return "true".equals(value);
+        return false;
+    }
 
     public /*package*/ synchronized static void formatBaseArea() {
         if ( initialized )
