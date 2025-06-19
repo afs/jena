@@ -18,13 +18,19 @@
 
 package org.apache.jena.fuseki.mod.admin;
 
+import static org.apache.jena.fuseki.mgt.ServerMgtConst.opDatasets;
+import static org.apache.jena.http.HttpOp.httpPost;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
+import org.apache.jena.atlas.io.IOX;
 import org.apache.jena.atlas.logging.LogCtl;
 import org.apache.jena.atlas.web.HttpException;
 import org.apache.jena.atlas.web.TypedInputStream;
@@ -35,6 +41,7 @@ import org.apache.jena.fuseki.mgt.FusekiServerCtl;
 import org.apache.jena.http.HttpOp;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.riot.WebContent;
 import org.apache.jena.sparql.exec.http.Params;
 import org.apache.jena.web.HttpSC;
 import org.junit.jupiter.api.AfterAll;
@@ -104,6 +111,41 @@ public class TestAdminAddDatasetTemplate extends FusekiServerPerTestClass {
 
     @Test public void add_dataset_bad_10() {
         badAddDataserverRequest("//bad_10");
+    }
+
+    //@Test 
+    public void noOverwriteExistingConfigFile() {
+        withServer(server->{
+            try {
+                var workingDir = Paths.get(serverArea()).toAbsolutePath();
+                var path = workingDir.resolve("configuration/test-ds0-empty.ttl");
+                var dbConfig = path.toFile();
+                dbConfig.createNewFile();
+                try {
+                    // refresh the file system so that the file exists
+                    dbConfig = path.toFile();
+                    assertTrue (dbConfig.exists());
+                    assertEquals(0, dbConfig.length());
+
+                    // Try to override the file with a new configuration.
+                    String ct = WebContent.contentTypeHTMLForm;
+                    String body = "dbName=test-ds0-empty&dbType=mem";
+                    HttpException ex = assertThrows(org.apache.jena.atlas.web.HttpException.class,
+                                                    ()-> httpPost(server.serverURL() + "$/" + opDatasets, ct, body));
+                    assertEquals(HttpSC.CONFLICT_409, ex.getStatusCode());
+                    // refresh the file system
+                    dbConfig = path.toFile();
+                    assertTrue(dbConfig.exists());
+                    assertEquals(0, dbConfig.length(), "File should be still empty");
+                }
+                finally {
+                    // Clean up the file.
+                    if (Files.exists(path)) {
+                        Files.delete(path);
+                    }
+                }
+            } catch (IOException ex) { throw IOX.exception(ex); }
+        });
     }
 
     // add-delete
