@@ -33,7 +33,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -58,7 +60,11 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.riot.WebContent;
 import org.apache.jena.web.HttpSC;
 import org.awaitility.Awaitility;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.AssumptionViolatedException;
+import org.junit.Before;
+import org.junit.jupiter.api.Test;
 
 /** Tests of the admin functionality */
 public class TestWebappAdminAddDeleteDatasetFile extends AbstractFusekiWebappTest {
@@ -74,7 +80,6 @@ public class TestWebappAdminAddDeleteDatasetFile extends AbstractFusekiWebappTes
     // if the two databases are the same.
     static String dsTestTdb2a = "test-tdb2a";
     static String dsTestTdb2b = "test-tdb2b";
-    static String dsTestTdb2c = "test-tdb2c";
     static String fileBase    = "testing/";
 
     @Before public void setLogging() {
@@ -274,6 +279,36 @@ public class TestWebappAdminAddDeleteDatasetFile extends AbstractFusekiWebappTes
     @Test public void add_error_4() {
         HttpTest.execWithHttpException(HttpSC.BAD_REQUEST_400,
                                          ()-> addTestDataset(fileBase+"config-ds-bad-name-4.ttl"));
+    }
+
+    @Test public void noOverwriteExistingConfigFile() throws IOException {
+        var workingDir = Paths.get("").toAbsolutePath();
+        var path = workingDir.resolve(TS_FusekiWebapp.FusekiTestBase+"/configuration/test-ds0-empty.ttl");
+        var dbConfig = path.toFile();
+        dbConfig.createNewFile();
+        try {
+            // refresh the file system so that the file exists
+            dbConfig = path.toFile();
+            assertTrue (dbConfig.exists());
+            assertEquals(0, dbConfig.length());
+
+            // Try to override the file with a new configuration.
+            String ct = WebContent.contentTypeHTMLForm;
+            String body = "dbName=test-ds0-empty&dbType=mem";
+            HttpException ex = assertThrows(org.apache.jena.atlas.web.HttpException.class,
+                                            ()-> httpPost(ServerCtl.urlRoot()+"$/" + opDatasets, ct, body));
+            assertEquals(HttpSC.CONFLICT_409, ex.getStatusCode());
+            // refresh the file system
+            dbConfig = path.toFile();
+            assertTrue(dbConfig.exists());
+            assertEquals("File should be still empty", 0, dbConfig.length());
+        }
+        finally {
+            // Clean up the file.
+            if (Files.exists(path)) {
+                Files.delete(path);
+            }
+        }
     }
 
     @Test public void delete_dataset_1() {
