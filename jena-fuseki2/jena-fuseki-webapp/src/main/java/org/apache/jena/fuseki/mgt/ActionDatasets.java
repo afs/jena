@@ -254,13 +254,11 @@ public class ActionDatasets extends ActionContainerItem {
                 // ----
                 action.log.info(format("[%d] Create database : name = %s", action.id, datasetPath));
 
-                configFile = FusekiWebapp.generateConfigurationFilename(datasetPath);
                 List<String> existing = FusekiWebapp.existingConfigurationFile(datasetPath);
                 if ( ! existing.isEmpty() )
                     ServletOps.error(HttpSC.CONFLICT_409, "Configuration file for '"+datasetPath+"' already exists");
 
-                // Write to configuration directory.
-                RDFWriter.source(model).lang(Lang.TURTLE).output(configFile);
+                configFile = FusekiWebapp.generateConfigurationFilename(datasetPath);
 
                 // ---- Build the service
                 DataAccessPoint dataAccessPoint = FusekiConfig.buildDataAccessPoint(subject.getModel().getGraph(), subject.asNode(), registry);
@@ -270,13 +268,18 @@ public class ActionDatasets extends ActionContainerItem {
                     return null;
                 }
                 dataAccessPoint.getDataService().setEndpointProcessors(action.getOperationRegistry());
-                dataAccessPoint.getDataService().goActive();
+
+                // Write to configuration directory.
+                RDFWriter.source(model).lang(Lang.TURTLE).output(configFile);
+
                 if ( ! datasetPath.equals(dataAccessPoint.getName()) )
                     FmtLog.warn(action.log, "Inconsistent names: datasetPath = %s; DataAccessPoint name = %s", datasetPath, dataAccessPoint);
 
+                dataAccessPoint.getDataService().goActive();
                 succeeded = true;
-                // At this point, a server restarting will find the new service.
 
+                // At this point, a server restarting will find the new service.
+                // This next line makes it dispatchable in this running server.
                 action.getDataAccessPointRegistry().register(dataAccessPoint);
 
                 // Add to metrics
@@ -427,8 +430,7 @@ public class ActionDatasets extends ActionContainerItem {
                 action.getDataAccessPointRegistry().remove(name);
 
                 // Find the configuration.
-                String filename = name.startsWith("/") ? name.substring(1) : name;
-                List<String> configurationFiles = FusekiWebapp.existingConfigurationFile(filename);
+                List<String> configurationFiles = FusekiWebapp.existingConfigurationFile(name);
 
                 if ( configurationFiles.isEmpty() ) {
                     // -- Unmanaged
@@ -473,6 +475,7 @@ public class ActionDatasets extends ActionContainerItem {
                     // Delete databases created by the UI, or the admin operation, which are
                     // in predictable, unshared locations on disk.
                     // There may not be any database files, the in-memory case. (TDB supports an in-memeory mode.)
+                    String filename = name.startsWith("/") ? name.substring(1) : name;
                     Path pDatabase = FusekiWebapp.dirDatabases.resolve(filename);
                     if ( Files.exists(pDatabase)) {
                         try {

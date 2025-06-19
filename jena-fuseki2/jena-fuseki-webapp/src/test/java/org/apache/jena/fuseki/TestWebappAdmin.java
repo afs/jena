@@ -63,9 +63,6 @@ import org.junit.Test;
 public class TestWebappAdmin extends AbstractFusekiWebappTest {
 
     // Name of the dataset in the assembler file.
-    static String dsTest      = "test-ds1";
-    static String dsTestInf   = "test-ds4";
-
     static String fileBase    = "testing/";
 
     @Before public void setLogging() {
