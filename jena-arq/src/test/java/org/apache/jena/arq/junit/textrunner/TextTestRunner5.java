@@ -26,6 +26,7 @@ import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.LoggingListener;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
+import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
 import org.apache.jena.arq.junit.EarlReport;
 import org.apache.jena.arq.junit.manifest.EarlReporter;
@@ -60,14 +61,11 @@ public class TextTestRunner5 {
             out.println(string.get());
         });
 
-
-        TestExecutionListener testExecListener = new PrintExecutionListener(out);
-
-//        // Unsubtle
-//        System.setProperty(ManifestHolder.MANIFEST, filename);
-
-        // Best way?
+        //Best way?
+        // JUnit creates a ManifestHolder, no arguments, which has one TestFactory method.
+        // ManifestHolder.INIT picks up the manifest file from the configuration parameter,
         LauncherDiscoveryListener injectManifest = new ManifestHolder.INIT();
+
         LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
                 .selectors(DiscoverySelectors.selectClass(ManifestHolder.class))
                 .configurationParameter(ManifestHolder.MANIFEST, filename)
@@ -75,29 +73,30 @@ public class TextTestRunner5 {
                 .build();
 
         Launcher launcher = LauncherFactory.create();
-
         TestPlan testPlan = launcher.discover(request);
-        //System.err.println("X: "+testPlan.getConfigurationParameters().get(ManifestHolder.MANIFEST));
 
+        ExecutionStats executionStats = new ExecutionStats();
+        PrintExecutionListener printExecListener = new PrintExecutionListener(out);
 
-        if ( ! produceEarlReport ) {
-            launcher.registerTestExecutionListeners(testExecListener, summaryListener);
-        } else {
+        if ( produceEarlReport ) {
             // Build report, no output.
-            //launcher.registerTestExecutionListeners();
+            launcher.registerTestExecutionListeners(executionStats);
+        } else {
+            launcher.registerTestExecutionListeners(executionStats, printExecListener, summaryListener);
         }
 
+        // Run!
         launcher.execute(request);
 
-        // ----
+        // For skips tests.
+        TestExecutionSummary summary = summaryListener.getSummary();
 
-        var summary = summaryListener.getSummary();
         if ( summary != null ) {
             //summary.printTo(new PrintWriter(System.out));
             out.println();
-            out.println("Manifests:  "+summary.getContainersFoundCount());
-            out.println("Tests pass: "+summary.getTestsSucceededCount());
-            out.println("Tests fail: "+summary.getTestsFailedCount());
+            out.println("Manifests:  "+executionStats.getContainerCount());
+            out.println("Tests pass: "+executionStats.getTestPasses());
+            out.println("Tests fail: "+executionStats.getTestFailures());
             if ( summary.getTestsSkippedCount() > 0 )
                 out.println("Tests skip: "+summary.getTestsSkippedCount());
         }

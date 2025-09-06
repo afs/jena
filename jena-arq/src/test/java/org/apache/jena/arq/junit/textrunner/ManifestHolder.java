@@ -30,11 +30,10 @@ import org.apache.jena.arq.junit.Scripts;
 import org.apache.jena.shared.JenaException;
 
 // This class DOES NOT run on its own. It is used by TextTestRunner.
-
 class ManifestHolder {
 
     static class INIT implements LauncherDiscoveryListener {
-
+        // Necessary because JUnit creates an instance of ManifestHolder() when using class selection.
         @Override public void launcherDiscoveryStarted(LauncherDiscoveryRequest request) {
             String fn = request.getConfigurationParameters().get(MANIFEST).get();
             if ( fn == null ) {
@@ -49,7 +48,7 @@ class ManifestHolder {
     public static String namePrefix = null;
     public static String manifest = null;
 
-    public ManifestHolder() {}
+    public ManifestHolder() { }
 
     @TestFactory
     @DisplayName("TextTestRunner")
@@ -62,12 +61,8 @@ class ManifestHolder {
             System.err.println("Manifest not set");
             throw new JenaException("Manifest not set");
         }
-
-//            DynamicNode dn = DynamicTest.dynamicTest("Hello!", ()->System.err.println("ManifestHolder: Executable"));
-//            return Stream.of(dn);
-
         try {
-            var x = Scripts.manifestTestFactory(fn, namePrefix);
+            Stream<DynamicNode> x = Scripts.manifestTestFactory(fn, namePrefix);
             return x;
         } catch (Exception ex) {
             ex.printStackTrace();

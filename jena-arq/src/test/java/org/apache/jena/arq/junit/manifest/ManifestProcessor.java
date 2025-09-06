@@ -40,7 +40,6 @@ import org.apache.jena.system.G;
  * {@link DynamicContainer}.
  * <p>
  * Manifest files can contain other manifest files.
- *
  */
 public class ManifestProcessor {
 
