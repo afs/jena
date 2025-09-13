@@ -233,8 +233,11 @@ class ParserRRX_StAX_SR {
     private static final String parseTypeCollection    = "Collection";
     private static final String parseTypeLiteral       = "Literal";
     private static final String parseTypeLiteralAlt    = "literal";
-    private static final String parseTypeLiteralStmts  = "Statements";    // CIM Github issue 2473
+    private static final String parseTypeLiteralStmts  = "Statements";      // CIM Github issue 2473
     private static final String parseTypeResource      = "Resource";
+    private static final String parseTypeTriple        = "Triple";          // RDF 1.2
+    private static final String parseTypeTripleAlt     = "triple";          // Not RDF 1.2, but a likely mistake.
+
     // This is a dummy parseType for when there is no given rdf:parseType.
     private static final String parseTypePlain = "$$";
 
@@ -372,10 +375,22 @@ class ParserRRX_StAX_SR {
         }
 
         incIndent();
+
+        // The emitter is the out of triples.
+        // Mostly, it goes to the destination StreamRDF.
+        //
+        // For RDF 1.1 reified statements rdf:ID=... ,
+        // it is wrapper in code to emit the RDF 1.1 reification quad.
+        //
+        // For RDF 1.2 triple terms., it is change to capture one triple,
+        // that becomes a triple term in the asserted triple being constructed.
+
+        Emitter emitter = this::emit;
+
         if ( hasRDF )
-            nodeElementLoop(eventType);
+            nodeElementLoop(eventType, emitter);
         else
-            nodeElementSingle(eventType);
+            nodeElementSingle(eventType, emitter);
         decIndent();
 
         // Possible </rdf:RDF>
@@ -396,23 +411,23 @@ class ParserRRX_StAX_SR {
      * Top level node element loop inside &lt;rdf:RDF&gt;, &lt;/rdf:RDF&gt;.
      * This is zero or more node elements.
      */
-    private void nodeElementLoop(int eventType) {
+    private void nodeElementLoop(int eventType, Emitter emitter) {
         // There was an rdf:RDF
         // ---- Node Loop - sequence of zero or more RDF/XML node elements.
         // generic move over multiple elements
         while ( eventType >= 0 ) {
             if ( ! lookingAt(eventType, START_ELEMENT) )
                 break;
-            nodeElement();
+            nodeElement(emitter);
             eventType = nextEventTag();
         }
     }
 
     /** Top level single node element. (no &lt;rdf:RDF&gt;, &lt;/rdf:RDF&gt;) */
-    private void nodeElementSingle(int eventType) {
+    private void nodeElementSingle(int eventType, Emitter emitter) {
         if ( ! lookingAt(eventType, START_ELEMENT) )
             return ;
-        nodeElement();
+        nodeElement(emitter);
     }
 
     /**
@@ -420,15 +435,15 @@ class ParserRRX_StAX_SR {
      * On entry, the start of node element has been read.
      * On exit, have read the end tag for the node element.
      */
-    private void nodeElement() {
-        nodeElement(null);
+    private void nodeElement(Emitter emitter) {
+        nodeElement(null, emitter);
     }
 
     /**
      * Process one node element. The subject may have been been determined;
      * this is needed for nested node elements.
      */
-    private void nodeElement(Node subject) {
+    private void nodeElement(Node subject, Emitter emitter) {
         QName qName = qName();
 
         if ( ReaderRDFXML_StAX_SR.TRACE )
@@ -447,7 +462,7 @@ class ParserRRX_StAX_SR {
         boolean hasFrame = startElement();
         if ( subject == null )
             subject = attributesToSubjectNode();
-        nodeElementProcess(subject);
+        nodeElementProcess(subject, emitter);
         endElement(hasFrame);
         decIndent();
 
@@ -455,7 +470,7 @@ class ParserRRX_StAX_SR {
             trace.println("<< nodeElement: "+str(location())+" "+strEventType(eventType()));
     }
 
-    private void nodeElementProcess(Node subject) {
+    private void nodeElementProcess(Node subject, Emitter emitter) {
         QName qName = qName();
         Location location = location();
 
@@ -476,7 +491,7 @@ class ParserRRX_StAX_SR {
 
         // Finished with the node start tag.
         int event = nextEventTag();
-        event = propertyElementlLoop(subject, event);
+        event = propertyElementlLoop(subject, event, emitter);
 
         if ( ! lookingAt(event, END_ELEMENT) )
             throw RDFXMLparseError("Expected end element for "+qName());
@@ -484,12 +499,12 @@ class ParserRRX_StAX_SR {
 
     // ---- Property elements
 
-    private int propertyElementlLoop(Node subject, int event) {
+    private int propertyElementlLoop(Node subject, int event, Emitter emitter) {
         Counter listElementCounter = new Counter();
         while (true) {
             if ( ! lookingAt(event, START_ELEMENT) )
                 break;
-            propertyElement(subject, listElementCounter, location());
+            propertyElement(subject, listElementCounter, emitter, location());
             event = nextEventTag();
         }
         return event;
@@ -499,8 +514,7 @@ class ParserRRX_StAX_SR {
      * Property elements.
      * On entry, the start of property has been inspected but not consumed.
      */
-    private void propertyElement(Node subject, Counter listElementCounter, Location location) {
-        // Pass in location?
+    private void propertyElement(Node subject, Counter listElementCounter, Emitter emitter, Location location) {
         if ( ReaderRDFXML_StAX_SR.TRACE )
             trace.println(">> propertyElement: "+str(location())+" "+str(qName()));
 
@@ -514,7 +528,7 @@ class ParserRRX_StAX_SR {
         if ( isNotRecognizedRDFproperty(qName) )
             RDFXMLparseWarning(str(qName)+" is not a recognized RDF property");
 
-        propertyElementProcess(subject, qName, listElementCounter, location);
+        propertyElementProcess(subject, qName, listElementCounter, emitter, location);
         endElement(hasFrame);
         decIndent();
 
@@ -522,8 +536,7 @@ class ParserRRX_StAX_SR {
             trace.println("<< propertyElement: "+str(location())+" "+str(qName));
     }
 
-    private int propertyElementProcess(Node subject, QName qName,
-                                       Counter listElementCounter, Location location) {
+    private int propertyElementProcess(Node subject, QName qName, Counter listElementCounter, Emitter emitter, Location location) {
         Node property;
 
         if ( qNameMatches(rdfContainerItem, qName) )
@@ -532,7 +545,7 @@ class ParserRRX_StAX_SR {
             property = qNameToIRI(qName, QNameUsage.PropertyElement, location);
 
         Node reify = reifyStatement(location);
-        Emitter emitter = (reify==null) ? this::emit : (s,p,o,loc)->emitReify(reify, s, p, o, loc);
+        Emitter thisEmitter = (reify==null) ? emitter : (s,p,o,loc)->emitReify(reify, s, p, o, loc);
 
         // If there is a blank node label, the element must be empty,
         // Check NCName if blank node created
@@ -570,7 +583,7 @@ class ParserRRX_StAX_SR {
 
         Node innerSubject = processPropertyAttributes(resourceObj, qName, true, location);
         if ( resourceObj == null && innerSubject != null ) {
-            emitter.emit(subject, property, innerSubject, location);
+            thisEmitter.emit(subject, property, innerSubject, location);
             int event = nextEventAny();
             if ( ! lookingAt(event, END_ELEMENT) )
                 throw RDFXMLparseError("Expecting end element tag when using property attributes on a property element");
@@ -578,7 +591,7 @@ class ParserRRX_StAX_SR {
         }
 
         if ( resourceObj != null ) {
-            emitter.emit(subject, property, resourceObj, location);
+            thisEmitter.emit(subject, property, resourceObj, location);
             // Must be an empty element.
             int event = nextEventAny();
             if ( ! lookingAt(event, END_ELEMENT) )
@@ -596,25 +609,35 @@ class ParserRRX_StAX_SR {
                 RDFXMLparseWarning("Encountered rdf:parseType='Statements'. Treated as rdf:parseType='Literal'", location());
                 parseTypeName = "Literal";
             }
+            case parseTypeTripleAlt -> {
+                RDFXMLparseWarning("Encountered rdf:parseType='triple'. Treated as rdf:parseType='Triple'", location);
+                parseTypeName = parseTypeTriple;
+            }
         }
         switch(parseTypeName) {
             case parseTypeResource -> {
                 // Implicit <rdf:Description><rdf:Description> i.e. fresh blank node
                 if ( ReaderRDFXML_StAX_SR.TRACE )
                     trace.println("rdfParseType=Resource");
-                int event = parseTypeResource(subject, property, emitter, location);
+                int event = parseTypeResource(subject, property, thisEmitter, location);
+                return event;
+            }
+            case parseTypeTriple -> {
+                if ( ReaderRDFXML_StAX_SR.TRACE )
+                    trace.println("rdfParseType=Triple");
+                int event = parseTypeTriple(subject, property, thisEmitter, location);
                 return event;
             }
             case parseTypeLiteral -> {
                 if ( ReaderRDFXML_StAX_SR.TRACE )
                     trace.println("rdfParseType=Literal");
-                int event = parseTypeLiteral(subject, property, emitter, location);
+                int event = parseTypeLiteral(subject, property, thisEmitter, location);
                 return event;
             }
             case parseTypeCollection -> {
                 if ( ReaderRDFXML_StAX_SR.TRACE )
                     trace.println("rdfParseType=Collection");
-                int event = parseTypeCollection(subject, property, emitter, location);
+                int event = parseTypeCollection(subject, property, thisEmitter, location);
                 return event;
             }
             case parseTypePlain -> {} // The code below.
@@ -644,7 +667,7 @@ class ParserRRX_StAX_SR {
                     String msg = nonWhitespaceMsg(accCharacters.toString());
                     throw RDFXMLparseError("Content before node element. '"+msg+"'");
                 }
-                event = processNestedNodeElement(event, subject, property, emitter);
+                event = processNestedNodeElement(event, subject, property, thisEmitter);
                 return event;
             }
             if ( lookingAt(event, END_ELEMENT) ) {
@@ -658,17 +681,17 @@ class ParserRRX_StAX_SR {
                     obj = literal(lexicalForm, currentLang, loc);
                 else
                     obj = literal(lexicalForm, loc);
-                emitter.emit(subject, property, obj, loc);
+                thisEmitter.emit(subject, property, obj, loc);
                 return event;
             }
             throw RDFXMLparseError("Unexpected element: "+strEventType(event));
 
         } else if ( lookingAt(event, START_ELEMENT) ) {
             // No content before start element
-            event = processNestedNodeElement(event, subject, property, emitter);
+            event = processNestedNodeElement(event, subject, property, thisEmitter);
             return event;
         } else if (lookingAt(event, END_ELEMENT) ) {
-            emitter.emit(subject, property, NodeConst.emptyString, location);
+            thisEmitter.emit(subject, property, NodeConst.emptyString, location);
         } else {
             throw RDFXMLparseError("Malformed property. "+strEventType(event));
         }
@@ -808,8 +831,46 @@ class ParserRRX_StAX_SR {
         emitter.emit(subject, property, innerSubject, location);
         // Move to first property
         int event = nextEventTag();
-        event = propertyElementlLoop(innerSubject, event);
+        event = propertyElementlLoop(innerSubject, event, emitter);
         return event;
+    }
+
+    // Emitter to capture a triple.
+    private class EmitterCapture implements Emitter {
+        Triple triple = null;
+
+        void reset() { triple = null;}
+        Triple getTriple() { return triple; }
+
+        @Override
+        public void emit(Node subject, Node property, Node object, Location location) {
+            if ( triple != null )
+                throw RDFXMLparseError("Only one triple allowed in parse type Triple", location);
+            triple = Triple.create(subject, property, object);
+        }
+    }
+
+    private int parseTypeTriple(Node subject, Node property, Emitter outerEmitter, Location location) {
+        // XXX version must be 1.2 or more.
+        // Expect one exactly triple but object of which can itself be a triple term.
+
+        int event = nextEventTag();
+        // Maybe use a shared EmitterCapture.
+        // We only need to collect one triple, immediately grab it,
+        // then reset the collector for the next level up.
+
+        // Capture the triple for the triple term.
+        EmitterCapture innerEmitter = new EmitterCapture();
+        nodeElement(null, innerEmitter);
+        Triple t = innerEmitter.getTriple();
+        innerEmitter.reset();
+        if ( t == null )
+            throw RDFXMLparseError("No triple for parse type Triple", location);
+
+        Node object = NodeFactory.createTripleTerm(t);
+        outerEmitter.emit(subject, property, object, location);
+        int endEvent = nextEventTag();
+        return endEvent;
     }
 
     private int parseTypeLiteral(Node subject, Node property, Emitter emitter, Location location) {
@@ -1054,7 +1115,7 @@ class ParserRRX_StAX_SR {
             }
             Node itemSubject = attributesToSubjectNode();
             emit(thisCell, RDF.Nodes.first, itemSubject, location);
-            nodeElement(itemSubject);
+            nodeElement(itemSubject, emitter);
             lastCell = thisCell;
         }
 
@@ -1092,7 +1153,7 @@ class ParserRRX_StAX_SR {
         emitter.emit(subject, property, subjectInner, location());
 
         // Process as a node element, having decided the subject.
-        nodeElement(subjectInner);
+        nodeElement(subjectInner, emitter);
 
         // End property tag.
         int eventType = nextEventTag();
