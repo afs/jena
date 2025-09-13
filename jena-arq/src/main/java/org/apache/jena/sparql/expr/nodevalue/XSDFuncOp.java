@@ -311,7 +311,7 @@ public class XSDFuncOp
             float v = nv.getFloat();
             return v != 0.0f && ! Float.isNaN(v);
         }
-        NodeValue.raise(new ExprEvalException("Not a boolean effective value (wrong type): " + nv));
+        NodeValue.raise(new ExprEvalException("Not an effective boolean value (wrong type): " + nv));
         // Does not return
         return false;
     }
