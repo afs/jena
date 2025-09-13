@@ -257,6 +257,9 @@ class ParserRRX_SAX
         // The node implied by rdf:parseType=Resource
         ObjectParseTypeResource,
 
+        // The node is a triple term.
+        ObjectParseTypeTriple,
+
         // The object is rdf:parseType=Literal. Collecting characters of a RDF XML Literal
         ObjectParseTypeLiteral,
 
@@ -286,13 +289,34 @@ class ParserRRX_SAX
      * rdf:parseType for objects, with a default "Lexical" case - see
      * {@link #objectParseType} for alternative, non-standard names
      */
-    private enum ObjectParseType { Literal, Collection, Resource,
+    private enum ObjectParseType {
+        Literal,
+        Collection,
+        Resource,
+        // RDF 1.2 triple terms
+        Triple,
         // This is a extra parseType to indicate the "no ParseType" case
         // which is a plain lexical or nested resource.
-        Plain }
+        Plain
+    }
 
     // ---- Parser output
     interface Emitter { void emit(Node subject, Node property, Node object, Position position); }
+
+    // Emitter to capture a triple.
+    private  class EmitterCapture implements Emitter {
+        Triple triple = null;
+
+        void reset() { triple = null;}
+        Triple getTriple() { return triple; }
+
+        @Override
+        public void emit(Node subject, Node property, Node object, Position position) {
+            if ( triple != null )
+                throw RDFXMLparseError("Only one triple allowed in parse type Triple", position);
+            triple = Triple.create(subject, property, object);
+        }
+    }
 
     // ---- Parser state
 
@@ -568,7 +592,7 @@ class ParserRRX_SAX
                 processBaseAndLang(attributes, position);
             }
             case ObjectNode -> {
-                // Already in ObjectNode so a second statrtElement is an error.
+                // Already in ObjectNode so a second startElement is an error.
                 throw RDFXMLparseError("Start tag after inner node element (only one node element permitted): got "+qName, position);
             }
             default -> {
@@ -602,6 +626,9 @@ class ParserRRX_SAX
                 currentEmitter.emit(currentSubject, currentProperty, innerSubject, position);
                 // This is an rdf:Description or a typed node element.
                 startNodeElementWithSubject(innerSubject, namespaceURI, localName, qName, attributes, position);
+            }
+            case ObjectParseTypeTriple -> {
+                System.err.println("startElement: ObjectParseTypeTriple");
             }
             case ObjectParseTypeLiteral ->
                 // Handled on entry.
@@ -644,6 +671,25 @@ class ParserRRX_SAX
         switch (parserMode) {
             case NodeElement, ObjectNode ->
                 endNodeElement(position);
+            case ObjectParseTypeTriple -> {
+
+                // XX How do we know we have come back to the end of a (nested) triple term
+
+                endNodeElement(position);
+                if ( currentEmitter instanceof EmitterCapture ec ) {
+                    Triple t = ec.getTriple();
+                    if ( t == null ) {
+                        throw RDFXMLparseError("No triple for parse type triple", position);
+                    } else {
+                        ec.reset();
+                        Node tt = NodeFactory.createTripleTerm(t);
+                        currentEmitter.emit(currentSubject, currentProperty, tt, position);
+                    }
+                } else {
+                    throw RDFXMLparseError("Inconsistent parserMode:" + parserMode, position);
+                }
+            }
+
             case PropertyElement -> {
                 if ( isEndNodeElement() )
                     // Possible next property but it's a node element so no property
@@ -868,6 +914,14 @@ class ParserRRX_SAX
                 // ... expect a property element start or an end element.
                 parserMode(ParserMode.PropertyElement);
                 // There is nothing else special to do other than the implicit pop.
+            }
+            case Triple -> {
+                // XXX triple term
+                System.err.println("** TripleTerm");
+                pushParserFrame();
+                parserMode(ParserMode.ObjectParseTypeTriple);
+                // Very like parserMode(ParserMode.NodeElement)
+                currentEmitter = new EmitterCapture();
             }
             case Literal -> {
                 startXMLLiteral(position);
@@ -1161,6 +1215,11 @@ class ParserRRX_SAX
                     RDFXMLparseWarning("Encountered rdf:parseType='literal'. Treated as rdf:parseType='Literal'", position);
                     parseTypeName = "Literal";
                 }
+                case "triple" -> {
+                    RDFXMLparseWarning("Encountered rdf:parseType='triple'. Treated as rdf:parseType='Triple'", position);
+                    parseTypeName = "Triple";
+                }
+
                 // CIM (Common Information Model) - see github issue 2473
                 case "Statements" -> {
                     RDFXMLparseWarning("Encountered rdf:parseType='Statements'. Treated as rdf:parseType='Literal'", position);
@@ -1247,7 +1306,7 @@ class ParserRRX_SAX
                 return;
             }
             // Allow whitespace only
-            case NodeElement, PropertyElement, ObjectParseTypeResource, ObjectParseTypeCollection, ObjectNode -> {
+            case NodeElement, PropertyElement, ObjectParseTypeResource, ObjectParseTypeTriple, ObjectParseTypeCollection, ObjectNode -> {
                 if ( !isWhitespace(ch, start, length) ) {
                     String text = nonWhitespaceMsg(ch, start, length);
                     throw RDFXMLparseError("Non-whitespace text content between element tags: '"+text+"'", position());
