@@ -34,8 +34,8 @@ import org.apache.jena.atlas.logging.LogCtl;
 import org.apache.jena.atlas.web.WebLib;
 import org.apache.jena.cmd.CmdException;
 import org.apache.jena.fuseki.Fuseki;
-import org.apache.jena.fuseki.main.cmds.FusekiMain;
-import org.apache.jena.fuseki.main.cmds.ServerArgs;
+import org.apache.jena.fuseki.main.runner.FusekiMain;
+import org.apache.jena.fuseki.main.runner.ServerArgs;
 import org.apache.jena.fuseki.system.FusekiLogging;
 import org.apache.jena.riot.SysRIOT;
 

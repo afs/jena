@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.apache.jena.atlas.lib.FileOps;
 import org.apache.jena.fuseki.main.FusekiServer;
 import org.apache.jena.fuseki.main.cmds.FusekiMain;
+import org.apache.jena.fuseki.main.runner.FusekiRunner;
 import org.apache.jena.fuseki.main.sys.FusekiModules;
 import org.apache.jena.fuseki.mgt.FusekiServerCtl;
 import org.apache.jena.fuseki.mod.FusekiServerModules;
@@ -56,7 +57,7 @@ public class TestFusekiServer {
         String runBase = serverBase+"1";
         setup(runBase);
         // Build-run command line
-        FusekiServer server = FusekiServerRunner.runAsync("--port=0", "--empty");
+        FusekiServer server = FusekiRunner.basic().runAsync("--port=0", "--empty");
         try {
             int port = server.getPort();
             assertNotEquals(0, port, "Port is zero after async start");

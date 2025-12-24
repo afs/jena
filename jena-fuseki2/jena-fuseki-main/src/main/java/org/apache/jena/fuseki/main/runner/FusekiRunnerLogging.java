@@ -18,14 +18,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.apache.jena.fuseki.main;
+package org.apache.jena.fuseki.main.runner;
 
+import org.apache.jena.atlas.logging.FmtLog;
 import org.apache.jena.fuseki.Fuseki;
 import org.apache.jena.fuseki.FusekiException;
-import org.apache.jena.fuseki.server.FusekiCoreInfo;
+import org.apache.jena.fuseki.main.FusekiServer;
+import org.apache.jena.fuseki.main.sys.FusekiCoreInfo;
+import org.apache.jena.fuseki.main.sys.PlatformInfo;
 import org.slf4j.Logger;
 
-public class FusekiRunner {
+public class FusekiRunnerLogging {
 
     // ---- Logging fragments
 
@@ -36,23 +39,29 @@ public class FusekiRunner {
     public static void logServerSetup(Logger log, FusekiServer server) {
         boolean verbose = Fuseki.getVerbose(server.getServletContext());
         FusekiCoreInfo.logDataAccessPointRegistry(log, server.getDataAccessPointRegistry(), verbose);
-        FusekiCoreInfo.logSystemDetails(log);
+        if ( verbose )
+            PlatformInfo.logSystemDetails(log);
+        else
+            PlatformInfo.logProcessOS(log);
     }
 
     public static void logServerStart(Logger log, FusekiServer server) {
         if ( ! server.getJettyServer().isStarted() )
             throw new FusekiException("FusekiServer not ready");
+
         int httpPort = server.getHttpPort();
         int httpsPort = server.getHttpsPort();
-        if ( httpsPort > 0 && httpPort > 0 )
-            Fuseki.serverLog.info("Start Fuseki (http="+httpPort+" https="+httpsPort+")");
-        else if ( httpsPort > 0 )
-            Fuseki.serverLog.info("Start Fuseki (https="+httpsPort+")");
-        else if ( httpPort > 0 )
-            Fuseki.serverLog.info("Start Fuseki (http="+httpPort+")");
-        else
-            Fuseki.serverLog.info("Start Fuseki");
+
+        if ( httpsPort > 0 )
+            FmtLog.info(log, "Port: https=%s", httpsPort);
+
+        if ( httpPort > 0 )
+            FmtLog.info(log, "Port: http=%s", httpPort);
+
+        log.info("Start Fuseki");
     }
+
+
 
     public static void logServerStop(Logger log, FusekiServer server) {
         log.info("Stopping Fuseki");

@@ -56,7 +56,7 @@ import org.apache.jena.rdf.model.Model;
  *     Modules must not rely on a call to {@code serverStopped} happening.</li>
  * </ul>
  */
-public interface FusekiModule extends FusekiServerArgsCustomiser, FusekiBuildCycle, FusekiStartStop, FusekiActionCycle {
+public interface FusekiModule extends FusekiServerArgsHandler, FusekiBuildCycle, FusekiStartStop, FusekiActionCycle {
     // Gather all interface method together.
     // Inherited javadoc.
 

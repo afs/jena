@@ -33,8 +33,8 @@ import org.apache.jena.cmd.CmdException;
 import org.apache.jena.cmd.CmdGeneral;
 import org.apache.jena.fuseki.Fuseki;
 import org.apache.jena.fuseki.main.cmds.FusekiMain;
-import org.apache.jena.fuseki.main.cmds.ServerArgs;
-import org.apache.jena.fuseki.main.sys.FusekiServerArgsCustomiser;
+import org.apache.jena.fuseki.main.runner.ServerArgs;
+import org.apache.jena.fuseki.main.sys.FusekiServerArgsHandler;
 import org.apache.jena.fuseki.server.DataAccessPoint;
 import org.apache.jena.fuseki.system.FusekiLogging;
 import org.apache.jena.rdf.model.Model;
@@ -96,7 +96,7 @@ public class TestFusekiMainCmdCustomArguments {
     @Test
     public void test_custom_allowNoArgs() {
         String[] arguments1 = {"--port=0"};
-        FusekiServerArgsCustomiser customiser = new TestArgsAllowNoSetup();
+        FusekiServerArgsHandler customiser = new TestArgsAllowNoSetup();
         FusekiServer server1 = test(customiser, arguments1, serv->{});
         // Dataset arguments are allowed.
         String[] arguments2 = {"--port=0","--mem", "/ds"};
@@ -132,7 +132,7 @@ public class TestFusekiMainCmdCustomArguments {
     public void test_custom_confModel_replace() {
         // Ignores command line.
         String[] arguments = {"--port=0", "--conf=somefile.ttl", "--fixed"};
-        FusekiServerArgsCustomiser customiser = new TestArgsCustomModelAltArg(new ArgDecl(false, "fixed"), confFixed);
+        FusekiServerArgsHandler customiser = new TestArgsCustomModelAltArg(new ArgDecl(false, "fixed"), confFixed);
         FusekiServer server = test(customiser, arguments, serv->{
             DataAccessPoint dap1 = serv.getDataAccessPointRegistry().get("/ds");
             assertNull(dap1);
@@ -148,7 +148,7 @@ public class TestFusekiMainCmdCustomArguments {
     public void test_custom_confModel_different() {
         // Ignores command line --conf setting.
         String[] arguments = {"--port=0", "--conf=somefile.ttl"};
-        FusekiServerArgsCustomiser customiser = new TestArgsMyConfModel();
+        FusekiServerArgsHandler customiser = new TestArgsMyConfModel();
         FusekiServer server = test(customiser, arguments, serv->{
             DataAccessPoint dap1 = serv.getDataAccessPointRegistry().get("/ds");
             assertNull(dap1);
@@ -163,7 +163,7 @@ public class TestFusekiMainCmdCustomArguments {
     public void test_custom_confModel_different_ignore() {
         // --conf not used. Does not reset.
         String[] arguments = {"--port=0", "--mem", "/ds"};
-        FusekiServerArgsCustomiser customiser = new TestArgsMyConfModel();
+        FusekiServerArgsHandler customiser = new TestArgsMyConfModel();
         FusekiServer server = test(customiser, arguments, serv->{
             DataAccessPoint dap1 = serv.getDataAccessPointRegistry().get("/ds");
             assertNotNull(dap1);
@@ -184,7 +184,7 @@ public class TestFusekiMainCmdCustomArguments {
         });
     }
 
-    private FusekiServer test(FusekiServerArgsCustomiser customiser, String[] arguments, Consumer<FusekiServer> checker) {
+    private FusekiServer test(FusekiServerArgsHandler customiser, String[] arguments, Consumer<FusekiServer> checker) {
         FusekiMain.resetCustomisers();
         if ( customiser != null )
             FusekiMain.addCustomiser(customiser);
@@ -197,7 +197,7 @@ public class TestFusekiMainCmdCustomArguments {
     // ---- Arg customisers.
 
     // Allow no daatset or configuration.
-    static class TestArgsAllowNoSetup implements FusekiServerArgsCustomiser {
+    static class TestArgsAllowNoSetup implements FusekiServerArgsHandler {
         @Override
         public void serverArgsModify(CmdGeneral fusekiCmd, ServerArgs serverArgs) {
             serverArgs.allowEmpty = true;
@@ -205,7 +205,7 @@ public class TestFusekiMainCmdCustomArguments {
     }
 
     // Custom argument.
-    static class TestArgsCustomArg implements FusekiServerArgsCustomiser {
+    static class TestArgsCustomArg implements FusekiServerArgsHandler {
         final ArgDecl argDecl;
         String argValue = null;
         boolean argSeen = false;
@@ -227,7 +227,7 @@ public class TestFusekiMainCmdCustomArguments {
     };
 
     // --fixed triggers replacing the configuration model.
-    static class TestArgsCustomModelAltArg implements FusekiServerArgsCustomiser {
+    static class TestArgsCustomModelAltArg implements FusekiServerArgsHandler {
         final ArgDecl argDecl;
         final Model fixedModel;
         Model notedServerConfigModel = null;
@@ -263,7 +263,7 @@ public class TestFusekiMainCmdCustomArguments {
     };
 
     // Replace --conf setting with the model. Do nothing if no --conf.
-    static class TestArgsMyConfModel implements FusekiServerArgsCustomiser {
+    static class TestArgsMyConfModel implements FusekiServerArgsHandler {
 
         TestArgsMyConfModel() { }
 

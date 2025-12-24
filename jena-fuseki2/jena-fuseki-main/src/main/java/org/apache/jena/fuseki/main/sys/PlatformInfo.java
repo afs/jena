@@ -16,28 +16,18 @@
  * limitations under the License.
  */
 
-package org.apache.jena.fuseki.server;
+package org.apache.jena.fuseki.main.sys;
 
-import java.io.IOException;
 import java.util.function.Function;
 
 import org.apache.jena.atlas.logging.FmtLog;
 import org.slf4j.Logger;
 
 /** Platform information - OS and JVM */
-/*package*/ class PlatformInfo {
-
-    public static void main(String ...args) throws IOException {
-        long maxMem = Runtime.getRuntime().maxMemory();
-        long totalMem = Runtime.getRuntime().totalMemory();
-        long freeMem = Runtime.getRuntime().freeMemory();
-        long usedMem = totalMem - freeMem;
-        Function<Long, String> f = PlatformInfo::strNum2;
-        System.out.printf("max=%s  total=%s  used=%s  free=%s\n", f.apply(maxMem), f.apply(totalMem), f.apply(usedMem), f.apply(freeMem));
-    }
+public class PlatformInfo {
 
     /** System details */
-    /*package*/ static void logSystemDetails(Logger log) {
+    public static void logSystemDetails(Logger log) {
         String prefix = "  ";
         long maxMem = Runtime.getRuntime().maxMemory();
         long totalMem = Runtime.getRuntime().totalMemory();
@@ -45,29 +35,36 @@ import org.slf4j.Logger;
         long usedMem = totalMem - freeMem;
         Function<Long, String> f = PlatformInfo::strNum2;
 
-        long pid = getProcessId();
         FmtLog.info(log, "%sMemory: %s",        prefix, f.apply(maxMem));
         //FmtLog.info(log, "%sMemory: max=%s  total=%s  used=%s  free=%s", prefix, f.apply(maxMem), f.apply(totalMem), f.apply(usedMem), f.apply(freeMem));
         FmtLog.info(log, "%sJava:   %s",        prefix, System.getProperty("java.version"));
         FmtLog.info(log, "%sOS:     %s %s %s",  prefix, System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"));
+        long pid = getProcessId();
         if ( pid != -1)
             FmtLog.info(log, "%sPID:    %s", prefix, pid);
     }
 
-    /** JVM details section. */
-    /*package*/ static void logDetailsJVM(Logger log) {
-        String prefix = "    ";
-        logOne(log, prefix, "java.vendor");
-        logOne(log, prefix, "java.home");
-        logOne(log, prefix, "java.runtime.version");
-        logOne(log, prefix, "java.runtime.name");
-        logOne(log, prefix, "user.language");
-        logOne(log, prefix, "user.timezone");
-        logOne(log, prefix, "user.country");
-        logOne(log, prefix, "user.dir");
+    /** Process ID, not offset */
+    public static void logProcessOS(Logger log) {
+        long pid = getProcessId();
+        if ( pid != -1)
+            FmtLog.info(log, "PID = %s", pid);
     }
 
-    private static void logOne(Logger log, String prefix, String property) {
+    /** JVM details section. */
+    public static void logDetailsJVM(Logger log) {
+        String prefix = "    ";
+        logOneJVM(log, prefix, "java.vendor");
+        logOneJVM(log, prefix, "java.home");
+        logOneJVM(log, prefix, "java.runtime.version");
+        logOneJVM(log, prefix, "java.runtime.name");
+        logOneJVM(log, prefix, "user.language");
+        logOneJVM(log, prefix, "user.timezone");
+        logOneJVM(log, prefix, "user.country");
+        logOneJVM(log, prefix, "user.dir");
+    }
+
+    private static void logOneJVM(Logger log, String prefix, String property) {
         if ( prefix == null )
             prefix = "";
         FmtLog.info(log, "%s%-20s = %s", prefix, property, System.getProperty(property));
@@ -102,5 +99,4 @@ import org.slf4j.Logger;
         if ( x < 1024L*1024*1024*1024 )
             return String.format("%.1f GiB", x/(1024.0*1024*1024));
         return String.format("%.1fTiB", x/(1024.0*1024*1024*1024));
-    }
-}
+    }}

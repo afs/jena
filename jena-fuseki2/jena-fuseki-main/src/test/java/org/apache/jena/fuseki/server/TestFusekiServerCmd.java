@@ -67,7 +67,7 @@ public class TestFusekiServerCmd {
     }
 
     @Test public void plainStart() {
-        FusekiServer server = FusekiServerRunner.construct();
+        FusekiServer server = FusekiServer.construct();
         server.start();
         server.stop();
     }

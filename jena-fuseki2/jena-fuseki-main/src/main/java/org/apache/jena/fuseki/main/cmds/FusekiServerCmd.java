@@ -18,8 +18,9 @@
 
 package org.apache.jena.fuseki.main.cmds;
 
+import org.apache.jena.fuseki.main.runner.FusekiMain;
+import org.apache.jena.fuseki.main.runner.FusekiRunner;
 import org.apache.jena.fuseki.main.sys.FusekiModule;
-import org.apache.jena.fuseki.server.FusekiServerRunner;
 import org.apache.jena.fuseki.system.FusekiLogging;
 
 /**
@@ -47,7 +48,7 @@ public class FusekiServerCmd {
      * syntax but not start it.
      */
     static public void main(String... args) {
-        FusekiServerRunner.run(args);
+        FusekiRunner.runServerUI(args);
     }
 }
 

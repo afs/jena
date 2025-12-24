@@ -14,16 +14,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.apache.jena.fuseki.main.cmds;
+package org.apache.jena.fuseki.main.runner;
 
-// Command line DSG
-public enum SetupType {
-    UNSET,
-    MEM, FILE, TDB, MEMTDB,  // Datasets on the command line
-    CONF,                    // Configuration file.
-    ASSEM,                   // Assembler for a datasets. Legacy.
-    NONE,                    // Explicitly no dataset or configuration file.
-    SPARQLer                 // SPARQler mode
+import java.net.BindException;
+
+import org.apache.jena.fuseki.FusekiException;
+
+public class FusekiBindException extends FusekiException
+{
+    public FusekiBindException(String msg, BindException cause)  { super(msg, cause); }
+//    public FusekiBindException(String msg)                     { super(msg); }
+//    public FusekiBindException(BindException cause)            { super(cause); }
+//    public FusekiBindException()                               { super(); }
 }

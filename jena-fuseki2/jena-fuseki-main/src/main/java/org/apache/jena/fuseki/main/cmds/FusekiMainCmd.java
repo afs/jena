@@ -18,7 +18,8 @@
 
 package org.apache.jena.fuseki.main.cmds;
 
-import org.apache.jena.fuseki.main.FusekiMainRunner;
+import org.apache.jena.fuseki.main.runner.FusekiMain;
+import org.apache.jena.fuseki.main.runner.FusekiRunner;
 import org.apache.jena.fuseki.system.FusekiLogging;
 
 /** Fuseki command that runs a Fuseki server without the admin UI, just SPARQL services.
@@ -45,6 +46,6 @@ public class FusekiMainCmd {
      * syntax but not start it.
      */
     static public void main(String... args) {
-        FusekiMainRunner.run(args);
+        FusekiRunner.runAsyncMain(args);
     }
 }

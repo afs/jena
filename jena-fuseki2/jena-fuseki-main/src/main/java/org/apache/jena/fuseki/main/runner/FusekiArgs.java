@@ -16,69 +16,59 @@
  * limitations under the License.
  */
 
-package org.apache.jena.fuseki.main.cmds;
+package org.apache.jena.fuseki.main.runner;
 
 import static arq.cmdline.ModAssembler.assemblerDescDecl;
-import static org.apache.jena.fuseki.main.cmds.SetupType.*;
+import static org.apache.jena.fuseki.main.runner.SetupType.*;
 
-import java.net.BindException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import arq.cmdline.CmdARQ;
 import arq.cmdline.ModDatasetAssembler;
-import org.apache.jena.assembler.exceptions.AssemblerException;
 import org.apache.jena.atlas.io.IOX;
 import org.apache.jena.atlas.lib.FileOps;
 import org.apache.jena.atlas.web.AuthScheme;
-import org.apache.jena.cmd.*;
+import org.apache.jena.cmd.ArgDecl;
+import org.apache.jena.cmd.CmdException;
+import org.apache.jena.cmd.CmdGeneral;
 import org.apache.jena.fuseki.Fuseki;
-import org.apache.jena.fuseki.FusekiException;
 import org.apache.jena.fuseki.main.FusekiServer;
+import org.apache.jena.fuseki.main.FusekiServer.Builder;
 import org.apache.jena.fuseki.main.sys.FusekiModule;
 import org.apache.jena.fuseki.main.sys.FusekiModules;
-import org.apache.jena.fuseki.main.sys.FusekiServerArgsCustomiser;
-import org.apache.jena.fuseki.main.sys.InitFusekiMain;
+import org.apache.jena.fuseki.main.sys.FusekiServerArgsHandler;
 import org.apache.jena.fuseki.server.DataAccessPoint;
-import org.apache.jena.fuseki.server.DataAccessPointRegistry;
-import org.apache.jena.fuseki.server.FusekiCoreInfo;
 import org.apache.jena.fuseki.servlets.SPARQL_QueryGeneral;
 import org.apache.jena.fuseki.validation.*;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.sparql.core.assembler.AssemblerUtils;
-import org.apache.jena.sys.JenaSystem;
 import org.slf4j.Logger;
 
-public class FusekiMain extends CmdARQ {
+/**
+ * The command line processor.
+ * <p>
+ * This used via one of the static functions to produce
+ * an initialized {@link Builder} or a constructed {@link FusekiServer}.
+ * <p>
+ * @see FusekiMain
+ */
+public class FusekiArgs extends CmdGeneral {
 
     /** Default HTTP port when running from the command line. */
-    public static int defaultPort          = 3030;
+    public static final int defaultPort          = 3030;
     /** Default HTTPS port when running from the command line. */
-    public static int defaultHttpsPort     = 3043;
+    public static final int defaultHttpsPort     = 3043;
 
-    /**
-     * Build, but do not start, a server based on command line syntax.
-     */
-    public static FusekiServer build(String... args) {
-        FusekiServer.Builder builder = builder(args);
-        return builder.build();
-    }
-
-    /**
-     * Create a server and run, within the same JVM.
-     * This is the command line entry point.
-     * This function does not return.
-     * See also {@link #build} to create and return a server.
-     */
-    public static void run(String... argv) {
-        JenaSystem.init();
-        InitFusekiMain.init();
-        new FusekiMain(argv).mainRun();
+    /** Apply arguments to a {@link org.apache.jena.fuseki.main.FusekiServer.Builder}. */
+    public static FusekiServer.Builder applyArgs(FusekiServer.Builder builder, String ...args) {
+        FusekiArgs fusekiArgs = new FusekiArgs(null, args);
+        fusekiArgs.process();
+        fusekiArgs.applyServerArgs(builder, fusekiArgs.serverArgs);
+        return builder;
     }
 
     private static ArgDecl  argMem          = new ArgDecl(ArgDecl.NoValue,  "mem");
@@ -135,94 +125,65 @@ public class FusekiMain extends CmdARQ {
     private static ArgDecl  argValidators   = new ArgDecl(ArgDecl.NoValue,  "validators");
 
     private ModDatasetAssembler modDataset  = new ModDatasetAssembler();
-    private List<FusekiServerArgsCustomiser> customiseServerArgs;
-    private final ServerArgs serverArgs     = new ServerArgs();
+
+    // ---- state
+    // XXX [NewStart] Moves into ServerArgs.
+    private List<? extends FusekiServerArgsHandler> serverArgsHandlers;
+    private List<? extends FusekiServerArgsHandler> getServerArgsHandlers(ServerArgs serverArgs) {
+        if ( serverArgsHandlers == null )
+            return List.of();
+        return serverArgsHandlers;
+    }
+
+    final ServerArgs serverArgs     = new ServerArgs();
 
     // Default
     private boolean useTDB2 = true;
+    // ---- state
 
     // -- Programmatic ways to create a server using command line syntax.
 
-    /**
-     * Create a {@link org.apache.jena.fuseki.main.FusekiServer.Builder} which has
-     * been setup according to the command line arguments.
-     * The builder can be further modified.
-     */
-    public static FusekiServer.Builder builder(String... args) {
-        // Parses command line, sets arguments.
-        FusekiMain fusekiMain = new FusekiMain(args);
-        // Process command line args according to the arguments specified.
-        fusekiMain.process();
-        // Apply serverArgs to a builder.
-        FusekiServer.Builder builder = FusekiServer.create();
-        fusekiMain.applyServerArgs(builder, fusekiMain.serverArgs);
-        return builder;
-    }
-
-    /**
-     * Registers a CLI customiser
-     * <p>
-     * A CLI customiser can add one/more custom arguments into the Fuseki Server CLI arguments and then can apply those
-     * to the Fuseki server being built during the processing of {@link #processModulesAndArgs()}.  This allows for
-     * custom arguments that directly affect how the Fuseki server is built to be created.
-     * </p>
-     * @param customiser CLI customiser
-     */
-    public static void addCustomiser(FusekiServerArgsCustomiser customiser) {
-        Objects.requireNonNull(customiser);
-        ArgCustomizers.addCustomiser(customiser);
-    }
-
-    /**
-     * Registers CLI customisers.
-     * <p>
-     * CLI customisers can add one/more custom arguments into the Fuseki Server CLI arguments and then can apply those
-     * to the Fuseki server being built during the processing of {@link #processModulesAndArgs()}.  This allows for
-     * custom arguments that directly affect how the Fuseki server is built to be created.
-     * </p>
-     * @see #addCustomiser(FusekiServerArgsCustomiser)
-     */
-    public static void addCustomisers(FusekiModules customiserSet) {
-        Objects.requireNonNull(customiserSet);
-        customiserSet.forEach(customiser->ArgCustomizers.addCustomiser(customiser));
-    }
-
-    /**
-     * Resets any previously registered CLI customisers
-     */
-    public static void resetCustomisers() {
-        ArgCustomizers.resetCustomisers();
-    }
-
-    private void applyCustomisers(Consumer<FusekiServerArgsCustomiser> action) {
-        for (FusekiServerArgsCustomiser customiser : customiseServerArgs) {
-            action.accept(customiser);
+    private static void applyArgsHandlers( List<? extends FusekiServerArgsHandler> argsHandlers, Consumer<FusekiServerArgsHandler> action) {
+        for (FusekiServerArgsHandler argsHandler : argsHandlers) {
+            action.accept( argsHandler);
         }
     }
 
-    // Customiser Lifecycle
+    // Args handler lifecycle
     //
     // :: Setup args
     // -- Called at the end of FusekiMain.argumentsSetup() after the standard arguments have been added.
-    // ---- FusekiServerArgsCustomiser.serverArgsModify(CmdLineGeneral, ServerArgs)
+    // ---- FusekiServerArgsHanlder.serverArgsModify(CmdLineGeneral, ServerArgs)
     //
     // :: Get values
     // -- End of FusekiMain.processModulesAndArgs
-    // ---- FusekiServerArgsCustomiser.serverArgsPrepare(CmdGeneral fusekiCmd, ServerArgs serverArgs)
+    // ---- FusekiServerArgsHanlder.serverArgsPrepare(CmdGeneral fusekiCmd, ServerArgs serverArgs)
 
     // :: Prepare server builder
     // -- End of applyServerArgs
-    // ---- FusekiServerArgsCustomiser.serverArgsBuilder(FusekiServer.Builder serverBuilder, Model configModel)
+    // ---- FusekiServerArgsHanlder.serverArgsBuilder(FusekiServer.Builder serverBuilder, Model configModel)
 
     // == Enter the build lifecycle in builder.build().
     //    Decide FusekiModules for the build.
     // --> then into FusekiBuildCycle.prepare(FusekiServer.Builder serverBuilder, Set<String> datasetNames, Model configModel) { }
 
-    protected FusekiMain(String... argv) {
+    /*package*/ FusekiArgs(FusekiModules fusekiModules, String... argv) {
         super(argv);
         // Snapshot for this FusekiMain instance
-        customiseServerArgs = List.copyOf(ArgCustomizers.get());
+        serverArgsHandlers = (fusekiModules == null) ? List.of() : fusekiModules.asList();
         argumentsSetup();
+    }
+
+    static String argUsage = "[--config=FILE|--mem|--loc=DIR|--file=FILE] [--port PORT] /DatasetPathName";
+
+    @Override
+    protected String getSummary() {
+        return getCommandName() + " " + argUsage;
+    }
+
+    @Override
+    protected String getCommandName() {
+        return "fuseki";
     }
 
     private void argumentsSetup() {
@@ -292,24 +253,21 @@ public class FusekiMain extends CmdARQ {
 
         add(argEnableModules, "--modules=true|false", "Enable Fuseki autoloaded modules");
 
-        applyCustomisers(customiser -> customiser.serverArgsModify(this, serverArgs));
-    }
-
-    static String argUsage = "[--config=FILE|--mem|--loc=DIR|--file=FILE] [--port PORT] /DatasetPathName";
-
-    @Override
-    protected String getSummary() {
-        return getCommandName() + " " + argUsage;
+        applyArgsHandlers(getServerArgsHandlers(serverArgs), argsHandler->argsHandler.serverArgsModify(this, serverArgs));
     }
 
     @Override
     protected void processModulesAndArgs() {
         Logger log = Fuseki.serverLog;
         serverArgs.verboseLogging = super.isVerbose();
+        serverArgs.quietLogging = super.isQuiet();
+        if ( serverArgs.quietLogging && serverArgs.verboseLogging )
+            throw new CmdException("Can't be both 'quiet' and 'verbose'");
         if ( ! serverArgs.bypassStdArgs )
+            // Only useful if an argument handler set up serverArgs in serverArgsModify
             processStdArguments(log);
-        // Have customisers process their own arguments.
-        applyCustomisers(customiser->customiser.serverArgsPrepare(this, serverArgs));
+
+        applyArgsHandlers(getServerArgsHandlers(serverArgs), argsHandler->argsHandler.serverArgsPrepare(this, serverArgs));
     }
 
     private void processStdArguments(Logger log) {
@@ -451,7 +409,7 @@ public class FusekiMain extends CmdARQ {
                 if ( !FileOps.exists(filebase) )
                     throw new CmdException("File area not found: " + filebase);
                 serverArgs.contentDirectory = filebase;
-                serverArgs.addGeneral = "/sparql";
+                serverArgs.addGeneralQueryProc = "/sparql";
                 serverArgs.startEmpty = true;
                 serverArgs.validators = true;
             }
@@ -476,7 +434,7 @@ public class FusekiMain extends CmdARQ {
             String z = getValue(argGeneralQuerySvc);
             if ( ! z.startsWith("/") )
                 z = "/"+z;
-            serverArgs.addGeneral = z;
+            serverArgs.addGeneralQueryProc = z;
         }
 
         if ( contains(argValidators) ) {
@@ -488,12 +446,12 @@ public class FusekiMain extends CmdARQ {
         boolean hasJettyConfigFile = contains(argJettyConfig);
 
         // ---- Port
-        serverArgs.port = defaultPort;
+        serverArgs.httpPort = defaultPort;
 
         if ( contains(argPort) ) {
             if ( hasJettyConfigFile )
                 throw new CmdException("Cannot specify the port and also provide a Jetty configuration file");
-            serverArgs.port = portNumber(argPort);
+            serverArgs.httpPort = portNumber(argPort);
         }
 
         if ( contains(argLocalhost) ) {
@@ -591,96 +549,23 @@ public class FusekiMain extends CmdARQ {
         serverArgs.withCompact = contains(argWithCompact);
     }
 
-    private int portNumber(ArgDecl arg) {
-        String portStr = getValue(arg);
-        if ( portStr.isEmpty() )
-            return -1;
-        try {
-            int port = Integer.parseInt(portStr);
-            return port;
-        } catch (NumberFormatException ex) {
-            throw new CmdException(argPort.getKeyName() + " : bad port number: '" + portStr+"'");
-        }
-    }
-
-    private static String sanitizeContextPath(String contextPath) {
-        if ( contextPath.isEmpty() )
-            return null;
-        if ( contextPath.equals("/") )
-            return null;
-        if ( contextPath.endsWith("/") ) {
-            throw new CmdException("Path base must not end with \"/\": '"+contextPath+"'");
-            //contextPath = StringUtils.chop(contextPath);
-        }
-        if ( ! contextPath.startsWith("/") )
-            contextPath = "/"+contextPath;
-        return contextPath;
-    }
-
-    @Override
-    protected void exec() {
-        FusekiCoreInfo.logCode(Fuseki.serverLog);
-        FusekiServer server = execMakeServer();
-        execStartServer(server);
-    }
-
-    private FusekiServer execMakeServer() {
-        try {
-            return makeServer(serverArgs);
-        } catch (AssemblerException | FusekiException  ex) {
-            if ( ex.getCause() != null )
-                System.err.println(ex.getCause().getMessage());
-            else
-                System.err.println(ex.getMessage());
-            throw new TerminationException(1);
-        }
-    }
-
-    /** The method is blocking. */
-    private void execStartServer(FusekiServer server) {
-        infoCmd(server, Fuseki.serverLog);
-        try {
-            server.start();
-        } catch (FusekiException ex) {
-            if ( ex.getCause() instanceof BindException ) {
-                if ( serverArgs.jettyConfigFile == null )
-                    Fuseki.serverLog.error("Failed to start server: "+ex.getCause().getMessage()+ ": port="+serverArgs.port);
-                else
-                    Fuseki.serverLog.error("Failed to start server: "+ex.getCause().getMessage()+ ": port in use");
-                System.exit(1);
-            }
-            throw ex;
-        } catch (Exception ex) {
-            throw new FusekiException("Failed to start server: " + ex.getMessage(), ex);
-        }
-        // This does not normally return.
-        server.join();
-        System.exit(0);
-    }
-
-    /**
-     * Take a {@link ServerArgs} and make a {@Link FusekiServer}.
-     * The server has not been started.
-     */
-    private FusekiServer makeServer(ServerArgs serverArgs) {
-        FusekiServer.Builder builder = FusekiServer.create();
-        applyServerArgs(builder, serverArgs);
-        return builder.build();
-    }
-
     /** Apply {@link ServerArgs} to a {@link FusekiServer.Builder}. */
-    private void applyServerArgs(FusekiServer.Builder builder, ServerArgs serverArgs) {
+    /*package*/ void applyServerArgs(FusekiServer.Builder builder, ServerArgs serverArgs) {
+        applyServerArgs(builder, getServerArgsHandlers(serverArgs), serverArgs);
+    }
+
+    private static void applyServerArgs(FusekiServer.Builder builder, List<? extends FusekiServerArgsHandler> argsHandlers, ServerArgs serverArgs) {
         boolean commandLineSetup = ( serverArgs.dataset != null || serverArgs.dsgMaker != null );
 
         if ( serverArgs.jettyConfigFile != null )
             builder.jettyServerConfig(serverArgs.jettyConfigFile);
-        builder.port(serverArgs.port);
+        builder.port(serverArgs.httpPort);
         builder.loopback(serverArgs.loopback);
         builder.verbose(serverArgs.verboseLogging);
 
-        if ( serverArgs.addGeneral != null )
+        if ( serverArgs.addGeneralQueryProc != null )
             // Add SPARQL_QueryGeneral as a general servlet, not reached by the service router.
-            builder.addServlet(serverArgs.addGeneral,  new SPARQL_QueryGeneral());
+            builder.addServlet(serverArgs.addGeneralQueryProc,  new SPARQL_QueryGeneral());
 
         if ( serverArgs.validators ) {
             // Validators.
@@ -698,7 +583,7 @@ public class FusekiMain extends CmdARQ {
         //   Command line.
         if ( ! serverArgs.startEmpty ) {
             if (serverArgs.serverConfigModel != null ) {
-                // -- Customiser has already set the configuration model
+                // -- A FusekiServerArgsHandler has already set the configuration model
                 builder.parseConfig(serverArgs.serverConfigModel);
                 serverArgs.datasetDescription = "Configuration: provided";
             } else if ( serverArgs.serverConfigFile != null ) {
@@ -722,7 +607,7 @@ public class FusekiMain extends CmdARQ {
                 if ( serverArgs.datasetPath == null )
                     throw new CmdException("No URL path name for the dataset");
                 // The dataset setup by command line arguments.
-                // A customizer may have set the dataset.
+                // An args customizer may have set the dataset.
                 if ( serverArgs.dataset == null ) {
                     // The dsgMaker should set serverArgs.dataset and serverArgs.datasetDescription
                     serverArgs.dsgMaker.accept(serverArgs);
@@ -775,35 +660,33 @@ public class FusekiMain extends CmdARQ {
         if ( serverArgs.withCompact )
             builder.enableCompact(true);
 
-        // Allow customisers to inspect and modify the builder.
-        applyCustomisers(customiser->customiser.serverArgsBuilder(builder, serverArgs.serverConfigModel));
+        // Allow args handlers to inspect and modify the builder.
+        applyArgsHandlers(argsHandlers, argsHandler->argsHandler.serverArgsBuilder(builder, serverArgs.serverConfigModel));
     }
 
-    /** Information from the command line setup */
-    private void infoCmd(FusekiServer server, Logger log) {
-        if ( super.isQuiet() )
-            return;
-
-        DataAccessPointRegistry dapRegistry = DataAccessPointRegistry.get(server.getServletContext());
-        if ( serverArgs.datasetPath != null ) {
-            if ( dapRegistry.size() != 1 )
-                log.error("Expected only one dataset in the DataAccessPointRegistry");
+    private int portNumber(ArgDecl arg) {
+        String portStr = getValue(arg);
+        if ( portStr.isEmpty() )
+            return -1;
+        try {
+            int port = Integer.parseInt(portStr);
+            return port;
+        } catch (NumberFormatException ex) {
+            throw new CmdException(argPort.getKeyName() + " : bad port number: '" + portStr+"'");
         }
-
-        // Log details on startup.
-        String datasetPath = serverArgs.datasetPath;
-        String datasetDescription = serverArgs.datasetDescription;
-        String serverConfigFile = serverArgs.serverConfigFile;
-        String staticFiles = serverArgs.contentDirectory;
-        boolean verbose = serverArgs.verboseLogging;
-
-        if ( ! super.isQuiet() )
-            FusekiCoreInfo.logServerCmdSetup(log, verbose, dapRegistry,
-                                             datasetPath, datasetDescription, serverConfigFile, staticFiles);
     }
 
-    @Override
-    protected String getCommandName() {
-        return "fuseki";
+    private static String sanitizeContextPath(String contextPath) {
+        if ( contextPath.isEmpty() )
+            return null;
+        if ( contextPath.equals("/") )
+            return null;
+        if ( contextPath.endsWith("/") ) {
+            throw new CmdException("Path base must not end with \"/\": '"+contextPath+"'");
+            //contextPath = StringUtils.chop(contextPath);
+        }
+        if ( ! contextPath.startsWith("/") )
+            contextPath = "/"+contextPath;
+        return contextPath;
     }
 }

@@ -21,8 +21,7 @@ package org.apache.jena.fuseki.main.sys;
 import org.apache.jena.cmd.CmdException;
 import org.apache.jena.cmd.CmdGeneral;
 import org.apache.jena.fuseki.main.FusekiServer;
-import org.apache.jena.fuseki.main.cmds.FusekiMain;
-import org.apache.jena.fuseki.main.cmds.ServerArgs;
+import org.apache.jena.fuseki.main.runner.ServerArgs;
 import org.apache.jena.rdf.model.Model;
 
 /**
@@ -61,7 +60,7 @@ import org.apache.jena.rdf.model.Model;
  * Following command like processing, server construction proceeds with the {@link FusekiBuildCycle},
  * the first step of which is {@link FusekiBuildCycle#prepare}.
  */
-public interface FusekiServerArgsCustomiser {
+public interface FusekiServerArgsHandler {
 
     /**
      * Called after the standard Fuseki main arguments have been added

@@ -14,17 +14,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.apache.jena.cmd;
+package org.apache.jena.fuseki.main.runner;
 
-/**
- * Exception used to indicate that the command should end now. Use instead of
- * System.exit so that a wrapper can catch (else a command server will exit wrongly).
- */
-public class TerminationException extends CmdException
-{
-    public int returnCode;
-    public TerminationException(int rc) { super(); this.returnCode = rc; }
-    public int getCode() { return returnCode; }
+import org.apache.jena.fuseki.main.FusekiServer;
+
+public interface Runner {
+    /**
+     * Setup a {@link FusekiServer} from the command line options and run it asynchronously.
+     * @param args line arguments.
+     * @return Return the running server.
+     */
+    public FusekiServer runAsync(String...args);
+
+    /**
+     * Setup a {@link FusekiServer} from the command line options and run it.
+     * This function doee not return.
+     * @param args line arguments.
+     */
+    public void run(String... args);
 }

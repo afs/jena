@@ -43,7 +43,6 @@ import org.apache.jena.fuseki.Fuseki;
 import org.apache.jena.fuseki.FusekiConfigException;
 import org.apache.jena.fuseki.build.DatasetDescriptionMap;
 import org.apache.jena.fuseki.build.FusekiConfig;
-import org.apache.jena.fuseki.main.cmds.FusekiMain;
 import org.apache.jena.fuseki.server.DataAccessPoint;
 import org.apache.jena.fuseki.server.DataService;
 import org.apache.jena.fuseki.server.FusekiVocabG;
@@ -386,7 +385,6 @@ public class FusekiServerCtl {
     public static void clearUpSystemState() {
         Lib.unsetenv(FusekiServerCtl.envFusekiShiro);
         Lib.unsetenv(FusekiServerCtl.envFusekiBase);
-        FusekiMain.resetCustomisers();
     }
 
     private static Path makePath(Path root , String relName ) {
