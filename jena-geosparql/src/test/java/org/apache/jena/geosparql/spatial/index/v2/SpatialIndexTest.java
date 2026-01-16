@@ -26,50 +26,45 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import org.apache.jena.geosparql.implementation.GeometryWrapperFactory;
 import org.apache.jena.geosparql.implementation.SRSInfo;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
-import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
 import org.apache.jena.geosparql.spatial.SearchEnvelope;
 import org.apache.jena.geosparql.spatial.SpatialIndex;
 import org.apache.jena.geosparql.spatial.SpatialIndexException;
-import org.apache.jena.geosparql.spatial.SpatialIndexItem;
 import org.apache.jena.geosparql.spatial.SpatialIndexTestData;
 import org.apache.jena.geosparql.spatial.index.compat.SpatialIndexIo;
-import org.apache.jena.geosparql.spatial.index.v1.SpatialIndexV1;
 import org.apache.jena.geosparql.spatial.index.v2.GeometryGenerator.GeometryType;
 import org.apache.jena.graph.Node;
-import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
-import org.junit.Assert;
-import org.junit.Test;
 import org.locationtech.jts.geom.Envelope;
 
-@SuppressWarnings("removal")
 public class SpatialIndexTest {
 
-    @Test
-    public void testLegacyLoading() throws IOException, SpatialIndexException {
-        Path file = Files.createTempFile("jena-", ".spatial.index");
-        try {
-            List<SpatialIndexItem> items = SpatialIndexTestData.getTestItems();
-
-            SpatialIndexV1.save(file.toFile(), items, SRS_URI.DEFAULT_WKT_CRS84);
-
-            SpatialIndex index = SpatialIndexIo.load(file, true);
-            Envelope envelope = new Envelope(-90, 0, 0, 90);
-            Collection<Node> actual = index.query(envelope, null);
-            Set<Node> expected = Set.of(SpatialIndexTestData.LONDON_FEATURE.asNode(), SpatialIndexTestData.NEW_YORK_FEATURE.asNode());
-            Assert.assertEquals(expected, actual);
-        } finally {
-            Files.delete(file);
-        }
-    }
+    // Jena5.
+//    @Test
+//    public void testLegacyLoading() throws IOException, SpatialIndexException {
+//        Path file = Files.createTempFile("jena-", ".spatial.index");
+//        try {
+//            List<SpatialIndexItem> items = SpatialIndexTestData.getTestItems();
+//
+//            SpatialIndexV1.save(file.toFile(), items, SRS_URI.DEFAULT_WKT_CRS84);
+//
+//            SpatialIndex index = SpatialIndexIo.load(file, true);
+//            Envelope envelope = new Envelope(-90, 0, 0, 90);
+//            Collection<Node> actual = index.query(envelope, null);
+//            Set<Node> expected = Set.of(SpatialIndexTestData.LONDON_FEATURE.asNode(), SpatialIndexTestData.NEW_YORK_FEATURE.asNode());
+//            Assert.assertEquals(expected, actual);
+//        } finally {
+//            Files.delete(file);
+//        }
+//    }
 
     @Test
     public void testSerdeSpatialIndex() throws IOException, SpatialIndexException {
@@ -128,13 +123,13 @@ public class SpatialIndexTest {
             long itemCountB = indexB.query(envelope, null).size();
             Assert.assertEquals(expectedItemCount, itemCountB);
 
-            // Save the index with legacy format and load from file.
-            // File must not exist or the index might/will attempt to load it.
-            Files.delete(file);
-            SpatialIndexV1.buildSpatialIndex(DatasetFactory.wrap(dsg), file.toFile());
-            SpatialIndex indexC = SpatialIndexIo.load(file, true);
-            long itemCountC = indexC.query(envelope, null).size();
-            Assert.assertEquals(expectedItemCount, itemCountC);
+//            // Save the index with legacy format and load from file.
+//            // File must not exist or the index might/will attempt to load it.
+//            Files.delete(file);
+//            SpatialIndexV1.buildSpatialIndex(DatasetFactory.wrap(dsg), file.toFile());
+//            SpatialIndex indexC = SpatialIndexIo.load(file, true);
+//            long itemCountC = indexC.query(envelope, null).size();
+//            Assert.assertEquals(expectedItemCount, itemCountC);
         } finally {
             Files.deleteIfExists(file);
         }
