@@ -26,7 +26,6 @@ import static org.apache.jena.fuseki.main.runner.SetupType.*;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 import arq.cmdline.ModDatasetAssembler;
@@ -180,7 +179,8 @@ public class FusekiArgs extends CmdGeneral {
 
     /*package*/ FusekiArgs(FusekiModules fusekiModules, String... args) {
         super(args);
-        Objects.requireNonNull(fusekiModules);
+//        if ( fusekiModules == null )
+//            fusekiModules = FusekiModules.empty();
         this.serverArgs.fusekiModules = fusekiModules;
         // serverArgsHandlers for argument processing.
         this.serverArgsHandlersList = ( fusekiModules == null ) ? FusekiModules.empty().asList() : fusekiModules.asList();
@@ -546,28 +546,6 @@ public class FusekiArgs extends CmdGeneral {
                 throw new CmdException("Jetty config file not found: "+jettyConfigFile);
             serverArgs.jettyConfigFile = jettyConfigFile;
         }
-
-        // No-op.
-        // To be removed.
-//        boolean withModules = hasValueOfTrue(argEnableModules);
-//        if ( withModules ) {
-//            // Passed in when the FusekiArgs object was created
-//            FusekiModules presetModules = serverArgs.fusekiModules;
-//            // Get auto modules from system-wide setup.
-//            FusekiModules autoModules = FusekiModules.getSystemModules();
-//
-//            // Merge preset and auto-loaded modules into one FusekiModules instance.
-//            if ( presetModules == null ) {
-//                serverArgs.fusekiModules = autoModules;
-//            } else {
-//                List<FusekiModule> allModules = Stream.concat(
-//                        presetModules.asList().stream(),
-//                        autoModules.asList().stream())
-//                    .distinct()
-//                    .toList();
-//                serverArgs.fusekiModules = FusekiModules.create(allModules);
-//            }
-//        }
 
         if ( contains(argCORS) ) {
             String corsConfigFile = getValue(argCORS);
