@@ -50,6 +50,7 @@ public class RiotTests
         Node testType = entry.getTestType();
         if ( testType == null )
             return null;
+        String specVersion  = entry.getSpecVersion();
 
         try {
             String labelPrefix = "[RIOT]";
@@ -117,7 +118,10 @@ public class RiotTests
                 String base = rebase(input, assumedBase);
                 return new RiotEvalTest(entry, base, RDFLanguages.TURTLE, true);
             }
-            if ( equalsType(testType, VocabLangRDF.TestNegativeEvalTTL) ) {
+
+            @SuppressWarnings("deprecation")
+            Resource testNegativeEvalTTL = VocabLangRDF.TestNegativeEvalTTL;
+            if ( equalsType(testType, testNegativeEvalTTL) ) {
                 String base = rebase(input, assumedBase);
                 return new RiotEvalTest(entry, base, RDFLanguages.TURTLE, false);
             }
@@ -159,7 +163,7 @@ public class RiotTests
                     String resultURI = result.getURI().replaceAll("/rdf-tests-cg/rdf/rdf11/rdf-xml/xml-canon/", "/RIOT/Lang/rdf-xml/xml-canon/");
                     Node action2 = NodeFactory.createURI(actionURI);
                     Node result2 = NodeFactory.createURI(resultURI);
-                    entry = ManifestEntry.alter(entry, testType, action2, result2);
+                    entry = ManifestEntry.alter(entry, testType, specVersion, action2, result2);
                 }
                 String fn = entry.getAction().getURI();
                 // Adjust to changes in rdf-tests-cg layout.
