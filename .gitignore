@@ -10,6 +10,9 @@ buildNumber.properties
 .flattened-pom.xml
 .m2/
 
+# AI
+.claude/**
+
 # Eclipse
 .classpath
 .project
