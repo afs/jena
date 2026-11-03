@@ -23,6 +23,7 @@ package org.apache.jena.riot.lang;
 
 import static org.apache.jena.riot.tokens.TokenType.*;
 
+import org.apache.jena.atlas.lib.InternalErrorException;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.riot.system.ParserProfile;
@@ -141,9 +142,14 @@ public abstract class LangTurtleBase extends LangBase {
             directiveVersion();
             return;
         }
-
-        exception(t, "Unrecognized keyword for directive: %s", x);
+        handleUnrecognizedKeywordDirective(t,x);
+        throw new InternalErrorException("failed to handle unrecognized keyword");
     }
+
+    protected void handleUnrecognizedKeywordDirective(Token t, String word) {
+        exception(t, "Unrecognized keyword for directive: %s", word);
+    }
+
 
     // Directive, @-form.
     protected final void directiveAtWord() {
@@ -182,7 +188,12 @@ public abstract class LangTurtleBase extends LangBase {
                 skipIf(DOT);
             return;
         }
-        exception(t, "Unrecognized directive: %s", x);
+        handleUnrecognizedAtDirective(t,x);
+        throw new InternalErrorException("failed to handle unrecognized @keyword");
+    }
+
+    protected void handleUnrecognizedAtDirective(Token t, String word) {
+        exception(t, "Unrecognized keyword for directive: %s", word);
     }
 
     protected final void directivePrefix() {

@@ -25,7 +25,7 @@ public enum TokenType {
 
     NODE, IRI, PREFIXED_NAME, BNODE,
     // BOOLEAN,
-    // One kind of string - the seen form is record
+    // One kind of string - the seen form is recorded
     STRING,
 
     LITERAL_LANG, LITERAL_DT, INTEGER, DECIMAL, DOUBLE, BOOLEAN,
